@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="colorPrimary">#0017ED</color>
+    <color name="colorSecondary">#F97316</color>
+    <color name="colorColumnas">#8B5CF6</color>
+    <color name="colorBasta">#ff2341</color>
+    <color name="colorBg">#F8FAFC</color>
+    <color name="colorTextoP">#1E293B</color>
+
+    <color name="colorAzulPabotones">#1fa8d9</color>
+    <color name="colorCelestePapel">#C1F2F9</color>
+    <color name="colorGrisAzulado">#E9F2F6</color>
+    <color name="colorRojoFuerte">#DC080C</color>
+    <color name="colorNaranjaBrillante">#FC691F</color>
+    <color name="colorAmarilloRanking">#FFBC61</color>
+
+    <color name="colorCajaTexto">#E6FFFFFF</color>
+    <color name="colorTransparente">#00FFFFFF</color>
+    <color name="colorCelestePalido">#d3efed</color>
+</resources>
