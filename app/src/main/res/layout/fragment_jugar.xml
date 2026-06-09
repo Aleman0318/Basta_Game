@@ -4,51 +4,120 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:padding="24dp">
+    android:background="@color/colorTransparente">
 
-    <LinearLayout
-        android:layout_width="match_parent"
+    <TextView
+        android:id="@+id/tvTituloModos"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:orientation="vertical"
-        android:gravity="center_horizontal"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintBottom_toBottomOf="parent">
+        android:layout_marginTop="130dp"
+        android:fontFamily="@font/lilitaone_regular"
+        android:text="¡A JUGAR!"
+        android:textColor="@color/colorPrimary"
+        android:textSize="38sp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.502"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
 
-        <TextView
-            android:id="@+id/tvTituloJugar"
-            android:layout_width="wrap_content"
+    <com.google.android.material.card.MaterialCardView
+        android:id="@+id/cardCrearSala"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="40dp"
+        android:clickable="true"
+        android:focusable="true"
+        app:cardBackgroundColor="@color/colorBg"
+        app:cardCornerRadius="24dp"
+        app:cardElevation="6dp"
+        app:strokeWidth="3dp"
+        app:strokeColor="@color/colorPrimary"
+        app:layout_constraintTop_toBottomOf="@id/tvTituloModos"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintWidth_percent="0.85">
+
+        <LinearLayout
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:fontFamily="@font/lilitaone_regular"
-            android:text="Basta online"
-            android:textColor="@color/colorPrimary"
-            android:textSize="42sp"
-            android:layout_marginBottom="48dp" />
+            android:gravity="center"
+            android:orientation="vertical"
+            android:padding="10dp">
 
-        <androidx.appcompat.widget.AppCompatButton
-            android:id="@+id/btnCrearSala"
+            <ImageView
+                android:layout_width="92dp"
+                android:layout_height="92dp"
+                android:src="@drawable/ic_crear_sala_azul" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:fontFamily="@font/lilitaone_regular"
+                android:text="Crear sala"
+                android:textColor="@color/colorPrimary"
+                android:textSize="26sp" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="6dp"
+                android:fontFamily="@font/manrope_regular"
+                android:gravity="center"
+                android:text="Sé el anfitrión y personaliza las reglas"
+                android:textColor="@color/colorTextoP"
+                android:textSize="15sp" />
+        </LinearLayout>
+    </com.google.android.material.card.MaterialCardView>
+
+    <com.google.android.material.card.MaterialCardView
+        android:id="@+id/cardUnirseSala"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="24dp"
+        android:clickable="true"
+        android:focusable="true"
+        app:cardBackgroundColor="@color/colorBg"
+        app:cardCornerRadius="24dp"
+        app:cardElevation="6dp"
+        app:strokeWidth="3dp"
+        app:strokeColor="@color/colorSecondary"
+        app:layout_constraintTop_toBottomOf="@id/cardCrearSala"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintWidth_percent="0.85">
+
+        <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="60dp"
-            android:layout_marginBottom="20dp"
-            android:background="@drawable/bg_boton_redondeado"
-            android:fontFamily="@font/lilitaone_regular"
-            android:text="Crear sala"
-            android:textColor="@color/colorBg"
-            android:textSize="22sp"
-            android:textStyle="bold"
-            android:letterSpacing="0.15" />
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:orientation="vertical"
+            android:padding="10dp">
 
-        <androidx.appcompat.widget.AppCompatButton
-            android:id="@+id/btnUnirseSala"
-            android:layout_width="match_parent"
-            android:layout_height="60dp"
-            android:background="@drawable/bg_boton_redondeado"
-            android:backgroundTint="@color/colorSecondary"
-            android:fontFamily="@font/lilitaone_regular"
-            android:text="Unirse a sala"
-            android:textColor="@color/colorBg"
-            android:textSize="22sp"
-            android:textStyle="bold"
-            android:letterSpacing="0.15" />
+            <ImageView
+                android:layout_width="92dp"
+                android:layout_height="92dp"
+                android:src="@drawable/ic_unirse_sala_naranja"/>
 
-    </LinearLayout>
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:fontFamily="@font/lilitaone_regular"
+                android:text="Unirse a la sala"
+                android:textColor="@color/colorSecondary"
+                android:textSize="26sp" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="6dp"
+                android:fontFamily="@font/manrope_regular"
+                android:gravity="center"
+                android:text="Ingresa con un código de invitación"
+                android:textColor="@color/colorTextoP"
+                android:textSize="15sp" />
+        </LinearLayout>
+    </com.google.android.material.card.MaterialCardView>
+
 </androidx.constraintlayout.widget.ConstraintLayout>
