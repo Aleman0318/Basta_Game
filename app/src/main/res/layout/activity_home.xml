@@ -23,17 +23,18 @@
         style="@style/Widget.MaterialComponents.BottomNavigationView"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:background="@color/colorTransparente"
         android:paddingTop="8dp"
         android:paddingBottom="8dp"
-        android:background="@color/colorTransparente"
-        app:itemIconSize="55dp"
         app:itemBackground="@color/colorTransparente"
+        app:itemIconSize="55dp"
         app:itemRippleColor="@color/colorTransparente"
         app:itemTextColor="@color/colorPrimary"
         app:labelVisibilityMode="labeled"
-        app:menu="@menu/menu_basta"
         app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent" />
+        app:menu="@menu/menu_basta" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
