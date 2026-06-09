@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="utf-8"?>
+<com.google.android.material.card.MaterialCardView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/cardNotification"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_marginStart="18dp"
+    android:layout_marginTop="14dp"
+    android:layout_marginEnd="18dp"
+    android:visibility="gone"
+    android:alpha="0"
+    app:cardBackgroundColor="#FFFDF6"
+    app:cardCornerRadius="20dp"
+    app:cardElevation="8dp"
+    app:strokeWidth="2dp"
+    app:strokeColor="#0B4DFF"
+    tools:visibility="visible"
+    tools:alpha="1">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+
+        <!-- Barrita lateral tipo marcador/resaltador -->
+        <View
+            android:id="@+id/viewNotificationStripe"
+            android:layout_width="7dp"
+            android:layout_height="match_parent"
+            android:background="#0B4DFF" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:paddingStart="12dp"
+            android:paddingTop="10dp"
+            android:paddingEnd="12dp"
+            android:paddingBottom="10dp">
+
+            <!-- Círculo del ícono -->
+            <com.google.android.material.card.MaterialCardView
+                android:id="@+id/cardNotificationIcon"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:layout_marginEnd="10dp"
+                app:cardBackgroundColor="#EAF2FF"
+                app:cardCornerRadius="20dp"
+                app:cardElevation="0dp"
+                app:strokeWidth="1dp"
+                app:strokeColor="#0B4DFF">
+
+                <ImageView
+                    android:id="@+id/img_iconNotificacion"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    tools:srcCompat="@tools:sample/avatars" />
+            </com.google.android.material.card.MaterialCardView>
+
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:orientation="vertical">
+
+                <TextView
+                    android:id="@+id/txtNotificationTitle"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Aviso del juego"
+                    android:textColor="#0B4DFF"
+                    android:fontFamily="@font/lilitaone_regular"
+                    android:textSize="16sp"
+                    android:textStyle="bold"
+                    android:letterSpacing="0.03" />
+
+                <TextView
+                    android:id="@+id/txtNotificationMessage"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="2dp"
+                    android:text="Debes llenar todos los campos primero"
+                    android:textColor="#17213A"
+                    android:fontFamily="@font/manrope_regular"
+                    android:textSize="13.5sp"
+                    android:textStyle="bold"
+                    android:maxLines="2"
+                    android:ellipsize="end" />
+
+            </LinearLayout>
+
+        </LinearLayout>
+
+    </LinearLayout>
+
+</com.google.android.material.card.MaterialCardView>
