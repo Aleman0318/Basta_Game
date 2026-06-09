@@ -7,6 +7,17 @@
     android:layout_height="match_parent"
     android:background="@drawable/bg_fondocuaderno">
 
+    <include
+        android:id="@+id/notificationRegister"
+        layout="@layout/component_notification_card"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        app:layout_constraintWidth_percent="0.80"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent" />
+
+
     <ImageView
         android:id="@+id/ivLogoBasta"
         android:layout_width="400dp"
