@@ -1,4 +1,4 @@
-package com.example.basta_game.Fragments;
+package com.example.basta_game.fragments;
 
 import android.os.Bundle;
 import androidx.fragment.app.Fragment;
