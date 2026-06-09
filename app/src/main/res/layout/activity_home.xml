@@ -6,7 +6,7 @@
     android:id="@+id/main_home"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@drawable/bg_fondocuaderno"
+    android:background="@drawable/bg_fondocuaderno3"
     tools:context=".HomeActivity">
 
     <FrameLayout
@@ -18,22 +18,22 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent" />
 
-    <View
-        android:id="@+id/linea_separadora"
-        android:layout_width="match_parent"
-        android:layout_height="2dp"
-        android:background="@color/colorTextoP"
-        app:layout_constraintBottom_toTopOf="@id/bottom_navigation"/>
-
     <com.google.android.material.bottomnavigation.BottomNavigationView
         android:id="@+id/bottom_navigation"
+        style="@style/Widget.MaterialComponents.BottomNavigationView"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:paddingTop="8dp"
+        android:paddingBottom="8dp"
+        android:background="@color/colorTransparente"
+        app:itemIconSize="55dp"
+        app:itemBackground="@color/colorTransparente"
+        app:itemRippleColor="@color/colorTransparente"
+        app:itemTextColor="@color/colorPrimary"
+        app:labelVisibilityMode="labeled"
+        app:menu="@menu/menu_basta"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        android:background="@color/colorBg"
-        app:itemIconTint="@color/colorPrimary"
-        app:itemTextColor="@color/colorPrimary"
-        app:menu="@menu/menu_basta" />
+        app:layout_constraintEnd_toEndOf="parent" />
+
 </androidx.constraintlayout.widget.ConstraintLayout>
