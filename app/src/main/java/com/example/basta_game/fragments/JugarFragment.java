@@ -8,6 +8,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import com.example.basta_game.R;
 import com.google.android.material.card.MaterialCardView;
+
 public class JugarFragment extends Fragment {
 
     @Override

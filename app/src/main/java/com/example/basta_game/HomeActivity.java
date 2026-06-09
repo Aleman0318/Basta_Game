@@ -11,6 +11,7 @@ import com.example.basta_game.fragments.JugarFragment;
 import com.example.basta_game.fragments.PerfilFragment;
 import com.example.basta_game.fragments.RankingFragment;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
+
 public class HomeActivity extends AppCompatActivity {
 
     private BottomNavigationView bottomNavigationView;

@@ -12,7 +12,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 import androidx.appcompat.widget.AppCompatButton;
 import com.example.basta_game.adapters.CategoriaAdapter;
-import com.example.basta_game.models.Categoria;
+import com.example.basta_game.Models.Categoria;
 import com.example.basta_game.R;
 import java.util.ArrayList;
 import java.util.List;
@@ -38,6 +38,8 @@ public class Crear_salaFragment extends Fragment {
         misCategorias.add(new Categoria("Cosa", R.drawable.outline_person_24));
         misCategorias.add(new Categoria("Apellido", R.drawable.outline_person_24));
         misCategorias.add(new Categoria("Objeto o pastel", R.drawable.outline_person_24));
+
+        categoriasActivas.clear();
 
         for (Categoria cat : misCategorias) {
             categoriasActivas.add(cat.getNombre());
@@ -103,13 +105,27 @@ public class Crear_salaFragment extends Fragment {
         btnCrearSalaFinal.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                String nombresSeleccionados = android.text.TextUtils.join(", ", categoriasActivas);
-
                 if (categoriasActivas.isEmpty()) {
                     Toast.makeText(getContext(), "¡Debes seleccionar al menos una categoría!", Toast.LENGTH_SHORT).show();
-                } else {
-                    Toast.makeText(getContext(), "Categorías: " + nombresSeleccionados, Toast.LENGTH_LONG).show();
+                    return;
                 }
+
+                String nombresSeleccionados = android.text.TextUtils.join(", ", categoriasActivas);
+
+                LobbyFragment lobby = new LobbyFragment();
+                Bundle bundle = new Bundle();
+
+                bundle.putBoolean("ES_ANFITRION", true);
+                bundle.putString("CATEGORIAS", nombresSeleccionados);
+                bundle.putInt("TIEMPO", sbTiempo.getProgress());
+                bundle.putInt("JUGADORES", contadorJugadores);
+
+                lobby.setArguments(bundle);
+
+                getParentFragmentManager().beginTransaction()
+                        .replace(R.id.fragment_container, lobby)
+                        .addToBackStack(null)
+                        .commit();
             }
         });
 

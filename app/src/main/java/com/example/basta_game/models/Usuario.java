@@ -1,4 +1,4 @@
-package com.example.basta_game.models;
+package com.example.basta_game.Models;
 
 public class Usuario {
 
