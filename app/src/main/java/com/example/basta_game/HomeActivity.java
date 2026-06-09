@@ -7,9 +7,9 @@ import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 import androidx.fragment.app.Fragment;
-import com.example.basta_game.Fragments.JugarFragment;
-import com.example.basta_game.Fragments.PerfilFragment;
-import com.example.basta_game.Fragments.RankingFragment;
+import com.example.basta_game.fragments.JugarFragment;
+import com.example.basta_game.fragments.PerfilFragment;
+import com.example.basta_game.fragments.RankingFragment;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 public class HomeActivity extends AppCompatActivity {
 

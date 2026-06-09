@@ -1,4 +1,4 @@
-package com.example.basta_game.Fragments;
+package com.example.basta_game.fragments;
 
 import android.os.Bundle;
 import androidx.fragment.app.Fragment;
@@ -11,8 +11,8 @@ import android.widget.SeekBar;
 import android.widget.TextView;
 import android.widget.Toast;
 import androidx.appcompat.widget.AppCompatButton;
-import com.example.basta_game.Adapters.CategoriaAdapter;
-import com.example.basta_game.Models.Categoria;
+import com.example.basta_game.adapters.CategoriaAdapter;
+import com.example.basta_game.models.Categoria;
 import com.example.basta_game.R;
 import java.util.ArrayList;
 import java.util.List;
