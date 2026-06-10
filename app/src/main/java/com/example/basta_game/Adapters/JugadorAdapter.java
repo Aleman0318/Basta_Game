@@ -1,5 +1,6 @@
 package com.example.basta_game.Adapters;
 
+import android.content.res.ColorStateList;
 import android.graphics.Color;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -7,9 +8,9 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
+import com.google.android.material.card.MaterialCardView;
 import com.example.basta_game.models.Jugador;
 import com.example.basta_game.R;
-
 import java.util.List;
 
 public class JugadorAdapter extends RecyclerView.Adapter<JugadorAdapter.ViewHolder> {
@@ -31,24 +32,29 @@ public class JugadorAdapter extends RecyclerView.Adapter<JugadorAdapter.ViewHold
         Jugador jugador = listaJugadores.get(position);
         holder.tvNombre.setText(jugador.getNombre());
 
+        // Lógica de colores para el círculo
         if (jugador.isEstaListo()) {
-            holder.tvEstado.setText("LISTO");
-            holder.tvEstado.setTextColor(Color.parseColor("#4CAF50"));
+            // Verde si está listo
+            holder.cardEstado.setCardBackgroundColor(ColorStateList.valueOf(Color.parseColor("#4CAF50")));
         } else {
-            holder.tvEstado.setText("ESPERANDO...");
-            holder.tvEstado.setTextColor(Color.parseColor("#F97316"));
+            // Rojo si no está listo
+            holder.cardEstado.setCardBackgroundColor(ColorStateList.valueOf(Color.parseColor("#F44336")));
         }
     }
 
     @Override
-    public int getItemCount() { return listaJugadores.size(); }
+    public int getItemCount() {
+        return listaJugadores.size();
+    }
 
     public static class ViewHolder extends RecyclerView.ViewHolder {
-        TextView tvNombre, tvEstado;
+        TextView tvNombre;
+        MaterialCardView cardEstado; // Cambiamos de TextView a MaterialCardView
+
         public ViewHolder(@NonNull View itemView) {
             super(itemView);
             tvNombre = itemView.findViewById(R.id.tvNombreJugador);
-            tvEstado = itemView.findViewById(R.id.tvEstadoJugador);
+            cardEstado = itemView.findViewById(R.id.cardEstadoJugador); // Conectamos el nuevo círculo
         }
     }
 }

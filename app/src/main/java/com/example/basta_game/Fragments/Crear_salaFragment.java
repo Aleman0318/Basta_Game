@@ -20,6 +20,7 @@ import java.util.List;
 public class Crear_salaFragment extends Fragment {
 
     private int contadorJugadores = 4;
+    private int contadorRondas = 1;
     private ArrayList<String> categoriasActivas = new ArrayList<>();
 
     @Override
@@ -62,16 +63,46 @@ public class Crear_salaFragment extends Fragment {
         SeekBar sbTiempo = view.findViewById(R.id.sbTiempo);
         final TextView tvTiempoActual = view.findViewById(R.id.tvTiempoActual);
 
-        tvTiempoActual.setText(sbTiempo.getProgress() + "s");
+        int segundosIniciales = 60 + (sbTiempo.getProgress() * 10);
+        tvTiempoActual.setText(String.format("%d:%02d min", segundosIniciales / 60, segundosIniciales % 60));
 
         sbTiempo.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override
             public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
-                tvTiempoActual.setText(progress + "s");
+                int totalSegundos = 60 + (progress * 10);
+
+                String tiempoFormateado = String.format("%d:%02d min", totalSegundos / 60, totalSegundos % 60);
+                tvTiempoActual.setText(tiempoFormateado);
             }
 
             @Override public void onStartTrackingTouch(SeekBar seekBar) {}
             @Override public void onStopTrackingTouch(SeekBar seekBar) {}
+        });
+
+        AppCompatButton btnRestarRonda = view.findViewById(R.id.btnRestarRonda);
+        AppCompatButton btnSumarRonda = view.findViewById(R.id.btnSumarRonda);
+        final TextView tvCantRondas = view.findViewById(R.id.tvCantRondas);
+
+        tvCantRondas.setText(String.valueOf(contadorRondas));
+
+        btnRestarRonda.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (contadorRondas > 1) {
+                    contadorRondas--;
+                    tvCantRondas.setText(String.valueOf(contadorRondas));
+                }
+            }
+        });
+
+        btnSumarRonda.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (contadorRondas < 26) {
+                    contadorRondas++;
+                    tvCantRondas.setText(String.valueOf(contadorRondas));
+                }
+            }
         });
 
         AppCompatButton btnRestar = view.findViewById(R.id.btnRestarJugador);
@@ -117,8 +148,10 @@ public class Crear_salaFragment extends Fragment {
 
                 bundle.putBoolean("ES_ANFITRION", true);
                 bundle.putString("CATEGORIAS", nombresSeleccionados);
-                bundle.putInt("TIEMPO", sbTiempo.getProgress());
+
+                bundle.putInt("TIEMPO", 60 + (sbTiempo.getProgress() * 10));
                 bundle.putInt("JUGADORES", contadorJugadores);
+                bundle.putInt("RONDAS", contadorRondas);
 
                 lobby.setArguments(bundle);
 
