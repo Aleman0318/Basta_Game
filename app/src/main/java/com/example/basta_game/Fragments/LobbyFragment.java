@@ -1,4 +1,4 @@
-package com.example.basta_game.fragments;
+package com.example.basta_game.Fragments;
 
 import android.content.res.ColorStateList;
 import android.graphics.Color;
@@ -12,9 +12,9 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 import androidx.appcompat.widget.AppCompatButton;
-import com.example.basta_game.Models.Jugador;
+import com.example.basta_game.models.Jugador;
 import com.example.basta_game.R;
-import com.example.basta_game.adapters.JugadorAdapter;
+import com.example.basta_game.Adapters.JugadorAdapter;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -30,16 +30,22 @@ public class LobbyFragment extends Fragment {
         String categoriasStr = "Cargando...";
         int tiempoStr = 60;
         int jugadoresStr = 4;
-
+        int rondasStr = 5;
         if (getArguments() != null) {
             esAnfitrion = getArguments().getBoolean("ES_ANFITRION", false);
             categoriasStr = getArguments().getString("CATEGORIAS", "Pendiente...");
             tiempoStr = getArguments().getInt("TIEMPO", 60);
             jugadoresStr = getArguments().getInt("JUGADORES", 4);
+            rondasStr = getArguments().getInt("RONDAS", 5);
         }
 
+        String tiempoFormateado = String.format("%d:%02d min", tiempoStr / 60, tiempoStr % 60);
+
         TextView tvLobbyReglas = view.findViewById(R.id.tvLobbyReglas);
-        tvLobbyReglas.setText("• Categorías: " + categoriasStr + "\n• Tiempo: " + tiempoStr + "s por ronda\n• Jugadores: " + jugadoresStr);
+        tvLobbyReglas.setText("• Categorías: " + categoriasStr +
+                "\n• Rondas: " + rondasStr +
+                "\n• Duración: " + tiempoFormateado + " por ronda" +
+                "\n• Jugadores: Máximo " + jugadoresStr);
 
         RecyclerView rvJugadoresLobby = view.findViewById(R.id.rvJugadoresLobby);
         rvJugadoresLobby.setLayoutManager(new LinearLayoutManager(getContext()));
@@ -67,10 +73,10 @@ public class LobbyFragment extends Fragment {
         btnToggleListo.setOnClickListener(v -> {
             estoyListo = !estoyListo;
             if (estoyListo) {
-                btnToggleListo.setText("Estoy listo");
+                btnToggleListo.setText("ESTOY LISTO");
                 btnToggleListo.setBackgroundTintList(ColorStateList.valueOf(Color.parseColor("#4CAF50")));
             } else {
-                btnToggleListo.setText("No estoy listo");
+                btnToggleListo.setText("NO ESTOY LISTO");
                 btnToggleListo.setBackgroundTintList(ColorStateList.valueOf(Color.parseColor("#888888")));
             }
         });

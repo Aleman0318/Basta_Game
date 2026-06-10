@@ -1,4 +1,4 @@
-package com.example.basta_game.adapters;
+package com.example.basta_game.Adapters;
 
 import android.content.res.ColorStateList;
 import android.graphics.Color;
@@ -40,10 +40,12 @@ public class CategoriaAdapter extends RecyclerView.Adapter<CategoriaAdapter.View
         Categoria categoria = listaCategorias.get(position);
         holder.tvNombre.setText(categoria.getNombre());
 
+        // esto asigna la imagen correspondiente proveniente de el list de categoria
+        holder.ivIcono.setImageResource(categoria.getIconoId());
         if (categoria.isHabilitada()) {
-            holder.cardView.setCardBackgroundColor(ColorStateList.valueOf(Color.parseColor("#C9FFD0")));
+            holder.cardView.setCardBackgroundColor(ColorStateList.valueOf(Color.parseColor("#6373FF")));
         } else {
-            holder.cardView.setCardBackgroundColor(ColorStateList.valueOf(Color.parseColor("#FFBABA")));
+            holder.cardView.setCardBackgroundColor(ColorStateList.valueOf(Color.parseColor("#C2C0C0")));
         }
 
         holder.itemView.setOnClickListener(v -> {

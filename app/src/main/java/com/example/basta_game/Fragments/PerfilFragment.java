@@ -1,4 +1,4 @@
-package com.example.basta_game.fragments;
+package com.example.basta_game.Fragments;
 
 import android.app.Dialog;
 import android.graphics.Color;
@@ -8,7 +8,7 @@ import androidx.fragment.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ImageView;
+
 import androidx.appcompat.widget.AppCompatButton;
 import com.google.android.material.card.MaterialCardView;
 import com.example.basta_game.R;
