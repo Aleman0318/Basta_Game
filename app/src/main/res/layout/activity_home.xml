@@ -9,6 +9,16 @@
     android:background="@drawable/bg_fondocuaderno3"
     tools:context=".HomeActivity">
 
+    <include
+        android:id="@+id/notificationHome"
+        layout="@layout/component_notification_card"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        app:layout_constraintWidth_percent="0.80"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent" />
+
     <FrameLayout
         android:id="@+id/fragment_container"
         android:layout_width="0dp"

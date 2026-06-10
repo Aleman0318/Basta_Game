@@ -37,7 +37,7 @@ public class NotificationHelper {
                 mainColor = Color.parseColor("#1E9B4B");
                 softColor = Color.parseColor("#E8F8EE");
                 icon = R.drawable.ic_notificacion_succes;
-                title = "¡Bien hecho!";
+                title = "¡Excelente!";
                 break;
 
             case ERROR:

@@ -1,20 +1,38 @@
 package com.example.basta_game;
 
+import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
+import android.view.View;
+
 import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 import androidx.fragment.app.Fragment;
-import com.example.basta_game.fragments.JugarFragment;
-import com.example.basta_game.fragments.PerfilFragment;
-import com.example.basta_game.fragments.RankingFragment;
+import com.example.basta_game.Fragments.JugarFragment;
+import com.example.basta_game.Fragments.PerfilFragment;
+import com.example.basta_game.Fragments.RankingFragment;
+import com.example.basta_game.models.Usuario;
+import com.example.basta_game.utils.NotificationHelper;
+import com.example.basta_game.utils.VerificacionesAuth;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
+
+//imports de firebase
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.database.DatabaseReference;
+
 
 public class HomeActivity extends AppCompatActivity {
 
     private BottomNavigationView bottomNavigationView;
+
+    private View notificationHome;
+
+    private FirebaseAuth auth;
+
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -27,6 +45,15 @@ public class HomeActivity extends AppCompatActivity {
             return insets;
 
         });
+
+        notificationHome = findViewById(R.id.notificationHome);
+        auth = FirebaseAuth.getInstance();
+
+
+        //obtenemos nombre del usuario logueado
+        if(VerificacionesAuth.VerificarInicioSesion(auth)){
+            VerificacionesAuth.CargarYMostrarUsuarioLogueado(notificationHome, auth);
+        }
 
 
         bottomNavigationView = findViewById(R.id.bottom_navigation);
