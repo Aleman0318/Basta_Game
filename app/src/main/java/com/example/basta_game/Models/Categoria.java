@@ -1,4 +1,4 @@
-package com.example.basta_game.Models;
+package com.example.basta_game.models;
 
 public class Categoria {
     private String nombre;

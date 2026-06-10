@@ -1,5 +1,6 @@
 package com.example.basta_game;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
@@ -100,12 +101,6 @@ public class RegistrarActivity extends AppCompatActivity {
                         auth.createUserWithEmailAndPassword(emailUser, passUser)
                                 .addOnCompleteListener(task -> {
                                     if(task.isSuccessful()){
-                                        NotificationHelper.show(
-                                                notificationRegister,
-                                                "Usuario registrado correctamente",
-                                                NotificationHelper.SUCCESS
-                                        );
-
                                         String uid = auth.getCurrentUser().getUid();
 
                                         Usuario user = new Usuario(
@@ -120,13 +115,21 @@ public class RegistrarActivity extends AppCompatActivity {
                                                 System.currentTimeMillis()
                                         );
 
+                                        NotificationHelper.show(
+                                                notificationRegister,
+                                                "Usuario registrado correctamente",
+                                                NotificationHelper.SUCCESS
+                                        );
+
                                         DatabaseReference usuarioRef = FirebaseDatabase.getInstance().getReference("usuarios");
 
                                         usuarioRef.child(uid).setValue(user)
                                                 .addOnCompleteListener(taskGuardar->{
                                                     if(taskGuardar.isSuccessful()){
                                                         Log.d("REGISTRO_FIREBASE","usuario añadido correctamente a realtime");
-                                                    }
+                                                        Intent intent = new Intent(RegistrarActivity.this, HomeActivity.class);
+                                                        startActivity(intent);
+                                                                                                            }
                                                     else {
                                                         Log.d("REGISTRO_FIREBASE","ocurrio un error al guardar el perfil el realtime");
                                                     }
