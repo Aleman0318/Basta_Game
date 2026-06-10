@@ -6,123 +6,130 @@
     android:layout_height="match_parent"
     android:background="@color/colorTransparente">
 
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/headerUnirse"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:padding="20dp"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <ImageView
+            android:id="@+id/btnRegresar"
+            android:layout_width="55dp"
+            android:layout_height="55dp"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:padding="8dp"
+            android:src="@drawable/btn_atras1"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:fontFamily="@font/lilitaone_regular"
+            android:text="UNIRSE A SALA"
+            android:textColor="@color/colorSecondary"
+            android:textSize="32sp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
-        android:padding="20dp"
-        app:layout_constraintTop_toTopOf="parent"
+        android:paddingHorizontal="24dp"
+        app:layout_constraintTop_toBottomOf="@id/headerUnirse"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintVertical_bias="0.35">
+        app:layout_constraintVertical_bias="0.2"> <com.google.android.material.card.MaterialCardView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:cardBackgroundColor="@color/colorBg"
+        app:cardCornerRadius="24dp"
+        app:cardElevation="6dp"
+        app:strokeColor="@color/colorGrisAzulado"
+        app:strokeWidth="2dp">
 
-        <androidx.constraintlayout.widget.ConstraintLayout
+        <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content">
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:paddingTop="32dp"
+            android:paddingBottom="36dp"
+            android:paddingHorizontal="20dp"
+            android:gravity="center">
 
             <ImageView
-                android:id="@+id/btnRegresar"
-                android:layout_width="55dp"
-                android:layout_height="55dp"
-                android:background="?attr/selectableItemBackgroundBorderless"
-                android:padding="8dp"
-                android:src="@drawable/btn_atras1"
-                app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="parent" />
+                android:layout_width="90dp"
+                android:layout_height="90dp"
+                android:src="@drawable/ic_unirse_sala_naranja"
+                android:layout_marginBottom="20dp"/>
 
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:fontFamily="@font/lilitaone_regular"
-                android:text="UNIRSE A SALA"
-                android:textColor="@color/colorSecondary"
-                android:textSize="32sp"
-                app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="parent" />
-        </androidx.constraintlayout.widget.ConstraintLayout>
+                android:text="Código de Invitación"
+                android:textColor="@color/colorTextoP"
+                android:textSize="24sp" />
 
-        <com.google.android.material.card.MaterialCardView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="20dp"
-            app:cardBackgroundColor="@color/colorBg"
-            app:cardCornerRadius="20dp"
-            app:cardElevation="4dp"
-            app:strokeColor="@color/colorGrisAzulado"
-            app:strokeWidth="2dp">
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:layout_marginBottom="28dp"
+                android:fontFamily="@font/manrope_regular"
+                android:gravity="center"
+                android:text="Pídele el ID al anfitrión de la partida\npara poder ingresar."
+                android:textColor="@color/colorTextoP"
+                android:alpha="0.6"
+                android:textSize="15sp"
+                android:lineSpacingExtra="4dp"/>
 
-            <LinearLayout
+            <com.google.android.material.card.MaterialCardView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:padding="20dp"
-                android:gravity="center">
+                android:layout_marginHorizontal="10dp"
+                app:cardBackgroundColor="@color/colorGrisAzulado"
+                app:cardCornerRadius="16dp"
+                app:cardElevation="0dp"
+                app:strokeColor="@color/colorPrimary"
+                app:strokeWidth="1dp">
 
-                <ImageView
-                    android:layout_width="80dp"
-                    android:layout_height="80dp"
-                    android:src="@drawable/ic_unirse_sala_naranja"
-                    android:layout_marginBottom="16dp"/>
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:fontFamily="@font/lilitaone_regular"
-                    android:text="Código de Invitación"
-                    android:textColor="@color/colorTextoP"
-                    android:textSize="22sp" />
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginBottom="24dp"
-                    android:fontFamily="@font/manrope_regular"
-                    android:gravity="center"
-                    android:text="Pídele el ID al anfitrión de la partida\npara poder ingresar."
-                    android:textColor="@color/colorTextoP"
-                    android:alpha="0.7"
-                    android:textSize="14sp" />
-
-                <com.google.android.material.card.MaterialCardView
+                <EditText
+                    android:id="@+id/etSalaId"
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    app:cardBackgroundColor="@color/colorGrisAzulado"
-                    app:cardCornerRadius="12dp"
-                    app:cardElevation="0dp"
-                    app:strokeWidth="0dp">
+                    android:layout_height="65dp"
+                    android:background="@null"
+                    android:fontFamily="@font/lilitaone_regular"
+                    android:gravity="center"
+                    android:hint="EJ: AB1234"
+                    android:textColorHint="@color/colorTextoP"
+                    android:textColor="@color/colorPrimary"
+                    android:textSize="26sp"
+                    android:textAllCaps="true"
+                    android:maxLength="6"
+                    android:maxLines="1"
+                    android:inputType="textCapCharacters" />
+            </com.google.android.material.card.MaterialCardView>
 
-                    <EditText
-                        android:id="@+id/etSalaId"
-                        android:layout_width="match_parent"
-                        android:layout_height="60dp"
-                        android:background="@null"
-                        android:fontFamily="@font/lilitaone_regular"
-                        android:gravity="center"
-                        android:hint="EJ: AB1234"
-                        android:textColorHint="@color/colorTextoP"
-                        android:textColor="@color/colorPrimary"
-                        android:textSize="24sp"
-                        android:textAllCaps="true"
-                        android:maxLength="6"
-                        android:maxLines="1"
-                        android:inputType="textCapCharacters" />
-                </com.google.android.material.card.MaterialCardView>
-
-            </LinearLayout>
-        </com.google.android.material.card.MaterialCardView>
+        </LinearLayout>
+    </com.google.android.material.card.MaterialCardView>
 
         <androidx.appcompat.widget.AppCompatButton
             android:id="@+id/btnUnirseSalaFinal"
             android:layout_width="match_parent"
-            android:layout_height="55dp"
-            android:layout_marginTop="24dp"
+            android:layout_height="60dp"
+            android:layout_marginTop="30dp"
             android:background="@drawable/bg_boton_pildora"
             android:fontFamily="@font/lilitaone_regular"
             android:text="ENTRAR A LA SALA"
             android:textColor="@color/colorBg"
-            android:textSize="20sp" />
+            android:textSize="22sp"
+            android:elevation="4dp" />
 
     </LinearLayout>
 </androidx.constraintlayout.widget.ConstraintLayout>

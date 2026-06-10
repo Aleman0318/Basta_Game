@@ -29,6 +29,7 @@
                     android:layout_height="55dp"
                     android:padding="8dp"
                     android:src="@drawable/btn_atras1"
+                    android:background="?attr/selectableItemBackgroundBorderless"
                     app:layout_constraintBottom_toBottomOf="parent"
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintTop_toTopOf="parent"/>
@@ -122,13 +123,14 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:orientation="horizontal"
-                        android:gravity="center_vertical">
+                        android:gravity="center_vertical"
+                        android:layout_marginBottom="4dp">
 
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:fontFamily="@font/lilitaone_regular"
-                            android:text="Tiempo por ronda:"
+                            android:text="Tiempo por ronda: "
                             android:textColor="@color/colorTextoP"
                             android:textSize="18sp" />
 
@@ -136,9 +138,8 @@
                             android:id="@+id/tvTiempoActual"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:layout_marginStart="6dp"
                             android:fontFamily="@font/lilitaone_regular"
-                            android:text="30s"
+                            android:text="1:30 min"
                             android:textColor="@color/colorSecondary"
                             android:textSize="18sp" />
                     </LinearLayout>
@@ -147,9 +148,8 @@
                         android:id="@+id/sbTiempo"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_marginTop="10dp"
-                        android:max="60"
-                        android:progress="30" />
+                        android:max="9"
+                        android:progress="3" />
 
                     <View
                         android:layout_width="match_parent"
@@ -157,69 +157,163 @@
                         android:layout_marginVertical="20dp"
                         android:background="@color/colorGrisAzulado" />
 
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:fontFamily="@font/lilitaone_regular"
-                        android:text="Máximo de jugadores"
-                        android:textColor="@color/colorTextoP"
-                        android:textSize="18sp" />
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginBottom="8dp"
-                        android:fontFamily="@font/manrope_regular"
-                        android:text="Mínimo 2 usuarios / Máximo 8 usuarios"
-                        android:textColor="@color/colorTextoP"
-                        android:alpha="0.6"
-                        android:textSize="12sp" />
-
                     <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_marginTop="5dp"
-                        android:gravity="center"
-                        android:orientation="horizontal">
+                        android:orientation="horizontal"
+                        android:baselineAligned="false">
 
-                        <androidx.appcompat.widget.AppCompatButton
-                            android:id="@+id/btnRestarJugador"
-                            android:layout_width="45dp"
-                            android:layout_height="45dp"
-                            android:minWidth="0dp"
-                            android:minHeight="0dp"
-                            android:insetTop="0dp"
-                            android:insetBottom="0dp"
-                            android:background="@drawable/bg_fondo_icono_crearsala"
-                            android:text="-"
-                            android:textColor="@color/colorSecondary"
-                            android:textStyle="bold"
-                            android:textSize="30sp" />
-
-                        <TextView
-                            android:id="@+id/tvCantJugadores"
-                            android:layout_width="60dp"
+                        <LinearLayout
+                            android:layout_width="0dp"
                             android:layout_height="wrap_content"
-                            android:fontFamily="@font/lilitaone_regular"
-                            android:gravity="center"
-                            android:text="4"
-                            android:textColor="@color/colorSecondary"
-                            android:textSize="24sp" />
+                            android:layout_weight="1"
+                            android:orientation="vertical"
+                            android:gravity="center">
 
-                        <androidx.appcompat.widget.AppCompatButton
-                            android:id="@+id/btnSumarJugador"
-                            android:layout_width="45dp"
-                            android:layout_height="45dp"
-                            android:minWidth="0dp"
-                            android:minHeight="0dp"
-                            android:insetTop="0dp"
-                            android:insetBottom="0dp"
-                            android:rotationY="180"
-                            android:background="@drawable/bg_fondo_icono_crearsala"
-                            android:text="+"
-                            android:textStyle="bold"
-                            android:textColor="@color/colorSecondary"
-                            android:textSize="25sp" />
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:fontFamily="@font/lilitaone_regular"
+                                android:text="Rondas"
+                                android:textColor="@color/colorTextoP"
+                                android:textSize="18sp" />
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_marginBottom="10dp"
+                                android:fontFamily="@font/manrope_regular"
+                                android:gravity="center"
+                                android:text="Mín 1 / Máx 26"
+                                android:textColor="@color/colorTextoP"
+                                android:alpha="0.6"
+                                android:textSize="11sp" />
+
+                            <LinearLayout
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:gravity="center"
+                                android:orientation="horizontal">
+
+                                <androidx.appcompat.widget.AppCompatButton
+                                    android:id="@+id/btnRestarRonda"
+                                    android:layout_width="38dp"
+                                    android:layout_height="38dp"
+                                    android:minWidth="0dp"
+                                    android:minHeight="0dp"
+                                    android:insetTop="0dp"
+                                    android:insetBottom="0dp"
+                                    android:background="@drawable/bg_fondo_icono_crearsala"
+                                    android:text="-"
+                                    android:textColor="@color/colorSecondary"
+                                    android:textStyle="bold"
+                                    android:textSize="24sp" />
+
+                                <TextView
+                                    android:id="@+id/tvCantRondas"
+                                    android:layout_width="40dp"
+                                    android:layout_height="wrap_content"
+                                    android:fontFamily="@font/lilitaone_regular"
+                                    android:gravity="center"
+                                    android:text="5"
+                                    android:textColor="@color/colorSecondary"
+                                    android:textSize="22sp" />
+
+                                <androidx.appcompat.widget.AppCompatButton
+                                    android:id="@+id/btnSumarRonda"
+                                    android:layout_width="38dp"
+                                    android:layout_height="38dp"
+                                    android:minWidth="0dp"
+                                    android:minHeight="0dp"
+                                    android:insetTop="0dp"
+                                    android:insetBottom="0dp"
+                                    android:rotationY="180"
+                                    android:background="@drawable/bg_fondo_icono_crearsala"
+                                    android:text="+"
+                                    android:textStyle="bold"
+                                    android:textColor="@color/colorSecondary"
+                                    android:textSize="20sp" />
+                            </LinearLayout>
+                        </LinearLayout>
+
+                        <View
+                            android:layout_width="1dp"
+                            android:layout_height="match_parent"
+                            android:layout_marginHorizontal="8dp"
+                            android:background="@color/colorGrisAzulado" />
+
+                        <LinearLayout
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:orientation="vertical"
+                            android:gravity="center">
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:fontFamily="@font/lilitaone_regular"
+                                android:text="Jugadores"
+                                android:textColor="@color/colorTextoP"
+                                android:textSize="18sp" />
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_marginBottom="10dp"
+                                android:fontFamily="@font/manrope_regular"
+                                android:gravity="center"
+                                android:text="Mín 2 / Máx 8"
+                                android:textColor="@color/colorTextoP"
+                                android:alpha="0.6"
+                                android:textSize="11sp" />
+
+                            <LinearLayout
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:gravity="center"
+                                android:orientation="horizontal">
+
+                                <androidx.appcompat.widget.AppCompatButton
+                                    android:id="@+id/btnRestarJugador"
+                                    android:layout_width="38dp"
+                                    android:layout_height="38dp"
+                                    android:minWidth="0dp"
+                                    android:minHeight="0dp"
+                                    android:insetTop="0dp"
+                                    android:insetBottom="0dp"
+                                    android:background="@drawable/bg_fondo_icono_crearsala"
+                                    android:text="-"
+                                    android:textColor="@color/colorSecondary"
+                                    android:textStyle="bold"
+                                    android:textSize="24sp" />
+
+                                <TextView
+                                    android:id="@+id/tvCantJugadores"
+                                    android:layout_width="40dp"
+                                    android:layout_height="wrap_content"
+                                    android:fontFamily="@font/lilitaone_regular"
+                                    android:gravity="center"
+                                    android:text="4"
+                                    android:textColor="@color/colorSecondary"
+                                    android:textSize="22sp" />
+
+                                <androidx.appcompat.widget.AppCompatButton
+                                    android:id="@+id/btnSumarJugador"
+                                    android:layout_width="38dp"
+                                    android:layout_height="38dp"
+                                    android:minWidth="0dp"
+                                    android:minHeight="0dp"
+                                    android:insetTop="0dp"
+                                    android:insetBottom="0dp"
+                                    android:rotationY="180"
+                                    android:background="@drawable/bg_fondo_icono_crearsala"
+                                    android:text="+"
+                                    android:textStyle="bold"
+                                    android:textColor="@color/colorSecondary"
+                                    android:textSize="20sp" />
+                            </LinearLayout>
+                        </LinearLayout>
                     </LinearLayout>
 
                 </LinearLayout>
