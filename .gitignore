@@ -1,15 +1,39 @@
-*.iml
-.gradle
-/local.properties
-/.idea/caches
-/.idea/libraries
-/.idea/modules.xml
-/.idea/workspace.xml
-/.idea/navEditor.xml
-/.idea/assetWizardSettings.xml
-.DS_Store
-/build
-/captures
-.externalNativeBuild
-.cxx
+# Archivos de compilación
+*.apk
+*.aab
+*.ap_
+*.dex
+*.class
+
+# Carpetas de build
+build/
+*/build/
+
+# Gradle
+.gradle/
+gradle-app.setting
+!gradle-wrapper.jar
+
+# Local properties
 local.properties
+
+# Android Studio / IntelliJ
+.idea/
+*.iml
+
+# Captures
+captures/
+
+# Archivos del sistema
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+
+# Keystore / firmas
+*.jks
+*.keystore
+
+# Google Services - OJO: ver explicación abajo
+# google-services.json

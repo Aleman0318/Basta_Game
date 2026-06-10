@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "270698606832",
+    "project_id": "basta-game-3e140",
+    "storage_bucket": "basta-game-3e140.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:270698606832:android:05ef70c6f38534b4b55235",
+        "android_client_info": {
+          "package_name": "com.example.basta_game"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCUrOUiTnkdxen8lpAczYYSSfS64Oj4cHI"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
