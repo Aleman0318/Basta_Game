@@ -1,4 +1,4 @@
-package com.example.basta_game.adapters;
+package com.example.basta_game.Adapters;
 
 import android.graphics.Color;
 import android.view.LayoutInflater;
@@ -7,7 +7,7 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
-import com.example.basta_game.Models.Jugador;
+import com.example.basta_game.models.Jugador;
 import com.example.basta_game.R;
 
 import java.util.List;

@@ -4,7 +4,6 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
@@ -14,12 +13,11 @@ import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 
 //import de firebase
-import com.example.basta_game.Models.Usuario;
+import com.example.basta_game.models.Usuario;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DatabaseReference;
 
 //imports notificacion personalizada
-import android.view.View;
 import com.example.basta_game.utils.NotificationHelper;
 
 import com.google.android.material.textfield.TextInputEditText;

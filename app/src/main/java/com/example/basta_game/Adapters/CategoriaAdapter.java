@@ -1,4 +1,4 @@
-package com.example.basta_game.adapters;
+package com.example.basta_game.Adapters;
 
 import android.content.res.ColorStateList;
 import android.graphics.Color;
@@ -9,7 +9,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
-import com.example.basta_game.Models.Categoria;
+import com.example.basta_game.models.Categoria;
 import com.example.basta_game.R;
 import com.google.android.material.card.MaterialCardView;
 import java.util.List;

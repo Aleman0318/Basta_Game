@@ -2,7 +2,6 @@ package com.example.basta_game;
 
 import android.os.Bundle;
 import android.widget.Toast;
-
 import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.graphics.Insets;

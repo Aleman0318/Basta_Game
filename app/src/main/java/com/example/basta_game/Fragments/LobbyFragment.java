@@ -1,4 +1,4 @@
-package com.example.basta_game.fragments;
+package com.example.basta_game.Fragments;
 
 import android.content.res.ColorStateList;
 import android.graphics.Color;
@@ -12,9 +12,9 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 import androidx.appcompat.widget.AppCompatButton;
-import com.example.basta_game.Models.Jugador;
+import com.example.basta_game.models.Jugador;
 import com.example.basta_game.R;
-import com.example.basta_game.adapters.JugadorAdapter;
+import com.example.basta_game.Adapters.JugadorAdapter;
 import java.util.ArrayList;
 import java.util.List;
 
