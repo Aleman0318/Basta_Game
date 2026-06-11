@@ -1,10 +1,8 @@
 package com.example.basta_game;
 
-import android.content.Intent;
-import android.os.Bundle;
-import android.util.Log;
-import android.view.View;
 
+import android.os.Bundle;
+import android.view.View;
 import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.graphics.Insets;
@@ -14,15 +12,11 @@ import androidx.fragment.app.Fragment;
 import com.example.basta_game.Fragments.JugarFragment;
 import com.example.basta_game.Fragments.PerfilFragment;
 import com.example.basta_game.Fragments.RankingFragment;
-import com.example.basta_game.models.Usuario;
-import com.example.basta_game.utils.NotificationHelper;
 import com.example.basta_game.utils.VerificacionesAuth;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 
 //imports de firebase
 import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.database.DatabaseReference;
-
 
 public class HomeActivity extends AppCompatActivity {
 

@@ -6,6 +6,16 @@
     android:layout_height="match_parent"
     android:background="@color/colorTransparente">
 
+    <include
+        android:id="@+id/notificationLobby"
+        layout="@layout/component_notification_card"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        app:layout_constraintWidth_percent="0.80"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent" />
+
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/headerLobby"
         android:layout_width="match_parent"
@@ -66,7 +76,7 @@
                     android:textSize="22sp" />
 
                 <TextView
-                    android:id="@+id/tvLobbyIdSala"
+                    android:id="@+id/tvidSalaLobby"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:fontFamily="@font/lilitaone_regular"
