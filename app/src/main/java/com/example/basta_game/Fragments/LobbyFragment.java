@@ -31,6 +31,7 @@ public class LobbyFragment extends Fragment {
         int tiempoStr = 60;
         int jugadoresStr = 4;
         int rondasStr = 5;
+
         if (getArguments() != null) {
             esAnfitrion = getArguments().getBoolean("ES_ANFITRION", false);
             categoriasStr = getArguments().getString("CATEGORIAS", "Pendiente...");
@@ -50,10 +51,13 @@ public class LobbyFragment extends Fragment {
         RecyclerView rvJugadoresLobby = view.findViewById(R.id.rvJugadoresLobby);
         rvJugadoresLobby.setLayoutManager(new LinearLayoutManager(getContext()));
 
+        // ==========================================
+        // CORRECCIÓN: Volvemos a usar booleanos
+        // ==========================================
         List<Jugador> listaFicticia = new ArrayList<>();
-        listaFicticia.add(new Jugador("Diego", false));
-        listaFicticia.add(new Jugador("Carlos_99", true));
-        listaFicticia.add(new Jugador("AnaBanana", false));
+        listaFicticia.add(new Jugador("Marlon", false));
+        listaFicticia.add(new Jugador("Diego", true));
+        listaFicticia.add(new Jugador("Diana", true));
 
         JugadorAdapter adaptador = new JugadorAdapter(listaFicticia);
         rvJugadoresLobby.setAdapter(adaptador);
@@ -79,6 +83,20 @@ public class LobbyFragment extends Fragment {
                 btnToggleListo.setText("NO ESTOY LISTO");
                 btnToggleListo.setBackgroundTintList(ColorStateList.valueOf(Color.parseColor("#888888")));
             }
+        });
+
+        btnComenzarPartida.setOnClickListener(v -> {
+            PartidaFragment partidaFragment = new PartidaFragment();
+            Bundle bundle = new Bundle();
+
+            bundle.putString("CODIGO_SALA", "AB1234");
+            bundle.putBoolean("ES_ANFITRION", esAnfitrion);
+
+            partidaFragment.setArguments(bundle);
+
+            getParentFragmentManager().beginTransaction()
+                    .replace(R.id.sala_fragment_container, partidaFragment)
+                    .commit();
         });
 
         return view;

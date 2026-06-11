@@ -1,0 +1,296 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:fillViewport="true"
+    android:background="@drawable/bg_fondocuaderno">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:paddingStart="18dp"
+        android:paddingEnd="18dp"
+        android:paddingTop="18dp"
+        android:paddingBottom="50dp">
+
+        <ImageView
+            android:id="@+id/imgLogoBasta"
+            android:layout_width="match_parent"
+            android:layout_height="130dp"
+            android:adjustViewBounds="true"
+            android:scaleType="fitCenter"
+            android:src="@drawable/logo_basta" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="6dp"
+            android:orientation="horizontal"
+            android:gravity="center"
+            android:weightSum="3">
+
+            <TextView
+                android:id="@+id/txtCodigoSala"
+                android:layout_width="0dp"
+                android:layout_height="42dp"
+                android:layout_weight="1"
+                android:gravity="center"
+                android:background="@drawable/bg_chip_blanco_azul"
+                android:fontFamily="@font/lilitaone_regular"
+                android:text="Sala AB12"
+                android:textColor="#064DDB"
+                android:textSize="15sp" />
+
+            <TextView
+                android:id="@+id/txtRondaActual"
+                android:layout_width="0dp"
+                android:layout_height="42dp"
+                android:layout_marginStart="8dp"
+                android:layout_marginEnd="8dp"
+                android:layout_weight="1"
+                android:gravity="center"
+                android:background="@drawable/bg_chip_blanco_gris"
+                android:fontFamily="@font/lilitaone_regular"
+                android:text="Ronda 1/5"
+                android:textColor="#064DDB"
+                android:textSize="15sp" />
+
+            <TextView
+                android:id="@+id/txtEstadoPartida"
+                android:layout_width="0dp"
+                android:layout_height="42dp"
+                android:layout_weight="1"
+                android:gravity="center"
+                android:background="@drawable/bg_chip__blanco_verde"
+                android:fontFamily="@font/lilitaone_regular"
+                android:text="● En juego"
+                android:textColor="#3A8C24"
+                android:textSize="15sp" />
+
+        </LinearLayout>
+
+        <com.google.android.material.card.MaterialCardView
+            android:id="@+id/cardJugadores"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
+            app:cardCornerRadius="22dp"
+            app:cardElevation="5dp"
+            app:cardBackgroundColor="#FDFDFD"
+            app:strokeWidth="2dp"
+            app:strokeColor="#D6E0FF">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:padding="12dp">
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:fontFamily="@font/lilitaone_regular"
+                    android:text="Jugadores en la sala"
+                    android:textColor="#064DDB"
+                    android:textSize="20sp" />
+
+                <androidx.recyclerview.widget.RecyclerView
+                    android:id="@+id/rvJugadoresPartida"
+                    android:layout_width="match_parent"
+                    android:layout_height="90dp"
+                    android:layout_marginTop="8dp"
+                    android:clipToPadding="false"
+                    android:padding="4dp" />
+            </LinearLayout>
+
+        </com.google.android.material.card.MaterialCardView>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="18dp"
+            android:orientation="horizontal"
+            android:gravity="center_vertical">
+
+            <FrameLayout
+                android:id="@+id/contenedorLetra"
+                android:layout_width="0dp"
+                android:layout_height="165dp"
+                android:layout_weight="1"
+                android:layout_marginEnd="10dp">
+
+                <ImageView
+                    android:id="@+id/imgMarcoLetra"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:scaleType="fitCenter"
+                    android:src="@drawable/marco_rojo" />
+
+                <ImageView
+                    android:id="@+id/imgLetraActual"
+                    android:layout_width="95dp"
+                    android:layout_height="95dp"
+                    android:layout_gravity="center"
+                    android:scaleType="fitCenter"
+                    android:src="@drawable/letra_m" />
+
+            </FrameLayout>
+
+            <LinearLayout
+                android:id="@+id/cardTiempo"
+                android:layout_width="0dp"
+                android:layout_height="150dp"
+                android:layout_weight="1"
+                android:orientation="vertical"
+                android:gravity="center"
+                android:background="@drawable/bg_boton_secundario_azul"
+                android:padding="10dp">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:fontFamily="@font/lilitaone_regular"
+                    android:text="Tiempo restante"
+                    android:textColor="#064DDB"
+                    android:textSize="18sp" />
+
+                <TextView
+                    android:id="@+id/txtTiempoRestante"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="4dp"
+                    android:fontFamily="@font/summer"
+                    android:text="00:37"
+                    android:textColor="#E91D2C"
+                    android:textSize="42sp" />
+
+                <TextView
+                    android:id="@+id/txtInstruccionLetra"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:gravity="center"
+                    android:fontFamily="@font/manrope_regular"
+                    android:text="Respuestas con la letra M"
+                    android:textColor="#064DDB"
+                    android:textSize="12sp"
+                    android:textStyle="bold" />
+
+            </LinearLayout>
+
+        </LinearLayout>
+
+        <com.google.android.material.card.MaterialCardView
+            android:id="@+id/cardRespuestas"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="18dp"
+            app:cardCornerRadius="22dp"
+            app:cardElevation="5dp"
+            app:cardBackgroundColor="#FDFDFD"
+            app:strokeWidth="2dp"
+            app:strokeColor="#D6E0FF">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:padding="14dp">
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:fontFamily="@font/lilitaone_regular"
+                    android:text="Tus respuestas"
+                    android:textColor="#064DDB"
+                    android:textSize="22sp" />
+
+                <androidx.recyclerview.widget.RecyclerView
+                    android:id="@+id/rvCategoriasJuego"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    android:nestedScrollingEnabled="false" />
+
+            </LinearLayout>
+
+        </com.google.android.material.card.MaterialCardView>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="18dp"
+            android:orientation="horizontal"
+            android:gravity="center_vertical">
+
+            <androidx.appcompat.widget.AppCompatButton
+                android:id="@+id/btnBasta"
+                android:layout_width="0dp"
+                android:layout_height="62dp"
+                android:layout_weight="1.4"
+                android:background="@drawable/bg_boton_basta"
+                android:fontFamily="@font/lilitaone_regular"
+                android:text="¡BASTA!"
+                android:textAllCaps="false"
+                android:textColor="#FFFFFF"
+                android:textSize="30sp"
+                android:elevation="6dp" />
+
+            <androidx.appcompat.widget.AppCompatButton
+                android:id="@+id/btnVerPuntajes"
+                android:layout_width="0dp"
+                android:layout_height="56dp"
+                android:layout_marginStart="12dp"
+                android:layout_weight="1"
+                android:background="@drawable/bg_boton_secundario_azul"
+                android:fontFamily="@font/lilitaone_regular"
+                android:text="Puntajes"
+                android:textAllCaps="false"
+                android:textColor="#064DDB"
+                android:textSize="17sp" />
+
+        </LinearLayout>
+
+        <!-- PUNTAJES -->
+        <com.google.android.material.card.MaterialCardView
+            android:id="@+id/cardPuntajes"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="18dp"
+            app:cardCornerRadius="22dp"
+            app:cardBackgroundColor="@color/blanco"
+            app:strokeWidth="2dp"
+            app:strokeColor="#D6E0FF">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:padding="12dp">
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:gravity="center"
+                    android:fontFamily="@font/lilitaone_regular"
+                    android:text="PUNTAJES"
+                    android:textColor="#064DDB"
+                    android:textSize="24sp" />
+
+                <androidx.recyclerview.widget.RecyclerView
+                    android:id="@+id/rvPuntajesPartida"
+                    android:layout_width="match_parent"
+                    android:layout_height="140dp"
+                    android:layout_marginTop="8dp"
+                    android:clipToPadding="false"
+                    android:padding="4dp" />
+
+            </LinearLayout>
+
+        </com.google.android.material.card.MaterialCardView>
+
+    </LinearLayout>
+
+</ScrollView>
