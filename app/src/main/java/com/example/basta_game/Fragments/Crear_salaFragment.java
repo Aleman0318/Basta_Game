@@ -262,13 +262,14 @@ public class Crear_salaFragment extends Fragment {
 
     private void crearSala() {
 
+        Log.d("DEBUG_SALA", "Entrando a funcion sala");
         auth = FirebaseAuth.getInstance();
 
         if(auth != null && VerificacionesAuth.VerificarInicioSesion(auth)){
             if (!validarConfiguracionSala()) {
                 return;
             }
-
+            Log.d("DEBUG_SALA", "Sesion validada con metodo verificarsesion");
             String usuarioUID = auth.getCurrentUser().getUid();
             DatabaseReference db = FirebaseDatabase.getInstance().getReference("usuarios").child(usuarioUID);
 
@@ -311,6 +312,9 @@ public class Crear_salaFragment extends Fragment {
 
                     salaConID.setValue(sala).addOnCompleteListener(taskSala -> {
                        if(taskSala.isSuccessful()){
+
+                           Log.d("DEBUG_SALA", "Sala creada correctamente");
+
                            JugadorSala jugador = new JugadorSala(
                                    usuarioUID,
                                    nombreUsuario,
@@ -325,6 +329,8 @@ public class Crear_salaFragment extends Fragment {
                                    .setValue(jugador).addOnCompleteListener(task -> {
                                        if(task.isSuccessful()){
 
+                                           Log.d("DEBUG_SALA", "Jugador creado correctamente");
+
                                            CodigoSalaSearch codigo = new CodigoSalaSearch(
                                                    codigoSala,
                                                    idSalaString,
@@ -334,6 +340,7 @@ public class Crear_salaFragment extends Fragment {
                                             DatabaseReference nodoCodigoSala = FirebaseDatabase.getInstance().getReference("codigosSalas");
                                             nodoCodigoSala.child(codigoSala).setValue(codigo).addOnCompleteListener(taskCodigo ->{
                                                 if(taskCodigo.isSuccessful()){
+                                                    Log.d("DEBUG_SALA", "codigo almacenado en realtime correctamente");
                                                     Log.d("JUGADOR_SALA", "jugador sala cargado correctamente en la realtime");
                                                     abrirLobbyComoAnfitrion(categoriasActivas);
                                                 }
@@ -348,6 +355,7 @@ public class Crear_salaFragment extends Fragment {
                                    });
                        }
                        else {
+                           Log.d("DEBUG_SALA", "no se pudo crear la sala");
                            NotificationHelper.show(
                                    notificationCrearSala,
                                    "¡No se pudo crear la sala!",
