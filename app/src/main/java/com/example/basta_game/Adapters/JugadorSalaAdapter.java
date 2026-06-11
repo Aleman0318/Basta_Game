@@ -43,6 +43,7 @@ public class JugadorSalaAdapter extends RecyclerView.Adapter<JugadorSalaAdapter.
                     ColorStateList.valueOf(Color.parseColor("#4CAF50"))
             );
 
+            holder.tvEstadoJugador.setTextColor(Color.parseColor("#4CAF50"));
             holder.tvEstadoJugador.setText("Listo");
 
         } else {
@@ -50,7 +51,8 @@ public class JugadorSalaAdapter extends RecyclerView.Adapter<JugadorSalaAdapter.
                     ColorStateList.valueOf(Color.parseColor("#F44336"))
             );
 
-            holder.tvEstadoJugador.setText("En Espera");
+            holder.tvEstadoJugador.setTextColor(Color.parseColor("#F44336"));
+            holder.tvEstadoJugador.setText("No Listo");
         }
     }
 
