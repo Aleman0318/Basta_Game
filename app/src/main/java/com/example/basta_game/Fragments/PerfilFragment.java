@@ -74,7 +74,7 @@ public class PerfilFragment extends Fragment {
             AppCompatButton btnCancelar = dialog.findViewById(R.id.btnCancelarAvatar);
             AppCompatButton btnGuardar = dialog.findViewById(R.id.btnGuardarAvatar);
 
-            rvListaAvatares.setLayoutManager(new GridLayoutManager(getContext(), 2));
+            rvListaAvatares.setLayoutManager(new GridLayoutManager(getContext(), 3));
 
             adapter = new AvatarAdapter(listaAvatares, avatar -> {
                 avatarSeleccionado = avatar;
@@ -93,6 +93,11 @@ public class PerfilFragment extends Fragment {
                     guardarAvatarEnFirebase(dialog);
                 }
             });
+            if (dialog.getWindow() != null) {
+                int ancho = (int) (getResources().getDisplayMetrics().widthPixels * 0.99);
+                int alto = (int) (getResources().getDisplayMetrics().heightPixels * 0.85);
+                dialog.getWindow().setLayout(ancho, alto);
+            }
 
             dialog.show();
         });
@@ -105,23 +110,21 @@ public class PerfilFragment extends Fragment {
         FirebaseStorage storage = FirebaseStorage.getInstance();
 
         List<String> nombresArchivos = new ArrayList<>();
-        nombresArchivos.add("avatar1.png");
-        nombresArchivos.add("avatar2.png");
-        nombresArchivos.add("avatar3.png");
-        nombresArchivos.add("avatar4.png");
-        nombresArchivos.add("avatar5.png");
-        nombresArchivos.add("avatar6.png");
-        nombresArchivos.add("avatar7.png");
-        nombresArchivos.add("avatar8.png");
-        nombresArchivos.add("helicoptero.png");
-        nombresArchivos.add("hipopotama.png");
-        nombresArchivos.add("therian.png");
+        listaAvatares.add(new Avatar("avatar1.png", "Chico one"));
+        listaAvatares.add(new Avatar("avatar2.png", "Chico two"));
+        listaAvatares.add(new Avatar("avatar3.png", "Ingeniero"));
+        listaAvatares.add(new Avatar("avatar4.png", "Chica one"));
+        listaAvatares.add(new Avatar("avatar5.png", "nossaJ"));
+        listaAvatares.add(new Avatar("avatar6.png", "Chica two"));
+        listaAvatares.add(new Avatar("avatar7.png", "Chica three"));
+        listaAvatares.add(new Avatar("avatar8.png", "anairA"));
+        listaAvatares.add(new Avatar("helicoptero.png", "Helicoptero Apache"));
+        listaAvatares.add(new Avatar("hipopotama.png", "Flaca asintomatica"));
+        listaAvatares.add(new Avatar("therian.png", "Therian"));
 
-        for (String nombre : nombresArchivos) {
-            Avatar avatar = new Avatar(nombre);
-            listaAvatares.add(avatar);
+        for (Avatar avatar : listaAvatares) {
 
-            StorageReference storageRef = storage.getReference().child("avatares/" + nombre);
+            StorageReference storageRef = storage.getReference().child("avatares/" + avatar.getNombreArchivo());
             storageRef.getDownloadUrl().addOnSuccessListener(uri -> {
                 avatar.setUrlDescarga(uri.toString());
                 if (adapter != null) {
@@ -129,7 +132,7 @@ public class PerfilFragment extends Fragment {
                 }
             }).addOnFailureListener(e -> {
                 if (getContext() != null) {
-                    Toast.makeText(getContext(), "Error al enlazar: " + nombre, Toast.LENGTH_SHORT).show();
+                    Toast.makeText(getContext(), "Error al enlazar: " + avatar.getNombreArchivo(), Toast.LENGTH_SHORT).show();
                 }
             });
         }
