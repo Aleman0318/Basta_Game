@@ -43,15 +43,18 @@
             android:id="@+id/tvTituloLobby"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
+            android:paddingStart="58dp"
+            android:paddingEnd="58dp"
             android:fontFamily="@font/lilitaone_regular"
             android:gravity="center"
             android:text="LOBBY DE ESPERA"
             android:textColor="@color/colorPrimary"
             android:textSize="29sp"
             android:letterSpacing="0.03"
+            android:maxLines="1"
             app:layout_constraintTop_toTopOf="@id/btnRegresar"
             app:layout_constraintBottom_toBottomOf="@id/btnRegresar"
-            app:layout_constraintStart_toEndOf="@id/btnRegresar"
+            app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toEndOf="parent" />
 
         <View
@@ -61,8 +64,8 @@
             android:layout_marginTop="4dp"
             android:background="@color/colorPrimary"
             app:layout_constraintTop_toBottomOf="@id/tvTituloLobby"
-            app:layout_constraintStart_toStartOf="@id/tvTituloLobby"
-            app:layout_constraintEnd_toEndOf="@id/tvTituloLobby" />
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 
@@ -199,7 +202,7 @@
                             android:fontFamily="@font/playkidz"
                             android:text="Nombre, Color, País, Apellido"
                             android:textColor="@color/colorPrimary"
-                            android:textSize="16sp"
+                            android:textSize="18sp"
                             android:lineSpacingExtra="3dp"
                             tools:text="Nombre, Color, Fruta, País, Animal, Cosa, Apellido" />
 
@@ -240,7 +243,7 @@
                             android:fontFamily="@font/playkidz"
                             android:text="1"
                             android:textColor="@color/colorPrimary"
-                            android:textSize="16sp" />
+                            android:textSize="18sp" />
 
                     </LinearLayout>
 
@@ -280,7 +283,7 @@
                             android:fontFamily="@font/playkidz"
                             android:text="2:00 min por ronda"
                             android:textColor="@color/colorPrimary"
-                            android:textSize="16sp" />
+                            android:textSize="18sp" />
 
                     </LinearLayout>
 
@@ -319,7 +322,7 @@
                             android:fontFamily="@font/playkidz"
                             android:text="Máximo 4"
                             android:textColor="@color/colorPrimary"
-                            android:textSize="16sp" />
+                            android:textSize="18sp" />
 
                     </LinearLayout>
 

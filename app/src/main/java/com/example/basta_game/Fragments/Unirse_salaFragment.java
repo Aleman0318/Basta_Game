@@ -75,7 +75,8 @@ public class Unirse_salaFragment extends Fragment {
                                                        0,
                                                        false,
                                                        false,
-                                                       true
+                                                       true,
+                                                       user.getFotoPerfilUrl()
                                                );
 
                                                DatabaseReference nodoJugadorSala = FirebaseDatabase.getInstance().getReference("salas").child(codigoElegido.getIdSala()).child("jugadores").child(user.getUid());
