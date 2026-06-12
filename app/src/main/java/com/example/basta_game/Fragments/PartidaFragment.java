@@ -9,7 +9,6 @@ import android.widget.TextView;
 
 import androidx.appcompat.widget.AppCompatButton;
 import androidx.fragment.app.Fragment;
-import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -106,8 +105,9 @@ public class PartidaFragment extends Fragment {
         listaJugadores.add(new Jugador("Steven", true));
         rvJugadoresPartida.setAdapter(new JugadorPartidaAdapter(listaJugadores));
 
-        // 2. CONFIGURAR CATEGORÍAS (Centro - 2 Columnas)
-        rvCategoriasJuego.setLayoutManager(new GridLayoutManager(getContext(), 2));
+        // 2. CONFIGURAR CATEGORÍAS (Centro - 1 Columna con Scroll)
+        // ¡Aquí está el cambio! De GridLayoutManager(..., 2) a LinearLayoutManager normal
+        rvCategoriasJuego.setLayoutManager(new LinearLayoutManager(getContext()));
         List<Categoria> listaCategorias = new ArrayList<>();
 
         // Verificamos si nos pasaron categorías desde el Lobby
