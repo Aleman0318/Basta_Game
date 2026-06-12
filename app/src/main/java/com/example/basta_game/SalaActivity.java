@@ -3,6 +3,7 @@ package com.example.basta_game;
 import android.os.Bundle;
 import androidx.appcompat.app.AppCompatActivity;
 import com.example.basta_game.Fragments.PartidaFragment;
+import java.util.ArrayList; // No olvides importar esto
 
 public class SalaActivity extends AppCompatActivity {
 
@@ -28,11 +29,26 @@ public class SalaActivity extends AppCompatActivity {
         bundle.putString("CODIGO_SALA", codigoSala);
         bundle.putBoolean("ES_ANFITRION", esAnfitrion);
 
+        // ==========================================
+        // ¡AQUÍ ESTÁ LA SOLUCIÓN!
+        // Agregamos categorías simuladas para la prueba
+        // ==========================================
+        ArrayList<String> categoriasPrueba = new ArrayList<>();
+        categoriasPrueba.add("Nombre");
+        categoriasPrueba.add("Color");
+        categoriasPrueba.add("Fruta");
+        categoriasPrueba.add("País");
+        categoriasPrueba.add("Animal");
+        categoriasPrueba.add("Cosa");
+        categoriasPrueba.add("Apellido");
+
+        bundle.putStringArrayList("CATEGORIAS", categoriasPrueba);
+
         partidaFragment.setArguments(bundle);
 
         getSupportFragmentManager()
                 .beginTransaction()
-                .replace(R.id.sala_fragment_container, partidaFragment)
+                .replace(R.id.main, partidaFragment)
                 .commit();
     }
 }

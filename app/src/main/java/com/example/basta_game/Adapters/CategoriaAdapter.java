@@ -43,7 +43,7 @@ public class CategoriaAdapter extends RecyclerView.Adapter<CategoriaAdapter.View
         // esto asigna la imagen correspondiente proveniente de el list de categoria
         holder.ivIcono.setImageResource(categoria.getIconoId());
         if (categoria.isHabilitada()) {
-            holder.cardView.setCardBackgroundColor(ColorStateList.valueOf(Color.parseColor("#6373FF")));
+            holder.cardView.setCardBackgroundColor(ColorStateList.valueOf(Color.parseColor("#3B4B7D")));
         } else {
             holder.cardView.setCardBackgroundColor(ColorStateList.valueOf(Color.parseColor("#C2C0C0")));
         }

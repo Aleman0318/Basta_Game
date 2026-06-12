@@ -11,13 +11,10 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.Basta_Game">
         <activity
-            android:name=".SalaActivity"
+            android:name=".HomeActivity"
             android:exported="false" />
         <activity
             android:name=".LoginActivity"
-            android:exported="false" />
-        <activity
-            android:name=".HomeActivity"
             android:exported="false" />
         <activity
             android:name=".RegistrarActivity"

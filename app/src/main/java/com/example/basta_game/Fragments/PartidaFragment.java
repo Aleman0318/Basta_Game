@@ -15,7 +15,6 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.basta_game.Adapters.CategoriaPartidaAdapter;
 import com.example.basta_game.Adapters.JugadorPartidaAdapter;
-import com.example.basta_game.Adapters.PuntajePartidaAdapter;
 import com.example.basta_game.models.Categoria;
 import com.example.basta_game.models.Jugador;
 import com.example.basta_game.R;
@@ -30,6 +29,7 @@ public class PartidaFragment extends Fragment {
 
     private String codigoSala;
     private boolean esAnfitrion;
+    private ArrayList<String> listaNombresCategorias;
 
     private DatabaseReference salaRef;
 
@@ -42,12 +42,10 @@ public class PartidaFragment extends Fragment {
     private ImageView imgLetraActual;
 
     private AppCompatButton btnBasta;
-    private AppCompatButton btnVerPuntajes;
 
     // Declaramos los RecyclerViews
     private RecyclerView rvJugadoresPartida;
     private RecyclerView rvCategoriasJuego;
-    private RecyclerView rvPuntajesPartida;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -69,6 +67,7 @@ public class PartidaFragment extends Fragment {
         if (getArguments() != null) {
             codigoSala = getArguments().getString("CODIGO_SALA");
             esAnfitrion = getArguments().getBoolean("ES_ANFITRION", false);
+            listaNombresCategorias = getArguments().getStringArrayList("CATEGORIAS");
         }
     }
 
@@ -82,12 +81,10 @@ public class PartidaFragment extends Fragment {
         imgLetraActual = view.findViewById(R.id.imgLetraActual);
 
         btnBasta = view.findViewById(R.id.btnBasta);
-        btnVerPuntajes = view.findViewById(R.id.btnVerPuntajes);
 
         // Enlazamos los RecyclerViews
         rvJugadoresPartida = view.findViewById(R.id.rvJugadoresPartida);
         rvCategoriasJuego = view.findViewById(R.id.rvCategoriasJuego);
-        rvPuntajesPartida = view.findViewById(R.id.rvPuntajesPartida);
     }
 
     private void configurarFirebase() {
@@ -107,36 +104,28 @@ public class PartidaFragment extends Fragment {
         listaJugadores.add(new Jugador("Diego", true));
         listaJugadores.add(new Jugador("Diana", true));
         listaJugadores.add(new Jugador("Steven", true));
-        listaJugadores.add(new Jugador("Marlon", false));
-        listaJugadores.add(new Jugador("Diego", true));
-        listaJugadores.add(new Jugador("Diana", true));
-        listaJugadores.add(new Jugador("Steven", true));
         rvJugadoresPartida.setAdapter(new JugadorPartidaAdapter(listaJugadores));
 
         // 2. CONFIGURAR CATEGORÍAS (Centro - 2 Columnas)
         rvCategoriasJuego.setLayoutManager(new GridLayoutManager(getContext(), 2));
         List<Categoria> listaCategorias = new ArrayList<>();
-        // Reutilizamos las categorías que definiste en Crear_sala
-        listaCategorias.add(new Categoria("Nombre", R.drawable.outline_person_24));
-        listaCategorias.add(new Categoria("Color", R.drawable.outline_person_24));
-        listaCategorias.add(new Categoria("Fruta", R.drawable.outline_person_24));
-        listaCategorias.add(new Categoria("País", R.drawable.outline_person_24));
-        listaCategorias.add(new Categoria("Animal", R.drawable.outline_person_24)); // Cambia al icono de animal si lo tienes
-        listaCategorias.add(new Categoria("Cosa", R.drawable.outline_person_24));
-        rvCategoriasJuego.setAdapter(new CategoriaPartidaAdapter(listaCategorias));
 
-        // 3. CONFIGURAR PUNTAJES (Abajo)
-        rvPuntajesPartida.setLayoutManager(new LinearLayoutManager(getContext(), LinearLayoutManager.HORIZONTAL, false));
-        rvPuntajesPartida.setAdapter(new PuntajePartidaAdapter(listaJugadores));
+        // Verificamos si nos pasaron categorías desde el Lobby
+        if (listaNombresCategorias != null && !listaNombresCategorias.isEmpty()) {
+            for (String nombreCat : listaNombresCategorias) {
+                int iconoId = obtenerIconoParaCategoria(nombreCat);
+                listaCategorias.add(new Categoria(nombreCat, iconoId));
+            }
+        } else {
+            // Un fallback por si entras a la pantalla sin datos (solo para pruebas)
+            listaCategorias.add(new Categoria("Sin categorías", R.drawable.outline_person_24));
+        }
+        rvCategoriasJuego.setAdapter(new CategoriaPartidaAdapter(listaCategorias));
     }
 
     private void configurarBotones() {
         btnBasta.setOnClickListener(v -> {
             // Más adelante: guardar respuestas, cambiar estado de ronda...
-        });
-
-        btnVerPuntajes.setOnClickListener(v -> {
-            // Más adelante: mostrar/ocultar tarjeta de puntajes
         });
     }
 
@@ -148,6 +137,27 @@ public class PartidaFragment extends Fragment {
 
         if (idDrawable != 0) {
             imgLetraActual.setImageResource(idDrawable);
+        }
+    }
+
+    private int obtenerIconoParaCategoria(String nombre) {
+        switch (nombre.toLowerCase(Locale.ROOT)) {
+            case "animal":
+                return R.drawable.ic_animal3;
+            case "color":
+                return R.drawable.ic_paleta2;
+            case "fruta":
+                return R.drawable.ic_frutas2;
+            case "país":
+                return R.drawable.ic_pais2;
+            case "cosa":
+                return R.drawable.ic_cosa;
+            case "nombre":
+                return R.drawable.ic_nombre;
+            case "apellido":
+                return R.drawable.ic_mujer;
+            default:
+                return R.drawable.perfil_menuu;
         }
     }
 }

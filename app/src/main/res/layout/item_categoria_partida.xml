@@ -6,39 +6,43 @@
     android:orientation="horizontal"
     android:gravity="center_vertical"
     android:paddingHorizontal="4dp"
-    android:paddingVertical="8dp"
-    android:weightSum="2"> <ImageView
-    android:id="@+id/imgIconoCategoriaPartida"
-    android:layout_width="26dp"
-    android:layout_height="26dp"
-    android:src="@drawable/outline_person_24" />
+    android:paddingVertical="5dp">
+
+    <ImageView
+        android:id="@+id/imgIconoCategoriaPartida"
+        android:layout_width="36dp"
+        android:layout_height="36dp"
+        android:src="@drawable/outline_person_24" />
 
     <TextView
         android:id="@+id/txtNombreCategoriaPartida"
         android:layout_width="0dp"
-        android:layout_weight="0.8"
+        android:layout_weight="1"
         android:layout_height="wrap_content"
         android:layout_marginStart="8dp"
-        android:fontFamily="@font/manrope_regular"
+        android:layout_marginEnd="4dp"
+        android:fontFamily="@font/comic"
         android:textColor="@color/colorPrimary"
-        android:textSize="14sp"
+        android:textSize="15sp"
+        android:textStyle="bold"
         android:text="Animal" />
 
     <FrameLayout
-        android:layout_width="0dp"
-        android:layout_weight="1.2"
-        android:layout_height="36dp">
+        android:layout_width="75dp"
+        android:layout_height="25dp"
+        android:layout_marginEnd="3dp">
 
         <EditText
             android:id="@+id/etRespuestaCategoriaPartida"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:background="@drawable/bg_input_juego"
-            android:paddingHorizontal="12dp"
+            android:paddingHorizontal="10dp"
+            android:paddingVertical="0dp"
             android:fontFamily="@font/playkidz"
             android:textSize="14sp"
+            android:letterSpacing="0.10"
             android:textColor="@color/colorPrimary"
-            android:inputType="textCapCharacters"
             android:maxLines="1" />
 
     </FrameLayout>
