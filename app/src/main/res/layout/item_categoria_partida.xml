@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="horizontal"
+    android:gravity="center_vertical"
+    android:paddingHorizontal="12dp"
+    android:paddingVertical="8dp">
+
+    <ImageView
+        android:id="@+id/imgIconoCategoriaPartida"
+        android:layout_width="45dp"
+        android:layout_height="45dp"
+        android:src="@drawable/outline_person_24" />
+
+    <TextView
+        android:id="@+id/txtNombreCategoriaPartida"
+        android:layout_width="0dp"
+        android:layout_weight="1"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:layout_marginEnd="8dp"
+        android:fontFamily="@font/comic"
+        android:textColor="@color/colorPrimary"
+        android:textSize="20sp"
+        android:text="Animal" />
+
+    <FrameLayout
+        android:layout_width="170dp"
+        android:layout_height="34dp">
+
+        <EditText
+            android:id="@+id/etRespuestaCategoriaPartida"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:background="@drawable/bg_input_juego"
+            android:paddingHorizontal="12dp"
+            android:paddingVertical="0dp"
+            android:fontFamily="@font/playkidz"
+            android:textSize="18sp"
+            android:letterSpacing="0.15"
+            android:textColor="@color/colorPrimary"
+            android:maxLines="1" />
+
+    </FrameLayout>
+</LinearLayout>

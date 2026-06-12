@@ -114,13 +114,13 @@ public class Crear_salaFragment extends Fragment {
         rvCategorias.setLayoutManager(new GridLayoutManager(getContext(), 2));
 
         List<Categoria> misCategorias = new ArrayList<>();
-        misCategorias.add(new Categoria("Nombre", R.drawable.outline_person_24));
-        misCategorias.add(new Categoria("Color", R.drawable.outline_person_24));
-        misCategorias.add(new Categoria("Fruta", R.drawable.outline_person_24));
-        misCategorias.add(new Categoria("País", R.drawable.outline_person_24));
-        misCategorias.add(new Categoria("Animal", R.drawable.outline_person_24));
-        misCategorias.add(new Categoria("Cosa", R.drawable.outline_person_24));
-        misCategorias.add(new Categoria("Apellido", R.drawable.outline_person_24));
+        misCategorias.add(new Categoria("Nombre", R.drawable.ic_nombre));
+        misCategorias.add(new Categoria("Color", R.drawable.ic_paleta2));
+        misCategorias.add(new Categoria("Fruta", R.drawable.ic_frutas2));
+        misCategorias.add(new Categoria("País", R.drawable.ic_pais2));
+        misCategorias.add(new Categoria("Animal", R.drawable.ic_animal3));
+        misCategorias.add(new Categoria("Cosa", R.drawable.ic_cosa));
+        misCategorias.add(new Categoria("Apellido", R.drawable.ic_mujer));
 
         categoriasActivas.clear();
 

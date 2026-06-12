@@ -65,22 +65,6 @@
                 android:layout_marginTop="3dp"
                 android:orientation="horizontal">
 
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:fontFamily="@font/lilitaone_regular"
-                    android:text="ID de Sala: "
-                    android:textColor="@color/colorTextoP"
-                    android:textSize="20sp" />
-
-                <TextView
-                    android:id="@+id/tvIdSala"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:fontFamily="@font/lilitaone_regular"
-                    android:text="------"
-                    android:textColor="@color/colorPrimary"
-                    android:textSize="20sp" />
             </LinearLayout>
 
             <com.google.android.material.card.MaterialCardView
