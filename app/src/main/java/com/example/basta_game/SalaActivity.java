@@ -2,6 +2,7 @@ package com.example.basta_game;
 
 import android.os.Bundle;
 import android.util.Log;
+import android.widget.Toast;
 
 import androidx.activity.EdgeToEdge;
 import androidx.annotation.NonNull;
@@ -61,35 +62,41 @@ public class SalaActivity extends AppCompatActivity {
     @Override
     protected void onPause() {
         super.onPause();
-        auth = FirebaseAuth.getInstance();
+      if(!isFinishing()){
+          try {
+              auth = FirebaseAuth.getInstance();
 
-        if(VerificacionesAuth.VerificarInicioSesion(auth)){
-            String uidUsuario = auth.getCurrentUser().getUid();
+              if(VerificacionesAuth.VerificarInicioSesion(auth)){
+                  String uidUsuario = auth.getCurrentUser().getUid();
 
-            Bundle bundle = getIntent().getBundleExtra("DATOS_SALA");
-            if(bundle != null){
-                String idSala = bundle.getString("IDSALA");
+                  Bundle bundle = getIntent().getBundleExtra("DATOS_SALA");
+                  if(bundle != null){
+                      String idSala = bundle.getString("IDSALA");
 
-                DatabaseReference nodoSalas = FirebaseDatabase.getInstance().getReference("salas").child(idSala).child("jugadores").child(uidUsuario);
-                nodoSalas.addListenerForSingleValueEvent(new ValueEventListener() {
-                    @Override
-                    public void onDataChange(@NonNull DataSnapshot snapshot) {
-                        JugadorSala jugador = snapshot.getValue(JugadorSala.class);
-                        jugador.setEstaConectado(false);
-                        nodoSalas.setValue(jugador).addOnCompleteListener(task -> {
-                           if(task.isSuccessful()){
-                               Log.d("ONPAUSE", "se cambio el estado del jugador");
-                           }
-                        });
-                    }
+                      DatabaseReference nodoSalas = FirebaseDatabase.getInstance().getReference("salas").child(idSala).child("jugadores").child(uidUsuario);
+                      nodoSalas.addListenerForSingleValueEvent(new ValueEventListener() {
+                          @Override
+                          public void onDataChange(@NonNull DataSnapshot snapshot) {
+                              JugadorSala jugador = snapshot.getValue(JugadorSala.class);
+                              jugador.setEstaConectado(false);
+                              nodoSalas.setValue(jugador).addOnCompleteListener(task -> {
+                                  if(task.isSuccessful()){
+                                      Log.d("ONPAUSE", "se cambio el estado del jugador");
+                                  }
+                              });
+                          }
 
-                    @Override
-                    public void onCancelled(@NonNull DatabaseError error) {
+                          @Override
+                          public void onCancelled(@NonNull DatabaseError error) {
 
-                    }
-                });
-            }
-        }
+                          }
+                      });
+                  }
+              }
+          }catch (Exception e){
+              Toast.makeText(this, "Ocurrio un error: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+          }
+      }
     }
 
     @Override

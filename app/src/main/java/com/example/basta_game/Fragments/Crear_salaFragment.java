@@ -412,6 +412,13 @@ public class Crear_salaFragment extends Fragment {
 
         startActivity(intent);
 
+        JugarFragment jFragment = new JugarFragment();
+
+        getParentFragmentManager().beginTransaction()
+                .replace(R.id.fragment_container, jFragment)
+                .addToBackStack(null)
+                .commit();
+
     }
 
     private void configurarBotonRegresar() {
