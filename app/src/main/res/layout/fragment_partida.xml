@@ -137,7 +137,22 @@
             <FrameLayout
                 android:layout_width="0dp"
                 android:layout_height="140dp"
-                android:layout_weight="1">
+                android:layout_weight="1"
+                android:clipChildren="false">
+                <View
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_marginTop="10dp"
+                android:layout_marginEnd="8dp"
+                android:background="@drawable/bg_chip_blanco_azul" />
+
+                <ImageView
+                    android:layout_width="50dp"
+                    android:layout_height="50dp"
+                    android:layout_marginTop="-6dp"
+                    android:layout_marginEnd="4dp"
+                    android:layout_gravity="top|end"
+                    android:src="@drawable/ic_crono" />
 
                 <LinearLayout
                     android:id="@+id/cardTiempo"
@@ -147,14 +162,13 @@
                     android:layout_marginEnd="8dp"
                     android:orientation="vertical"
                     android:gravity="center"
-                    android:background="@drawable/bg_chip_blanco_azul">
+                    android:background="@color/colorTransparente">
 
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:fontFamily="@font/lilitaone_regular"
                         android:text="Tiempo restante"
-
                         android:textColor="#064DDB"
                         android:textSize="16sp" />
 
@@ -186,14 +200,6 @@
                         android:textStyle="bold" />
 
                 </LinearLayout>
-
-                <ImageView
-                    android:layout_width="55dp"
-                    android:layout_height="55dp"
-                    android:layout_marginTop="-5dp"
-                    android:layout_marginRight="6dp"
-                    android:layout_gravity="top|end"
-                    android:src="@drawable/ic_crono" />
             </FrameLayout>
 
         </LinearLayout>
