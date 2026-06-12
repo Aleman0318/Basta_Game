@@ -370,6 +370,8 @@ public class Crear_salaFragment extends Fragment {
 
                 }
             });
+        }else{
+            Log.d("DEBUG_SALA", "usuario no verificado");
         }
     }
 
