@@ -110,7 +110,8 @@ public class RegistrarActivity extends AppCompatActivity {
                                                 0,
                                                 0,
                                                 "avatar_01",
-                                                System.currentTimeMillis()
+                                                System.currentTimeMillis(),
+                                                ""
                                         );
 
                                         NotificationHelper.show(

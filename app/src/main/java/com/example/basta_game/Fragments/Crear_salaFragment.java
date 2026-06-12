@@ -10,7 +10,6 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.SeekBar;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.widget.AppCompatButton;
@@ -20,6 +19,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.basta_game.Adapters.CategoriaAdapter;
 import com.example.basta_game.R;
+import com.example.basta_game.SalaActivity;
 import com.example.basta_game.models.Categoria;
 
 import java.util.ArrayList;
@@ -278,6 +278,7 @@ public class Crear_salaFragment extends Fragment {
                 public void onDataChange(@NonNull DataSnapshot snapshot) {
                     Usuario user = snapshot.getValue(Usuario.class);
                     String nombreUsuario = user.getNombre();
+                    String urlAvatar = user.getFotoPerfilUrl();
                     String estadoSala = "En Espera";
                     String letraElegida = LetraSala.ElegirLetraAlAzar();
                     String codigoSala = CodigoSala.GenerarCodigoSala();
@@ -321,7 +322,8 @@ public class Crear_salaFragment extends Fragment {
                                    0,
                                    false,
                                    true,
-                                   true
+                                   true,
+                                   urlAvatar
                            );
 
                            salaConID.child("jugadores")
@@ -370,6 +372,8 @@ public class Crear_salaFragment extends Fragment {
 
                 }
             });
+        }else{
+            Log.d("DEBUG_SALA", "usuario no verificado");
         }
     }
 
@@ -390,12 +394,8 @@ public class Crear_salaFragment extends Fragment {
         return categoriasActivas;
     }
 
-    private String obtenerCategoriasComoTexto() {
-        return TextUtils.join(", ", categoriasActivas);
-    }
-
     private void abrirLobbyComoAnfitrion(ArrayList<String> categoriasSeleccionadas) {
-        LobbyFragment lobby = new LobbyFragment();
+        Intent intent = new Intent(requireContext(), SalaActivity.class);
         Bundle bundle = new Bundle();
 
         bundle.putBoolean("ES_ANFITRION", true);
@@ -406,13 +406,19 @@ public class Crear_salaFragment extends Fragment {
         bundle.putBoolean("CREADOR", true);
         bundle.putString("CODIGO_SALA",codigoSalaLobby);
         bundle.putString("IDSALA", idSalaLobby);
+        bundle.putBoolean("ANEXO", true); //indica si se unio a la partida
 
-        lobby.setArguments(bundle);
+        intent.putExtra("DATOS_SALA", bundle);
+
+        startActivity(intent);
+
+        JugarFragment jFragment = new JugarFragment();
 
         getParentFragmentManager().beginTransaction()
-                .replace(R.id.fragment_container, lobby)
+                .replace(R.id.fragment_container, jFragment)
                 .addToBackStack(null)
                 .commit();
+
     }
 
     private void configurarBotonRegresar() {

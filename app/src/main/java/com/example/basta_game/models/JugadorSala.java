@@ -8,17 +8,27 @@ public class JugadorSala {
     private boolean estaListo;
     private boolean esHost;
     private boolean estaConectado;
+    private String urlAvatar;
 
     public JugadorSala() {
     }
 
-    public JugadorSala(String uid, String nombre, int puntajePartida, boolean estaListo, boolean esHost, boolean estaConectado) {
+    public JugadorSala(String uid, String nombre, int puntajePartida, boolean estaListo, boolean esHost, boolean estaConectado, String urlAvatar) {
         this.uid = uid;
         this.nombre = nombre;
         this.puntajePartida = puntajePartida;
         this.estaListo = estaListo;
         this.esHost = esHost;
         this.estaConectado = estaConectado;
+        this.urlAvatar = urlAvatar;
+    }
+
+    public String getUrlAvatar() {
+        return urlAvatar;
+    }
+
+    public void setUrlAvatar(String urlAvatar) {
+        this.urlAvatar = urlAvatar;
     }
 
     public String getUid() {

@@ -11,12 +11,13 @@ public class Usuario {
     private int puntajeGlobal;
     private String avatarID;
     private long fechaRegistro;
+    private String fotoPerfilUrl;
 
 
     public Usuario() {
     }
 
-    public Usuario(String uid, String nombre, String correo, int partidasJugadas, int partidasGanadas, int partidasPerdidas, int puntajeGlobal, String avatarID, long fechaRegistro) {
+    public Usuario(String uid, String nombre, String correo, int partidasJugadas, int partidasGanadas, int partidasPerdidas, int puntajeGlobal, String avatarID, long fechaRegistro, String fotoPerfilUrl) {
         this.uid = uid;
         this.nombre = nombre;
         this.correo = correo;
@@ -26,6 +27,15 @@ public class Usuario {
         this.puntajeGlobal = puntajeGlobal;
         this.avatarID = avatarID;
         this.fechaRegistro = fechaRegistro;
+        this.fotoPerfilUrl = fotoPerfilUrl;
+    }
+
+    public String getFotoPerfilUrl() {
+        return fotoPerfilUrl;
+    }
+
+    public void setFotoPerfilUrl(String fotoPerfilUrl) {
+        this.fotoPerfilUrl = fotoPerfilUrl;
     }
 
     public String getUid() {
