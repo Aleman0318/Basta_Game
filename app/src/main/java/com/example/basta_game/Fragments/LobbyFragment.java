@@ -56,6 +56,7 @@ public class LobbyFragment extends Fragment {
         boolean esCreador = false;
         String codigoSala = "";
         String idSala = "";
+        Boolean esAnexo = false;
 
         if (getArguments() != null) {
             esAnfitrion = getArguments().getBoolean("ES_ANFITRION", false);
@@ -66,6 +67,7 @@ public class LobbyFragment extends Fragment {
             esCreador = getArguments().getBoolean("CREADOR", false);
             codigoSala = getArguments().getString("CODIGO_SALA", "Esperando...");
             idSala = getArguments().getString("IDSALA");
+            esAnexo = getArguments().getBoolean("ANEXO", false);
         }
 
 
@@ -114,6 +116,14 @@ public class LobbyFragment extends Fragment {
             NotificationHelper.show(
                     notificationLobby,
                     "Sala creada Correctamente",
+                    NotificationHelper.SUCCESS
+            );
+        }
+
+        if(esAnexo){
+            NotificationHelper.show(
+                    notificationLobby,
+                    "Te has unido a la sala correctamente",
                     NotificationHelper.SUCCESS
             );
         }
