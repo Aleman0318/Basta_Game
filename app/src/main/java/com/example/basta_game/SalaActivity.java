@@ -62,6 +62,7 @@ public class SalaActivity extends AppCompatActivity {
     @Override
     protected void onPause() {
         super.onPause();
+        Log.d("ONPAUSE", "ENTRO AL ON PAUSE");
       if(!isFinishing()){
           try {
               auth = FirebaseAuth.getInstance();
@@ -78,12 +79,18 @@ public class SalaActivity extends AppCompatActivity {
                           @Override
                           public void onDataChange(@NonNull DataSnapshot snapshot) {
                               JugadorSala jugador = snapshot.getValue(JugadorSala.class);
-                              jugador.setEstaConectado(false);
-                              nodoSalas.setValue(jugador).addOnCompleteListener(task -> {
-                                  if(task.isSuccessful()){
-                                      Log.d("ONPAUSE", "se cambio el estado del jugador");
-                                  }
-                              });
+                              if(jugador != null){
+                                  jugador.setEstaConectado(false);
+                                  nodoSalas.setValue(jugador).addOnCompleteListener(task -> {
+                                      if(task.isSuccessful()){
+                                          Log.d("ONPAUSE", "se cambio el estado del jugador");
+                                      }
+                                  });
+                              }
+                              else{
+                                  Toast.makeText(SalaActivity.this, "Snapshot esta vacio", Toast.LENGTH_SHORT).show();
+                                  Log.d("ONPAUSE", "EL SNAPSHOT ESTA VACIO");
+                              }
                           }
 
                           @Override
@@ -92,10 +99,14 @@ public class SalaActivity extends AppCompatActivity {
                           }
                       });
                   }
+              }else{
+                  Log.d("ONPAUSE", "NO ESTA AUTENTICADO");
               }
           }catch (Exception e){
-              Toast.makeText(this, "Ocurrio un error: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+              Log.d("ONPAUSE", "ocurrio un error: " + e.getMessage());
           }
+      }else{
+          Log.d("ONPAUSE", "NO SE EJECUTO EL ON FINISHING");
       }
     }
 
