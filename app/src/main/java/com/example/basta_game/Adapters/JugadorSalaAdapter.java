@@ -19,6 +19,7 @@ public class JugadorSalaAdapter extends RecyclerView.Adapter<JugadorSalaAdapter.
 
     private List<JugadorSala> listaJugadores;
 
+
     public JugadorSalaAdapter(List<JugadorSala> listaJugadores) {
         this.listaJugadores = listaJugadores;
     }
@@ -43,6 +44,14 @@ public class JugadorSalaAdapter extends RecyclerView.Adapter<JugadorSalaAdapter.
                     ColorStateList.valueOf(Color.parseColor("#4CAF50"))
             );
 
+            //cambiandole color a las pastillas de estado de jugadores Listo y no Listo
+            holder.cardEstadoPill.setCardBackgroundColor(
+                    ColorStateList.valueOf(Color.parseColor("#F1FFF0"))
+            );
+            holder.cardEstadoPill.setStrokeColor(
+                    ColorStateList.valueOf(Color.parseColor("#BDE8B8"))
+            );
+
             holder.tvEstadoJugador.setTextColor(Color.parseColor("#4CAF50"));
             holder.tvEstadoJugador.setText("Listo");
 
@@ -52,7 +61,15 @@ public class JugadorSalaAdapter extends RecyclerView.Adapter<JugadorSalaAdapter.
             );
 
             holder.tvEstadoJugador.setTextColor(Color.parseColor("#F44336"));
-            holder.tvEstadoJugador.setText("No Listo");
+            holder.tvEstadoJugador.setText("En Espera");
+
+            //cambiandole color a las pastillas de estado de jugadores Listo y no Listo
+            holder.cardEstadoPill.setCardBackgroundColor(
+                    ColorStateList.valueOf(Color.parseColor("#FFF4CC"))
+            );
+            holder.cardEstadoPill.setStrokeColor(
+                    ColorStateList.valueOf(Color.parseColor("#FFCC66"))
+            );
         }
     }
 
@@ -73,12 +90,16 @@ public class JugadorSalaAdapter extends RecyclerView.Adapter<JugadorSalaAdapter.
         TextView tvEstadoJugador;
         MaterialCardView cardEstado;
 
+        MaterialCardView cardEstadoPill;
+
+
         public ViewHolder(@NonNull View itemView) {
             super(itemView);
 
             tvNombre = itemView.findViewById(R.id.tvNombreJugador);
             cardEstado = itemView.findViewById(R.id.cardEstadoJugador);
             tvEstadoJugador = itemView.findViewById(R.id.tvEstadoJugador);
+            cardEstadoPill = itemView.findViewById(R.id.cardEstadoPill);
         }
     }
 }

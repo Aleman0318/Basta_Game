@@ -31,11 +31,13 @@ public class CodigoSalaSearch {
         this.idSala = idSala;
     }
 
-    public boolean isEstaActiva() {
+    public boolean getEstaActiva() {
         return estaActiva;
     }
 
     public void setEstaActiva(boolean estaActiva) {
         this.estaActiva = estaActiva;
     }
+
+
 }

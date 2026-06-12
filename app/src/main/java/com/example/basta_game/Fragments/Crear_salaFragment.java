@@ -370,6 +370,8 @@ public class Crear_salaFragment extends Fragment {
 
                 }
             });
+        }else{
+            Log.d("DEBUG_SALA", "usuario no verificado");
         }
     }
 
@@ -406,6 +408,7 @@ public class Crear_salaFragment extends Fragment {
         bundle.putBoolean("CREADOR", true);
         bundle.putString("CODIGO_SALA",codigoSalaLobby);
         bundle.putString("IDSALA", idSalaLobby);
+        bundle.putBoolean("ANEXO", true); //indica si se unio a la partida
 
         lobby.setArguments(bundle);
 
