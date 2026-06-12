@@ -1,14 +1,18 @@
 package com.example.basta_game.Adapters;
 
+import static androidx.core.content.ContentProviderCompat.requireContext;
+
 import android.content.res.ColorStateList;
 import android.graphics.Color;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.bumptech.glide.Glide;
 import com.example.basta_game.R;
 import com.example.basta_game.models.JugadorSala;
 import com.google.android.material.card.MaterialCardView;
@@ -38,39 +42,65 @@ public class JugadorSalaAdapter extends RecyclerView.Adapter<JugadorSalaAdapter.
 
         holder.tvNombre.setText(jugador.getNombre());
 
-        // Verde si está listo, rojo si no está listo
-        if (jugador.isEstaListo()) {
-            holder.cardEstado.setCardBackgroundColor(
-                    ColorStateList.valueOf(Color.parseColor("#4CAF50"))
-            );
+        Glide.with(holder.itemView.getContext())
+                .load(jugador.getUrlAvatar())
+                .placeholder(R.drawable.outline_person_24)
+                .error(R.drawable.outline_person_24)
+                .into(holder.imgAvatar);
 
-            //cambiandole color a las pastillas de estado de jugadores Listo y no Listo
-            holder.cardEstadoPill.setCardBackgroundColor(
-                    ColorStateList.valueOf(Color.parseColor("#F1FFF0"))
-            );
-            holder.cardEstadoPill.setStrokeColor(
-                    ColorStateList.valueOf(Color.parseColor("#BDE8B8"))
-            );
 
-            holder.tvEstadoJugador.setTextColor(Color.parseColor("#4CAF50"));
-            holder.tvEstadoJugador.setText("Listo");
+       if(!jugador.isEstaConectado()){
+           holder.cardEstado.setCardBackgroundColor(
+                   ColorStateList.valueOf(Color.parseColor("#404040"))
+           );
 
-        } else {
-            holder.cardEstado.setCardBackgroundColor(
-                    ColorStateList.valueOf(Color.parseColor("#F44336"))
-            );
+           //cambiandole color a las pastillas de estado de jugadores Listo y no Listo
+           holder.cardEstadoPill.setCardBackgroundColor(
+                   ColorStateList.valueOf(Color.parseColor("#A4A4A4"))
+           );
+           holder.cardEstadoPill.setStrokeColor(
+                   ColorStateList.valueOf(Color.parseColor("#6E6E6E"))
+           );
 
-            holder.tvEstadoJugador.setTextColor(Color.parseColor("#F44336"));
-            holder.tvEstadoJugador.setText("En Espera");
+           holder.tvEstadoJugador.setTextColor(Color.parseColor("#FFFFFF"));
+           holder.tvEstadoJugador.setText("Desconectado");
 
-            //cambiandole color a las pastillas de estado de jugadores Listo y no Listo
-            holder.cardEstadoPill.setCardBackgroundColor(
-                    ColorStateList.valueOf(Color.parseColor("#FFF4CC"))
-            );
-            holder.cardEstadoPill.setStrokeColor(
-                    ColorStateList.valueOf(Color.parseColor("#FFCC66"))
-            );
-        }
+       }else {
+           // Verde si está listo, rojo si no está listo
+           if (jugador.isEstaListo()) {
+               holder.cardEstado.setCardBackgroundColor(
+                       ColorStateList.valueOf(Color.parseColor("#4CAF50"))
+               );
+
+               //cambiandole color a las pastillas de estado de jugadores Listo y no Listo
+               holder.cardEstadoPill.setCardBackgroundColor(
+                       ColorStateList.valueOf(Color.parseColor("#F1FFF0"))
+               );
+               holder.cardEstadoPill.setStrokeColor(
+                       ColorStateList.valueOf(Color.parseColor("#BDE8B8"))
+               );
+
+               holder.tvEstadoJugador.setTextColor(Color.parseColor("#4CAF50"));
+               holder.tvEstadoJugador.setText("Listo");
+
+           } else {
+               holder.cardEstado.setCardBackgroundColor(
+                       ColorStateList.valueOf(Color.parseColor("#FF5E5E"))
+               );
+
+               holder.tvEstadoJugador.setTextColor(Color.parseColor("#CE0000"));
+               holder.tvEstadoJugador.setText("En Espera");
+
+               //cambiandole color a las pastillas de estado de jugadores Listo y no Listo
+               holder.cardEstadoPill.setCardBackgroundColor(
+                       ColorStateList.valueOf(Color.parseColor("#FFF4CC"))
+               );
+               holder.cardEstadoPill.setStrokeColor(
+                       ColorStateList.valueOf(Color.parseColor("#CE0000"))
+               );
+           }
+       }
+
     }
 
     @Override
@@ -92,6 +122,8 @@ public class JugadorSalaAdapter extends RecyclerView.Adapter<JugadorSalaAdapter.
 
         MaterialCardView cardEstadoPill;
 
+        ImageView imgAvatar;
+
 
         public ViewHolder(@NonNull View itemView) {
             super(itemView);
@@ -100,6 +132,7 @@ public class JugadorSalaAdapter extends RecyclerView.Adapter<JugadorSalaAdapter.
             cardEstado = itemView.findViewById(R.id.cardEstadoJugador);
             tvEstadoJugador = itemView.findViewById(R.id.tvEstadoJugador);
             cardEstadoPill = itemView.findViewById(R.id.cardEstadoPill);
+            imgAvatar = itemView.findViewById(R.id.ivAvatarJugador);
         }
     }
 }

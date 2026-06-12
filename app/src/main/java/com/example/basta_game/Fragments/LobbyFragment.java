@@ -1,5 +1,6 @@
 package com.example.basta_game.Fragments;
 
+import android.content.Intent;
 import android.content.res.ColorStateList;
 import android.graphics.Color;
 import android.os.Bundle;
@@ -8,16 +9,21 @@ import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 import androidx.appcompat.widget.AppCompatButton;
+
+import com.example.basta_game.HomeActivity;
 import com.example.basta_game.models.Jugador;
 import com.example.basta_game.R;
 import com.example.basta_game.Adapters.JugadorSalaAdapter;
 import com.example.basta_game.models.JugadorSala;
+import com.example.basta_game.utils.CustomDialogHelper;
 import com.example.basta_game.utils.NotificationHelper;
 import com.example.basta_game.utils.VerificacionesAuth;
 import com.google.android.material.card.MaterialCardView;
@@ -134,7 +140,30 @@ public class LobbyFragment extends Fragment {
             btnComenzarPartida.setVisibility(View.GONE);
         }
 
-        btnRegresar.setOnClickListener(v -> getParentFragmentManager().popBackStack());
+        btnRegresar.setOnClickListener(v -> {
+            CustomDialogHelper.show(
+                    requireContext(),
+                    "¿Deseas salir?",
+                    "Si sales de la sala abandonarás el lobby actual.",
+                    true,
+                    new CustomDialogHelper.DialogButton(
+                            "No",
+                            Color.parseColor("#888888"),
+                            Color.WHITE,
+                            true,
+                            null
+                    ),
+                    new CustomDialogHelper.DialogButton(
+                            "Sí, salir",
+                            Color.parseColor("#E53935"),
+                            Color.WHITE,
+                            true,
+                            () -> SalirDeLobbyYCerrarPartida()
+                    )
+            );
+        });
+
+
 
         btnToggleListo.setOnClickListener(v -> {
             estoyListo = !estoyListo;
@@ -209,6 +238,30 @@ public class LobbyFragment extends Fragment {
         return view;
     }
 
+
+    public void SalirDeLobbyYCerrarPartida(){
+        auth = FirebaseAuth.getInstance();
+
+        if(VerificacionesAuth.VerificarInicioSesion(auth)){
+            String uidUsuario = auth.getCurrentUser().getUid();
+                String idSala = idSalaMetodo;
+
+                DatabaseReference nodoSalas = FirebaseDatabase.getInstance().getReference("salas").child(idSala).child("jugadores").child(uidUsuario);
+                nodoSalas.removeValue().addOnCompleteListener(task -> {
+                   if(task.isSuccessful()){
+                       requireActivity().finish();
+                       Intent intent = new Intent(requireContext(), HomeActivity.class);
+                       startActivity(intent);
+                   }else{
+                       NotificationHelper.show(
+                               notificationLobby,
+                               "No pudiste abandonar la partida",
+                               NotificationHelper.ERROR
+                       );
+                   }
+                });
+        }
+    }
     public void ObtenerJugadoresYLlenarLobby(String idSala){
         auth = FirebaseAuth.getInstance();
         if(VerificacionesAuth.VerificarInicioSesion(auth)){

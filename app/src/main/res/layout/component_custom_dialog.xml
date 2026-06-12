@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="utf-8"?>
+<com.google.android.material.card.MaterialCardView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/cardDialog"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_margin="26dp"
+    app:cardBackgroundColor="@color/colorBg"
+    app:cardCornerRadius="26dp"
+    app:cardElevation="10dp"
+    app:strokeColor="#B8C8FF"
+    app:strokeWidth="2dp">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:paddingStart="24dp"
+        android:paddingTop="24dp"
+        android:paddingEnd="24dp"
+        android:paddingBottom="22dp">
+
+        <TextView
+            android:id="@+id/txtDialogTitle"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:fontFamily="@font/lilitaone_regular"
+            android:gravity="center"
+            android:text="¿Deseas salir?"
+            android:textColor="@color/colorPrimary"
+            android:textSize="25sp" />
+
+        <View
+            android:layout_width="150dp"
+            android:layout_height="2dp"
+            android:layout_gravity="center"
+            android:layout_marginTop="8dp"
+            android:layout_marginBottom="14dp"
+            android:background="@color/colorPrimary" />
+
+        <TextView
+            android:id="@+id/txtDialogMessage"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:fontFamily="@font/manrope_regular"
+            android:gravity="center"
+            android:lineSpacingExtra="4dp"
+            android:text="Si sales de la sala podrías abandonar la partida actual."
+            android:textColor="@color/colorTextoP"
+            android:textSize="15sp" />
+
+        <LinearLayout
+            android:id="@+id/layoutDialogButtons"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="22dp"
+            android:gravity="center"
+            android:orientation="horizontal" />
+
+    </LinearLayout>
+
+</com.google.android.material.card.MaterialCardView>

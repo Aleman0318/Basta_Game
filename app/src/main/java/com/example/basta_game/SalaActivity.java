@@ -1,54 +1,135 @@
 package com.example.basta_game;
 
 import android.os.Bundle;
+import android.util.Log;
+import android.widget.Toast;
+
+import androidx.activity.EdgeToEdge;
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
-import com.example.basta_game.Fragments.PartidaFragment;
-import java.util.ArrayList; // No olvides importar esto
+import androidx.core.graphics.Insets;
+import androidx.core.view.ViewCompat;
+import androidx.core.view.WindowInsetsCompat;
+
+import com.example.basta_game.Fragments.LobbyFragment;
+import com.example.basta_game.models.JugadorSala;
+import com.example.basta_game.models.Usuario;
+import com.example.basta_game.utils.VerificacionesAuth;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 
 public class SalaActivity extends AppCompatActivity {
 
-    private String codigoSala;
-    private boolean esAnfitrion;
+    private FirebaseAuth auth;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        EdgeToEdge.enable(this);
         setContentView(R.layout.activity_sala);
+        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -> {
+            Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
+            v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
+            return insets;
+        });
 
-        // DATOS DE PRUEBA SOLO PARA VER EL DISEÑO
-        codigoSala = "TEST1";
-        esAnfitrion = true;
 
-        mostrarPartidaDePrueba();
+        Bundle bundle = getIntent().getBundleExtra("DATOS_SALA");
+
+        if(bundle != null){
+            mostrarLobby(bundle);
+        }
+
     }
 
-    private void mostrarPartidaDePrueba() {
-        PartidaFragment partidaFragment = new PartidaFragment();
+    public void mostrarLobby(Bundle datosSala){
+        LobbyFragment lobby = new LobbyFragment();
+        lobby.setArguments(datosSala);
 
-        Bundle bundle = new Bundle();
-        bundle.putString("CODIGO_SALA", codigoSala);
-        bundle.putBoolean("ES_ANFITRION", esAnfitrion);
-
-        // ==========================================
-        // ¡AQUÍ ESTÁ LA SOLUCIÓN!
-        // Agregamos categorías simuladas para la prueba
-        // ==========================================
-        ArrayList<String> categoriasPrueba = new ArrayList<>();
-        categoriasPrueba.add("Nombre");
-        categoriasPrueba.add("Color");
-        categoriasPrueba.add("Fruta");
-        categoriasPrueba.add("País");
-        categoriasPrueba.add("Animal");
-        categoriasPrueba.add("Cosa");
-        categoriasPrueba.add("Apellido");
-
-        bundle.putStringArrayList("CATEGORIAS", categoriasPrueba);
-
-        partidaFragment.setArguments(bundle);
-
-        getSupportFragmentManager()
-                .beginTransaction()
-                .replace(R.id.main, partidaFragment)
+        getSupportFragmentManager().beginTransaction()
+                .replace(R.id.sala_fragment_container, lobby)
+                .addToBackStack(null)
                 .commit();
+    }
+
+    //controlando si el usuario sale de la pantalla
+
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+      if(!isFinishing()){
+          try {
+              auth = FirebaseAuth.getInstance();
+
+              if(VerificacionesAuth.VerificarInicioSesion(auth)){
+                  String uidUsuario = auth.getCurrentUser().getUid();
+
+                  Bundle bundle = getIntent().getBundleExtra("DATOS_SALA");
+                  if(bundle != null){
+                      String idSala = bundle.getString("IDSALA");
+
+                      DatabaseReference nodoSalas = FirebaseDatabase.getInstance().getReference("salas").child(idSala).child("jugadores").child(uidUsuario);
+                      nodoSalas.addListenerForSingleValueEvent(new ValueEventListener() {
+                          @Override
+                          public void onDataChange(@NonNull DataSnapshot snapshot) {
+                              JugadorSala jugador = snapshot.getValue(JugadorSala.class);
+                              jugador.setEstaConectado(false);
+                              nodoSalas.setValue(jugador).addOnCompleteListener(task -> {
+                                  if(task.isSuccessful()){
+                                      Log.d("ONPAUSE", "se cambio el estado del jugador");
+                                  }
+                              });
+                          }
+
+                          @Override
+                          public void onCancelled(@NonNull DatabaseError error) {
+
+                          }
+                      });
+                  }
+              }
+          }catch (Exception e){
+              Toast.makeText(this, "Ocurrio un error: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+          }
+      }
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        auth = FirebaseAuth.getInstance();
+
+        if(VerificacionesAuth.VerificarInicioSesion(auth)){
+            String uidUsuario = auth.getCurrentUser().getUid();
+
+            Bundle bundle = getIntent().getBundleExtra("DATOS_SALA");
+            if(bundle != null){
+                String idSala = bundle.getString("IDSALA");
+
+                DatabaseReference nodoSalas = FirebaseDatabase.getInstance().getReference("salas").child(idSala).child("jugadores").child(uidUsuario);
+                nodoSalas.addListenerForSingleValueEvent(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(@NonNull DataSnapshot snapshot) {
+                        JugadorSala jugador = snapshot.getValue(JugadorSala.class);
+                        jugador.setEstaConectado(true);
+                        nodoSalas.setValue(jugador).addOnCompleteListener(task -> {
+                            if(task.isSuccessful()){
+                                Log.d("ONPAUSE", "se cambio el estado del jugador");
+                            }
+                        });
+                    }
+
+                    @Override
+                    public void onCancelled(@NonNull DatabaseError error) {
+
+                    }
+                });
+            }
+        }
     }
 }
