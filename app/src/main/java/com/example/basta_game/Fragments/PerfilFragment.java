@@ -74,6 +74,7 @@ public class PerfilFragment extends Fragment {
             AppCompatButton btnCancelar = dialog.findViewById(R.id.btnCancelarAvatar);
             AppCompatButton btnGuardar = dialog.findViewById(R.id.btnGuardarAvatar);
 
+
             rvListaAvatares.setLayoutManager(new GridLayoutManager(getContext(), 3));
 
             adapter = new AvatarAdapter(listaAvatares, avatar -> {
