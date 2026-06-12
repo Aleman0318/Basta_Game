@@ -10,13 +10,12 @@
         android:id="@+id/tvTituloModos"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="130dp"
+        android:layout_marginTop="110dp"
         android:fontFamily="@font/lilitaone_regular"
         android:text="¡A JUGAR!"
         android:textColor="@color/colorPrimary"
         android:textSize="38sp"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.502"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
@@ -41,8 +40,9 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:gravity="center"
+            android:background="@color/colorGrisAzulado"
             android:orientation="vertical"
-            android:padding="10dp">
+            android:padding="20dp">
 
             <ImageView
                 android:layout_width="92dp"
@@ -56,17 +56,17 @@
                 android:fontFamily="@font/lilitaone_regular"
                 android:text="Crear sala"
                 android:textColor="@color/colorPrimary"
-                android:textSize="26sp" />
+                android:textSize="28sp" />
 
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="6dp"
+                android:layout_marginTop="10dp"
                 android:fontFamily="@font/manrope_regular"
                 android:gravity="center"
                 android:text="Sé el anfitrión y personaliza las reglas"
                 android:textColor="@color/colorTextoP"
-                android:textSize="15sp" />
+                android:textSize="16sp" />
         </LinearLayout>
     </com.google.android.material.card.MaterialCardView>
 
@@ -91,8 +91,9 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:gravity="center"
+            android:background="@color/colorSecondaryTenue"
             android:orientation="vertical"
-            android:padding="10dp">
+            android:padding="20dp">
 
             <ImageView
                 android:layout_width="92dp"
@@ -111,12 +112,12 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="6dp"
+                android:layout_marginTop="10dp"
                 android:fontFamily="@font/manrope_regular"
                 android:gravity="center"
                 android:text="Ingresa con un código de invitación"
                 android:textColor="@color/colorTextoP"
-                android:textSize="15sp" />
+                android:textSize="16sp" />
         </LinearLayout>
     </com.google.android.material.card.MaterialCardView>
 
