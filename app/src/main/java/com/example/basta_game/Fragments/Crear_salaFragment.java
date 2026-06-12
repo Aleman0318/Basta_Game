@@ -43,7 +43,7 @@ import com.google.firebase.database.ValueEventListener;
 
 public class Crear_salaFragment extends Fragment {
 
-    private int contadorJugadores = 4;
+    private int contadorJugadores = 2;
     private int contadorRondas = 1;
 
     private final ArrayList<String> categoriasActivas = new ArrayList<>();
