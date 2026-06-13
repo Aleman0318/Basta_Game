@@ -1,5 +1,8 @@
 package com.example.basta_game.Fragments;
 
+import android.app.Dialog;
+import android.graphics.Color;
+import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -13,10 +16,12 @@ import androidx.appcompat.widget.AppCompatButton;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+import androidx.viewpager2.widget.ViewPager2;
 
 import com.example.basta_game.Adapters.CategoriaPartidaAdapter;
 import com.example.basta_game.Adapters.JugadorPartidaAdapter;
 import com.example.basta_game.Adapters.JugadorSalaAdapter;
+//import com.example.basta_game.Adapters.TarjetasValidacionAdapter;
 import com.example.basta_game.models.Categoria;
 import com.example.basta_game.models.Jugador;
 import com.example.basta_game.R;
@@ -133,7 +138,6 @@ public class PartidaFragment extends Fragment {
         rvJugadoresPartida.setAdapter(new JugadorPartidaAdapter(listaJugadores));*/
 
         // 2. CONFIGURAR CATEGORÍAS (Centro - 1 Columna con Scroll)
-        // ¡Aquí está el cambio! De GridLayoutManager(..., 2) a LinearLayoutManager normal
         rvCategoriasJuego.setLayoutManager(new LinearLayoutManager(getContext()));
         List<Categoria> listaCategorias = new ArrayList<>();
 
@@ -152,7 +156,13 @@ public class PartidaFragment extends Fragment {
 
     private void configurarBotones() {
         btnBasta.setOnClickListener(v -> {
-            // Más adelante: guardar respuestas, cambiar estado de ronda...
+            // LÓGICA DE DAIGO: Lanzar el modal del carrusel con datos de prueba
+            List<String> categoriasPrueba = new ArrayList<>(); //cat de prueba
+            categoriasPrueba.add("Fruta");
+            categoriasPrueba.add("Animal");
+            categoriasPrueba.add("Color");
+
+           // mostrarModalValidacionCarrusel(categoriasPrueba);
         });
     }
 
@@ -193,9 +203,9 @@ public class PartidaFragment extends Fragment {
         if(VerificacionesAuth.VerificarInicioSesion(auth)){
             DatabaseReference nodoSala = FirebaseDatabase.getInstance().getReference("salas").child(idSala).child("estadoPartida");
             nodoSala.setValue("En juego").addOnCompleteListener(task -> {
-               if(task.isSuccessful()){
-                   Log.d("ESTADO", "se cambio el estado de la partida correctamente");
-               }
+                if(task.isSuccessful()){
+                    Log.d("ESTADO", "se cambio el estado de la partida correctamente");
+                }
             });
         }
     }
@@ -251,4 +261,34 @@ public class PartidaFragment extends Fragment {
             });
         }
     }
+
+    // ==============================================================
+    // LÓGICA DE DAIGO: VALIDACIÓN TIPO CARRUSEL (ViewPager2)
+    // ==============================================================
+    /*private void mostrarModalValidacionCarrusel(List<String> categorias) {
+        Dialog dialog = new Dialog(requireContext());
+        dialog.setContentView(R.layout.dialogo_respuestas);
+
+        if (dialog.getWindow() != null) {
+            dialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+            dialog.getWindow().setLayout(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT);
+        }
+
+        ViewPager2 vpCategorias = dialog.findViewById(R.id.vpCategoriasValidacion);
+        androidx.appcompat.widget.AppCompatButton btnSalir = dialog.findViewById(R.id.btnSalirRevision);
+
+        btnSalir.setOnClickListener(v -> dialog.dismiss());
+
+        Runnable accionMostrarBotonSalir = () -> {
+            btnSalir.setVisibility(View.VISIBLE);
+        };
+
+        TarjetasValidacionAdapter adapter = new TarjetasValidacionAdapter(categorias, vpCategorias, accionMostrarBotonSalir);
+        vpCategorias.setAdapter(adapter);
+
+        vpCategorias.setOffscreenPageLimit(1);
+
+        dialog.setCancelable(false);
+        dialog.show();
+    }*/
 }
