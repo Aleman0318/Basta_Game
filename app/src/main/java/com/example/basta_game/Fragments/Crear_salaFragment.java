@@ -71,7 +71,7 @@ public class Crear_salaFragment extends Fragment {
 
     private String idSalaLobby;
 
-    private String estadoSala;
+    private String estadoPartida;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -117,12 +117,12 @@ public class Crear_salaFragment extends Fragment {
 
         List<Categoria> misCategorias = new ArrayList<>();
         misCategorias.add(new Categoria("Nombre", R.drawable.ic_nombre));
-        misCategorias.add(new Categoria("Color", R.drawable.ic_paleta2));
-        misCategorias.add(new Categoria("Fruta", R.drawable.ic_frutas2));
-        misCategorias.add(new Categoria("País", R.drawable.ic_pais2));
-        misCategorias.add(new Categoria("Animal", R.drawable.ic_animal3));
-        misCategorias.add(new Categoria("Cosa", R.drawable.ic_cosa));
         misCategorias.add(new Categoria("Apellido", R.drawable.ic_mujer));
+        misCategorias.add(new Categoria("Fruta", R.drawable.ic_frutas2));
+        misCategorias.add(new Categoria("Color", R.drawable.ic_paleta2));
+        misCategorias.add(new Categoria("Cosa", R.drawable.ic_cosa));
+        misCategorias.add(new Categoria("Animal", R.drawable.ic_animal3));
+        misCategorias.add(new Categoria("País", R.drawable.ic_pais2));
 
         categoriasActivas.clear();
 
@@ -281,7 +281,8 @@ public class Crear_salaFragment extends Fragment {
                     Usuario user = snapshot.getValue(Usuario.class);
                     String nombreUsuario = user.getNombre();
                     String urlAvatar = user.getFotoPerfilUrl();
-                    String estadoSala = "En Espera";
+                    String estadoSala = "En espera";
+                    estadoPartida = estadoSala;
                     String letraElegida = LetraSala.ElegirLetraAlAzar();
                     String codigoSala = CodigoSala.GenerarCodigoSala();
                     codigoSalaLobby = codigoSala;
@@ -411,6 +412,7 @@ public class Crear_salaFragment extends Fragment {
         bundle.putString("CODIGO_SALA",codigoSalaLobby);
         bundle.putString("IDSALA", idSalaLobby);
         bundle.putBoolean("ANEXO", true); //indica si se unio a la partida
+        bundle.putString("ESTADO_SALA", estadoPartida);
 
         intent.putExtra("DATOS_SALA", bundle);
 
