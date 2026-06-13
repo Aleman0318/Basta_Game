@@ -19,6 +19,8 @@
 
     <color name="blanco">#FFFFFF</color>
     <color name="verde_puntos">#4CAF50</color>
+    <color name="crema">#F5F1E8</color>
+
     <color name="colorCajaTexto">#E6FFFFFF</color>
     <color name="colorTransparente">#00FFFFFF</color>
     <color name="colorCelestePalido">#d3efed</color>

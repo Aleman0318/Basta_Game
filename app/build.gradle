@@ -34,6 +34,7 @@ android {
 }
 
 dependencies {
+    implementation libs.activity.ktx
     implementation libs.appcompat
     implementation libs.material
     implementation libs.activity
@@ -41,7 +42,8 @@ dependencies {
     //dependencias Firebase
     implementation platform('com.google.firebase:firebase-bom:34.7.0') //para usar BoM (manejo de versiones)
     implementation libs.firebase.database //para la base de datos realtime
-    implementation 'com.google.firebase:firebase-auth' //para utilizar el servicio de Authentication (correo /contraseña)
+    implementation 'com.google.firebase:firebase-auth'
+    implementation libs.fragment//para utilizar el servicio de Authentication (correo /contraseña)
     testImplementation libs.junit
     androidTestImplementation libs.ext.junit
     androidTestImplementation libs.espresso.core

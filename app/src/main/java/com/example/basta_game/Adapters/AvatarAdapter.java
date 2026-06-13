@@ -4,6 +4,8 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
+import android.widget.TextView;
+
 import androidx.annotation.NonNull;
 import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.RecyclerView;
@@ -36,7 +38,7 @@ public class AvatarAdapter extends RecyclerView.Adapter<AvatarAdapter.AvatarVH> 
     @Override
     public void onBindViewHolder(@NonNull AvatarAdapter.AvatarVH holder, int position) {
         Avatar avatar = listaAvatares.get(position);
-
+        holder.tvNombreAvatar.setText(avatar.getNombrePersonalizado());
 
         if (avatar.getUrlDescarga() != null && !avatar.getUrlDescarga().trim().isEmpty()) {
             Glide.with(holder.itemView.getContext())
@@ -78,11 +80,13 @@ public class AvatarAdapter extends RecyclerView.Adapter<AvatarAdapter.AvatarVH> 
     public  static class AvatarVH extends RecyclerView.ViewHolder{
         public MaterialCardView cardAvatar;
         public ImageView imgAvatarItem, imgCheck;
+        public TextView tvNombreAvatar;
         public AvatarVH(@NonNull View itemView) {
             super(itemView);
             cardAvatar = itemView.findViewById(R.id.cardAvatar);
             imgAvatarItem = itemView.findViewById(R.id.imgAvatarItem);
             imgCheck = itemView.findViewById(R.id.imgCheck);
+            tvNombreAvatar = itemView.findViewById(R.id.tvNombreAvatar);
         }
     }
 }

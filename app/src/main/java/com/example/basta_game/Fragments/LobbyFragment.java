@@ -1,5 +1,6 @@
 package com.example.basta_game.Fragments;
 
+import android.content.Intent;
 import android.content.res.ColorStateList;
 import android.graphics.Color;
 import android.os.Bundle;
@@ -8,18 +9,25 @@ import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
 import androidx.appcompat.widget.AppCompatButton;
+
+import com.example.basta_game.HomeActivity;
 import com.example.basta_game.models.Jugador;
 import com.example.basta_game.R;
 import com.example.basta_game.Adapters.JugadorSalaAdapter;
 import com.example.basta_game.models.JugadorSala;
+import com.example.basta_game.utils.CustomDialogHelper;
 import com.example.basta_game.utils.NotificationHelper;
 import com.example.basta_game.utils.VerificacionesAuth;
+import com.google.android.material.card.MaterialCardView;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
@@ -36,11 +44,16 @@ public class LobbyFragment extends Fragment {
     private boolean estoyListo = false;
     private View notificationLobby;
 
-    private TextView txtCodigoSala;
+    private TextView txtCodigoSala, tvValorCategoriasLobby, tvValorRondasLobby, tvValorDuracionLobby, tvValorJugadoresLobby;
 
     private FirebaseAuth auth;
 
     private RecyclerView rvJugadoresLobby;
+
+    private String idSalaMetodo;
+    private Button btnComenzarPartida;
+
+    private Bundle bundleDatosPartida;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -53,27 +66,42 @@ public class LobbyFragment extends Fragment {
         boolean esCreador = false;
         String codigoSala = "";
         String idSala = "";
+        Boolean esAnexo = false;
 
-        if (getArguments() != null) {
-            esAnfitrion = getArguments().getBoolean("ES_ANFITRION", false);
-            categoriasStr = getArguments().getStringArrayList("CATEGORIAS");
-            tiempoStr = getArguments().getInt("TIEMPO", 60);
-            jugadoresStr = getArguments().getInt("JUGADORES", 4);
-            rondasStr = getArguments().getInt("RONDAS", 5);
-            esCreador = getArguments().getBoolean("CREADOR", false);
-            codigoSala = getArguments().getString("CODIGO_SALA", "Esperando...");
-            idSala = getArguments().getString("IDSALA");
+        bundleDatosPartida = getArguments();
+
+        if (bundleDatosPartida != null) {
+            esAnfitrion = bundleDatosPartida.getBoolean("ES_ANFITRION", false);
+            categoriasStr = bundleDatosPartida.getStringArrayList("CATEGORIAS");
+            tiempoStr = bundleDatosPartida.getInt("TIEMPO", 60);
+            jugadoresStr = bundleDatosPartida.getInt("JUGADORES", 4);
+            rondasStr = bundleDatosPartida.getInt("RONDAS", 5);
+            esCreador = bundleDatosPartida.getBoolean("CREADOR", false);
+            codigoSala = bundleDatosPartida.getString("CODIGO_SALA", "Esperando...");
+            idSala = bundleDatosPartida.getString("IDSALA");
+            esAnexo = bundleDatosPartida.getBoolean("ANEXO", false);
         }
 
 
 
         String tiempoFormateado = String.format("%d:%02d min", tiempoStr / 60, tiempoStr % 60);
 
-        TextView tvLobbyReglas = view.findViewById(R.id.tvLobbyReglas);
-        tvLobbyReglas.setText("• Categorías: " + categoriasStr +
-                "\n• Rondas: " + rondasStr +
-                "\n• Duración: " + tiempoFormateado + " por ronda" +
-                "\n• Jugadores: Máximo " + jugadoresStr);
+        String categoriasFormateadas = android.text.TextUtils.join(", ", categoriasStr);
+
+        idSalaMetodo = idSala;
+
+        tvValorCategoriasLobby = view.findViewById(R.id.tvValorCategoriasLobby);
+        tvValorDuracionLobby = view.findViewById(R.id.tvValorDuracionLobby);
+        tvValorJugadoresLobby = view.findViewById(R.id.tvValorJugadoresLobby);
+        tvValorRondasLobby = view.findViewById(R.id.tvValorRondasLobby);
+        btnComenzarPartida = view.findViewById(R.id.btnComenzarPartida);
+
+        tvValorCategoriasLobby.setText(categoriasFormateadas);
+        tvValorRondasLobby.setText(String.valueOf(rondasStr));
+        tvValorJugadoresLobby.setText("Máximo " + String.valueOf(jugadoresStr));
+        tvValorDuracionLobby.setText(tiempoFormateado + " por ronda");
+
+
 
         rvJugadoresLobby = view.findViewById(R.id.rvJugadoresLobby);
         rvJugadoresLobby.setLayoutManager(new LinearLayoutManager(getContext()));
@@ -88,10 +116,27 @@ public class LobbyFragment extends Fragment {
 
         txtCodigoSala.setText(codigoSala);
 
+        //confirmamos valor cuando cargamos la pantalla
+        if (estoyListo) {
+            btnToggleListo.setText("NO ESTOY LISTO");
+            btnToggleListo.setBackgroundTintList(ColorStateList.valueOf(Color.parseColor("#888888")));
+        } else {
+            btnToggleListo.setText("ESTOY LISTO");
+            btnToggleListo.setBackgroundTintList(ColorStateList.valueOf(Color.parseColor("#4CAF50")));
+        }
+
         if(esCreador){
             NotificationHelper.show(
                     notificationLobby,
                     "Sala creada Correctamente",
+                    NotificationHelper.SUCCESS
+            );
+        }
+
+        if(esAnexo){
+            NotificationHelper.show(
+                    notificationLobby,
+                    "Te has unido a la sala correctamente",
                     NotificationHelper.SUCCESS
             );
         }
@@ -102,22 +147,139 @@ public class LobbyFragment extends Fragment {
             btnComenzarPartida.setVisibility(View.GONE);
         }
 
-        btnRegresar.setOnClickListener(v -> getParentFragmentManager().popBackStack());
+        btnRegresar.setOnClickListener(v -> {
+            CustomDialogHelper.show(
+                    requireContext(),
+                    "¿Deseas salir?",
+                    "Si sales de la sala abandonarás el lobby actual.",
+                    true,
+                    new CustomDialogHelper.DialogButton(
+                            "No",
+                            Color.parseColor("#888888"),
+                            Color.WHITE,
+                            true,
+                            null
+                    ),
+                    new CustomDialogHelper.DialogButton(
+                            "Sí, salir",
+                            Color.parseColor("#E53935"),
+                            Color.WHITE,
+                            true,
+                            () -> SalirDeLobbyYCerrarPartida()
+                    )
+            );
+        });
+
+        btnComenzarPartida.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                PartidaFragment partida = new PartidaFragment();
+                partida.setArguments(bundleDatosPartida);
+
+                getParentFragmentManager().beginTransaction()
+                        .replace(R.id.sala_fragment_container, partida)
+                        .commit();
+            }
+        });
+
 
         btnToggleListo.setOnClickListener(v -> {
             estoyListo = !estoyListo;
             if (estoyListo) {
-                btnToggleListo.setText("ESTOY LISTO");
-                btnToggleListo.setBackgroundTintList(ColorStateList.valueOf(Color.parseColor("#4CAF50")));
+                if(auth != null && VerificacionesAuth.VerificarInicioSesion(auth)){
+                    String uid = auth.getCurrentUser().getUid();
+
+                    DatabaseReference nodoSala = FirebaseDatabase.getInstance().getReference("salas").child(idSalaMetodo).child("jugadores").child(uid);
+                    nodoSala.addListenerForSingleValueEvent(new ValueEventListener() {
+                        @Override
+                        public void onDataChange(@NonNull DataSnapshot snapshot) {
+                            JugadorSala jugador = snapshot.getValue(JugadorSala.class);
+                            if(jugador != null){
+                                jugador.setEstaListo(true);
+                                nodoSala.setValue(jugador).addOnCompleteListener(taskEstado ->{
+                                   if(taskEstado.isSuccessful()){
+                                       btnToggleListo.setText("NO ESTOY LISTO");
+                                       btnToggleListo.setBackgroundTintList(ColorStateList.valueOf(Color.parseColor("#888888")));
+                                   }else{
+                                       NotificationHelper.show(
+                                               notificationLobby,
+                                               "Hubo un error al cambiar de estado",
+                                               NotificationHelper.ERROR
+                                       );
+                                   }
+                                });
+                            }
+                        }
+
+                        @Override
+                        public void onCancelled(@NonNull DatabaseError error) {
+
+                        }
+                    });
+                }
+
             } else {
-                btnToggleListo.setText("NO ESTOY LISTO");
-                btnToggleListo.setBackgroundTintList(ColorStateList.valueOf(Color.parseColor("#888888")));
+                if(auth != null && VerificacionesAuth.VerificarInicioSesion(auth)){
+                    String uid = auth.getCurrentUser().getUid();
+
+                    DatabaseReference nodoSala = FirebaseDatabase.getInstance().getReference("salas").child(idSalaMetodo).child("jugadores").child(uid);
+                    nodoSala.addListenerForSingleValueEvent(new ValueEventListener() {
+                        @Override
+                        public void onDataChange(@NonNull DataSnapshot snapshot) {
+                            JugadorSala jugador = snapshot.getValue(JugadorSala.class);
+                            if(jugador != null){
+                                jugador.setEstaListo(false);
+                                nodoSala.setValue(jugador).addOnCompleteListener(taskEstado ->{
+                                    if(taskEstado.isSuccessful()){
+                                        btnToggleListo.setText("ESTOY LISTO");
+                                        btnToggleListo.setBackgroundTintList(ColorStateList.valueOf(Color.parseColor("#4CAF50")));
+                                    }else{
+                                        NotificationHelper.show(
+                                                notificationLobby,
+                                                "Hubo un error al cambiar de estado",
+                                                NotificationHelper.ERROR
+                                        );
+                                    }
+                                });
+                            }
+                        }
+
+                        @Override
+                        public void onCancelled(@NonNull DatabaseError error) {
+
+                        }
+                    });
+                }
             }
         });
 
         return view;
     }
 
+
+    public void SalirDeLobbyYCerrarPartida(){
+        auth = FirebaseAuth.getInstance();
+
+        if(VerificacionesAuth.VerificarInicioSesion(auth)){
+            String uidUsuario = auth.getCurrentUser().getUid();
+                String idSala = idSalaMetodo;
+
+                DatabaseReference nodoSalas = FirebaseDatabase.getInstance().getReference("salas").child(idSala).child("jugadores").child(uidUsuario);
+                nodoSalas.removeValue().addOnCompleteListener(task -> {
+                   if(task.isSuccessful()){
+                       requireActivity().finish();
+                       Intent intent = new Intent(requireContext(), HomeActivity.class);
+                       startActivity(intent);
+                   }else{
+                       NotificationHelper.show(
+                               notificationLobby,
+                               "No pudiste abandonar la partida",
+                               NotificationHelper.ERROR
+                       );
+                   }
+                });
+        }
+    }
     public void ObtenerJugadoresYLlenarLobby(String idSala){
         auth = FirebaseAuth.getInstance();
         if(VerificacionesAuth.VerificarInicioSesion(auth)){
@@ -149,4 +311,5 @@ public class LobbyFragment extends Fragment {
             });
         }
     }
+
 }

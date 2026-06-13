@@ -29,7 +29,13 @@ import java.util.Locale;
 public class PartidaFragment extends Fragment {
 
     private String codigoSala;
+    private int tiempoSeconds;
+    private String idSala;
+    private int jugadoresMaximos;
     private boolean esAnfitrion;
+    private int rondasMaximas;
+    private boolean esCreador;
+    private boolean esAnexo;
     private ArrayList<String> listaNombresCategorias;
 
     private DatabaseReference salaRef;
@@ -69,6 +75,12 @@ public class PartidaFragment extends Fragment {
             codigoSala = getArguments().getString("CODIGO_SALA");
             esAnfitrion = getArguments().getBoolean("ES_ANFITRION", false);
             listaNombresCategorias = getArguments().getStringArrayList("CATEGORIAS");
+            tiempoSeconds = getArguments().getInt("TIEMPO", 60);
+            jugadoresMaximos = getArguments().getInt("JUGADORES", 4);
+            rondasMaximas = getArguments().getInt("RONDAS", 3);
+            esCreador = getArguments().getBoolean("CREADOR", false);
+            idSala = getArguments().getString("IDSALA");
+            esAnexo = getArguments().getBoolean("ANEXO", false);
         }
     }
 

@@ -12,6 +12,7 @@ import androidx.fragment.app.Fragment;
 import com.example.basta_game.Fragments.JugarFragment;
 import com.example.basta_game.Fragments.PerfilFragment;
 import com.example.basta_game.Fragments.RankingFragment;
+import com.example.basta_game.utils.NotificationHelper;
 import com.example.basta_game.utils.VerificacionesAuth;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 
@@ -40,14 +41,30 @@ public class HomeActivity extends AppCompatActivity {
 
         });
 
+
+
         notificationHome = findViewById(R.id.notificationHome);
         auth = FirebaseAuth.getInstance();
 
+        if(getIntent().getExtras() != null){
+            Boolean seDesconecto = getIntent().getExtras().getBoolean("DESCONEXION");
 
-        //obtenemos nombre del usuario logueado
-        if(VerificacionesAuth.VerificarInicioSesion(auth)){
-            VerificacionesAuth.CargarYMostrarUsuarioLogueado(notificationHome, auth);
+            if(seDesconecto){
+                NotificationHelper.show(
+                        notificationHome,
+                        "Te expulsamos por desconexion",
+                        NotificationHelper.WARNING
+                );
+            }
+        }else{
+            //obtenemos nombre del usuario logueado
+            if(VerificacionesAuth.VerificarInicioSesion(auth)){
+                VerificacionesAuth.CargarYMostrarUsuarioLogueado(notificationHome, auth);
+            }
         }
+
+
+
 
 
         bottomNavigationView = findViewById(R.id.bottom_navigation);

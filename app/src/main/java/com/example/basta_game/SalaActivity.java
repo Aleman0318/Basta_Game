@@ -1,54 +1,160 @@
 package com.example.basta_game;
 
+import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
+
+import androidx.activity.EdgeToEdge;
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
-import com.example.basta_game.Fragments.PartidaFragment;
-import java.util.ArrayList; // No olvides importar esto
+import androidx.core.graphics.Insets;
+import androidx.core.view.ViewCompat;
+import androidx.core.view.WindowInsetsCompat;
+
+import com.example.basta_game.Fragments.LobbyFragment;
+import com.example.basta_game.utils.VerificacionesAuth;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 
 public class SalaActivity extends AppCompatActivity {
 
-    private String codigoSala;
-    private boolean esAnfitrion;
+    private FirebaseAuth auth;
+    private String idSala;
+    private DatabaseReference nodoJugadorSala;
+    private ValueEventListener listenerDesconexion;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        EdgeToEdge.enable(this);
         setContentView(R.layout.activity_sala);
 
-        // DATOS DE PRUEBA SOLO PARA VER EL DISEÑO
-        codigoSala = "TEST1";
-        esAnfitrion = true;
+        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -> {
+            Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
+            v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
+            return insets;
+        });
 
-        mostrarPartidaDePrueba();
+        auth = FirebaseAuth.getInstance();
+
+        Bundle bundle = getIntent().getBundleExtra("DATOS_SALA");
+
+        if (bundle != null) {
+            idSala = bundle.getString("IDSALA", "");
+            mostrarLobby(bundle);
+        }
+
+        if (VerificacionesAuth.VerificarInicioSesion(auth) && idSala != null && !idSala.isEmpty()) {
+            String uid = auth.getCurrentUser().getUid();
+
+            nodoJugadorSala = FirebaseDatabase.getInstance()
+                    .getReference("salas")
+                    .child(idSala)
+                    .child("jugadores")
+                    .child(uid);
+
+            VerificarSiUsuarioSeDesconecto();
+        }
     }
 
-    private void mostrarPartidaDePrueba() {
-        PartidaFragment partidaFragment = new PartidaFragment();
-
-        Bundle bundle = new Bundle();
-        bundle.putString("CODIGO_SALA", codigoSala);
-        bundle.putBoolean("ES_ANFITRION", esAnfitrion);
-
-        // ==========================================
-        // ¡AQUÍ ESTÁ LA SOLUCIÓN!
-        // Agregamos categorías simuladas para la prueba
-        // ==========================================
-        ArrayList<String> categoriasPrueba = new ArrayList<>();
-        categoriasPrueba.add("Nombre");
-        categoriasPrueba.add("Color");
-        categoriasPrueba.add("Fruta");
-        categoriasPrueba.add("País");
-        categoriasPrueba.add("Animal");
-        categoriasPrueba.add("Cosa");
-        categoriasPrueba.add("Apellido");
-
-        bundle.putStringArrayList("CATEGORIAS", categoriasPrueba);
-
-        partidaFragment.setArguments(bundle);
+    public void mostrarLobby(Bundle datosSala) {
+        LobbyFragment lobby = new LobbyFragment();
+        lobby.setArguments(datosSala);
 
         getSupportFragmentManager()
                 .beginTransaction()
-                .replace(R.id.main, partidaFragment)
+                .replace(R.id.sala_fragment_container, lobby)
                 .commit();
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+
+        Log.d("ONPAUSE", "Entró al onPause");
+
+        if (VerificacionesAuth.VerificarInicioSesion(auth) && nodoJugadorSala != null && !isFinishing()) {
+            nodoJugadorSala.addListenerForSingleValueEvent(new ValueEventListener() {
+                @Override
+                public void onDataChange(@NonNull DataSnapshot snapshot) {
+                    if (snapshot.exists()) {
+                        nodoJugadorSala.child("estaConectado").setValue(false)
+                                .addOnSuccessListener(unused -> Log.d("ONPAUSE", "Jugador marcado como desconectado"));
+                    }
+                }
+
+                @Override
+                public void onCancelled(@NonNull DatabaseError error) {
+                    Log.d("ONPAUSE", "Error: " + error.getMessage());
+                }
+            });
+        }
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+
+        Log.d("ONRESUME", "Entró al onResume");
+
+        if (VerificacionesAuth.VerificarInicioSesion(auth) && nodoJugadorSala != null) {
+            nodoJugadorSala.addListenerForSingleValueEvent(new ValueEventListener() {
+                @Override
+                public void onDataChange(@NonNull DataSnapshot snapshot) {
+                    if (snapshot.exists()) {
+                        nodoJugadorSala.child("estaConectado").setValue(true)
+                                .addOnSuccessListener(unused -> Log.d("ONRESUME", "Jugador marcado como conectado"));
+                    } else {
+                        mandarHomePorDesconexion();
+                    }
+                }
+
+                @Override
+                public void onCancelled(@NonNull DatabaseError error) {
+                    Log.d("ONRESUME", "Error: " + error.getMessage());
+                }
+            });
+        }
+    }
+
+    public void VerificarSiUsuarioSeDesconecto() {
+        //para evitar que la app EXPLOTE si el nodo esta vacio
+        if (nodoJugadorSala == null) {
+            return;
+        }
+
+        listenerDesconexion = nodoJugadorSala.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                if (!snapshot.exists()) {
+                    mandarHomePorDesconexion();
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+                Log.d("DESCONECTADO", "Error: " + error.getMessage());
+            }
+        });
+    }
+
+    private void mandarHomePorDesconexion() {
+        Intent intent = new Intent(SalaActivity.this, HomeActivity.class);
+        intent.putExtra("DESCONEXION", true);
+        startActivity(intent);
+        finish();
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+
+        if (nodoJugadorSala != null && listenerDesconexion != null) {
+            nodoJugadorSala.removeEventListener(listenerDesconexion);
+        }
     }
 }
