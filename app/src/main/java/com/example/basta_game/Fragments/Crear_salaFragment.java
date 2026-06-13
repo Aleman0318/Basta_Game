@@ -43,7 +43,7 @@ import com.google.firebase.database.ValueEventListener;
 
 public class Crear_salaFragment extends Fragment {
 
-    private int contadorJugadores = 4;
+    private int contadorJugadores = 2;
     private int contadorRondas = 1;
 
     private final ArrayList<String> categoriasActivas = new ArrayList<>();
@@ -70,6 +70,8 @@ public class Crear_salaFragment extends Fragment {
     private String codigoSalaLobby;
 
     private String idSalaLobby;
+
+    private String estadoSala;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -330,6 +332,8 @@ public class Crear_salaFragment extends Fragment {
                                    .child(usuarioUID)
                                    .setValue(jugador).addOnCompleteListener(task -> {
                                        if(task.isSuccessful()){
+
+                                           salaConID.child("jugadores").child(usuarioUID).onDisconnect().removeValue();
 
                                            Log.d("DEBUG_SALA", "Jugador creado correctamente");
 
