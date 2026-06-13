@@ -3,9 +3,12 @@ package com.example.basta_game.Adapters;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
+
+import com.bumptech.glide.Glide;
 import com.example.basta_game.models.Jugador;
 import com.example.basta_game.R;
 import java.util.List;
@@ -29,6 +32,12 @@ public class JugadorPartidaAdapter extends RecyclerView.Adapter<JugadorPartidaAd
         Jugador jugador = listaJugadores.get(position);
         holder.txtNombre.setText(jugador.getNombre());
 
+        Glide.with(holder.itemView.getContext())
+                .load(jugador.getUrlPerfil())
+                .placeholder(R.drawable.outline_person_24)
+                .error(R.drawable.outline_person_24)
+                .into(holder.imgAvatar);
+
         // ¡AQUÍ ESTÁ LA SOLUCIÓN DEL TEXTO!
         if (jugador.isEstaListo()) {
             holder.txtEstado.setText("Listo");
@@ -42,11 +51,13 @@ public class JugadorPartidaAdapter extends RecyclerView.Adapter<JugadorPartidaAd
 
     public static class ViewHolder extends RecyclerView.ViewHolder {
         TextView txtNombre, txtEstado;
+        ImageView imgAvatar;
         public ViewHolder(@NonNull View itemView) {
             super(itemView);
             txtNombre = itemView.findViewById(R.id.txtNombreJugador);
             // Aseguramos que el adaptador encuentre el TextView del estado
             txtEstado = itemView.findViewById(R.id.txtEstadoJugador);
+            imgAvatar = itemView.findViewById(R.id.imgAvatarJugadorPartida);
         }
     }
 }

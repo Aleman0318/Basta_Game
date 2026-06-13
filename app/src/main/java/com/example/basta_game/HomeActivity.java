@@ -52,7 +52,7 @@ public class HomeActivity extends AppCompatActivity {
             if(seDesconecto){
                 NotificationHelper.show(
                         notificationHome,
-                        "Te expulsamos por desconexion",
+                        "Has abandonado la partida",
                         NotificationHelper.WARNING
                 );
             }

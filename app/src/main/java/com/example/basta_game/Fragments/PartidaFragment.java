@@ -1,24 +1,42 @@
 package com.example.basta_game.Fragments;
 
+import android.app.Dialog;
+import android.graphics.Color;
+import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.widget.AppCompatButton;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+import androidx.viewpager2.widget.ViewPager2;
 
 import com.example.basta_game.Adapters.CategoriaPartidaAdapter;
 import com.example.basta_game.Adapters.JugadorPartidaAdapter;
+import com.example.basta_game.Adapters.JugadorSalaAdapter;
+import com.example.basta_game.Adapters.TarjetasValidacionAdapter;
+import com.example.basta_game.SalaActivity;
 import com.example.basta_game.models.Categoria;
 import com.example.basta_game.models.Jugador;
 import com.example.basta_game.R;
+import com.example.basta_game.models.JugadorSala;
+import com.example.basta_game.models.Sala;
+import com.example.basta_game.utils.CustomDialogHelper;
+import com.example.basta_game.utils.VerificacionesAuth;
+import com.google.android.material.button.MaterialButton;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -34,6 +52,9 @@ public class PartidaFragment extends Fragment {
     private int rondasMaximas;
     private boolean esCreador;
     private boolean esAnexo;
+
+    private MaterialButton btnAbandonar;
+
     private ArrayList<String> listaNombresCategorias;
 
     private DatabaseReference salaRef;
@@ -52,6 +73,8 @@ public class PartidaFragment extends Fragment {
     private RecyclerView rvJugadoresPartida;
     private RecyclerView rvCategoriasJuego;
 
+    private FirebaseAuth auth;
+
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         return inflater.inflate(R.layout.fragment_partida, container, false);
@@ -60,8 +83,10 @@ public class PartidaFragment extends Fragment {
     @Override
     public void onViewCreated(View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
+        auth = FirebaseAuth.getInstance();
 
         obtenerArgumentos();
+        CambiarEstadoPartida(auth, idSala);
         inicializarVistas(view);
         configurarFirebase();
         cargarDatosIniciales();
@@ -79,6 +104,7 @@ public class PartidaFragment extends Fragment {
             esCreador = getArguments().getBoolean("CREADOR", false);
             idSala = getArguments().getString("IDSALA");
             esAnexo = getArguments().getBoolean("ANEXO", false);
+            ObtenerEstadoPartida(auth, idSala);
         }
     }
 
@@ -88,7 +114,7 @@ public class PartidaFragment extends Fragment {
         txtEstadoPartida = view.findViewById(R.id.txtEstadoPartida);
         txtTiempoRestante = view.findViewById(R.id.txtTiempoRestante);
         txtInstruccionLetra = view.findViewById(R.id.txtInstruccionLetra);
-
+        btnAbandonar = view.findViewById(R.id.btnSalida);
         imgLetraActual = view.findViewById(R.id.imgLetraActual);
 
         btnBasta = view.findViewById(R.id.btnBasta);
@@ -106,19 +132,17 @@ public class PartidaFragment extends Fragment {
 
     private void cargarDatosIniciales() {
         txtCodigoSala.setText("Sala " + codigoSala);
-        txtEstadoPartida.setText("● En juego");
-
         // 1. CONFIGURAR JUGADORES (Arriba)
         rvJugadoresPartida.setLayoutManager(new LinearLayoutManager(getContext(), LinearLayoutManager.HORIZONTAL, false));
-        List<Jugador> listaJugadores = new ArrayList<>();
+        ObtenerJugadoresYLlenarPartida(idSala);
+        /*List<Jugador> listaJugadores = new ArrayList<>();
         listaJugadores.add(new Jugador("Marlon", false));
         listaJugadores.add(new Jugador("Diego", true));
         listaJugadores.add(new Jugador("Diana", true));
         listaJugadores.add(new Jugador("Steven", true));
-        rvJugadoresPartida.setAdapter(new JugadorPartidaAdapter(listaJugadores));
+        rvJugadoresPartida.setAdapter(new JugadorPartidaAdapter(listaJugadores));*/
 
         // 2. CONFIGURAR CATEGORÍAS (Centro - 1 Columna con Scroll)
-        // ¡Aquí está el cambio! De GridLayoutManager(..., 2) a LinearLayoutManager normal
         rvCategoriasJuego.setLayoutManager(new LinearLayoutManager(getContext()));
         List<Categoria> listaCategorias = new ArrayList<>();
 
@@ -137,7 +161,39 @@ public class PartidaFragment extends Fragment {
 
     private void configurarBotones() {
         btnBasta.setOnClickListener(v -> {
-            // Más adelante: guardar respuestas, cambiar estado de ronda...
+            // LÓGICA DE DAIGO: Lanzar el modal del carrusel con datos de prueba
+            List<String> categoriasPrueba = new ArrayList<>(); //cat de prueba
+            categoriasPrueba.add("Fruta");
+            categoriasPrueba.add("Animal");
+            categoriasPrueba.add("Color");
+
+           mostrarModalValidacionCarrusel(categoriasPrueba);
+        });
+
+        btnAbandonar.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                CustomDialogHelper.show(
+                        requireContext(),
+                        "¿Deseas salir?",
+                        "Si sales de la sala abandonarás la partida y no podras volver",
+                        true,
+                        new CustomDialogHelper.DialogButton(
+                                "No",
+                                Color.parseColor("#888888"),
+                                Color.WHITE,
+                                true,
+                                null
+                        ),
+                        new CustomDialogHelper.DialogButton(
+                                "Sí, salir",
+                                Color.parseColor("#E53935"),
+                                Color.WHITE,
+                                true,
+                                () -> ((SalaActivity) requireActivity()).mandarHomePorDesconexion()
+                        )
+                );
+            }
         });
     }
 
@@ -171,5 +227,96 @@ public class PartidaFragment extends Fragment {
             default:
                 return R.drawable.perfil_menuu;
         }
+    }
+
+    public void CambiarEstadoPartida(FirebaseAuth auth, String idSala){
+
+        if(VerificacionesAuth.VerificarInicioSesion(auth)){
+            DatabaseReference nodoSala = FirebaseDatabase.getInstance().getReference("salas").child(idSala).child("estadoPartida");
+            nodoSala.setValue("En juego").addOnCompleteListener(task -> {
+                if(task.isSuccessful()){
+                    Log.d("ESTADO", "se cambio el estado de la partida correctamente");
+                }
+            });
+        }
+    }
+
+    public void ObtenerEstadoPartida(FirebaseAuth auth, String salaID){
+        if(VerificacionesAuth.VerificarInicioSesion(auth)){
+            DatabaseReference nodoEstado = FirebaseDatabase.getInstance().getReference("salas").child(salaID);
+            nodoEstado.addValueEventListener(new ValueEventListener() {
+                @Override
+                public void onDataChange(@NonNull DataSnapshot snapshot) {
+                    Sala sala = snapshot.getValue(Sala.class);
+                    if(sala != null){
+                        txtEstadoPartida.setText("● " + sala.getEstadoPartida());
+                    }
+                }
+
+                @Override
+                public void onCancelled(@NonNull DatabaseError error) {
+
+                }
+            });
+        }
+    }
+
+    public void ObtenerJugadoresYLlenarPartida(String idSala){
+        auth = FirebaseAuth.getInstance();
+        if(VerificacionesAuth.VerificarInicioSesion(auth)){
+            DatabaseReference nodoSalas = FirebaseDatabase.getInstance().getReference("salas").child(idSala).child("jugadores");
+            nodoSalas.addValueEventListener(new ValueEventListener() {
+                @Override
+                public void onDataChange(@NonNull DataSnapshot snapshot) {
+                    ArrayList<Jugador> jugadoresActivos = new ArrayList<>();
+
+                    for (DataSnapshot hijo : snapshot.getChildren()) {
+                        JugadorSala jugador = hijo.getValue(JugadorSala.class);
+
+                        if (jugador != null) {
+                            jugadoresActivos.add(new Jugador(jugador.getNombre(), jugador.isEstaListo(), jugador.getUrlAvatar()));
+                        }
+                    }
+
+                    if(!jugadoresActivos.isEmpty()){
+                        JugadorPartidaAdapter adaptador = new JugadorPartidaAdapter(jugadoresActivos);
+                        rvJugadoresPartida.setAdapter(adaptador);
+                    }
+
+                }
+
+                @Override
+                public void onCancelled(@NonNull DatabaseError error) {
+
+                }
+            });
+        }
+    }
+
+    private void mostrarModalValidacionCarrusel(List<String> categorias) {
+        Dialog dialog = new Dialog(requireContext());
+        dialog.setContentView(R.layout.dialogo_respuestas);
+
+        if (dialog.getWindow() != null) {
+            dialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+            dialog.getWindow().setLayout(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT);
+        }
+
+        ViewPager2 vpCategorias = dialog.findViewById(R.id.vpCategoriasValidacion);
+        androidx.appcompat.widget.AppCompatButton btnSalir = dialog.findViewById(R.id.btnSalirRevision);
+
+        btnSalir.setOnClickListener(v -> dialog.dismiss());
+
+        Runnable accionMostrarBotonSalir = () -> {
+            btnSalir.setVisibility(View.VISIBLE);
+        };
+
+        TarjetasValidacionAdapter adapter = new TarjetasValidacionAdapter(categorias, vpCategorias, accionMostrarBotonSalir);
+        vpCategorias.setAdapter(adapter);
+
+        vpCategorias.setOffscreenPageLimit(1);
+
+        dialog.setCancelable(false);
+        dialog.show();
     }
 }

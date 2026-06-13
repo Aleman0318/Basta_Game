@@ -142,7 +142,7 @@ public class SalaActivity extends AppCompatActivity {
         });
     }
 
-    private void mandarHomePorDesconexion() {
+    public void mandarHomePorDesconexion() {
         Intent intent = new Intent(SalaActivity.this, HomeActivity.class);
         intent.putExtra("DESCONEXION", true);
         startActivity(intent);

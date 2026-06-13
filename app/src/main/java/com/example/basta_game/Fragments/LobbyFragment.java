@@ -20,6 +20,7 @@ import android.widget.TextView;
 import androidx.appcompat.widget.AppCompatButton;
 
 import com.example.basta_game.HomeActivity;
+import com.example.basta_game.SalaActivity;
 import com.example.basta_game.models.Jugador;
 import com.example.basta_game.R;
 import com.example.basta_game.Adapters.JugadorSalaAdapter;
@@ -165,7 +166,7 @@ public class LobbyFragment extends Fragment {
                             Color.parseColor("#E53935"),
                             Color.WHITE,
                             true,
-                            () -> SalirDeLobbyYCerrarPartida()
+                            () -> ((SalaActivity) requireActivity()).mandarHomePorDesconexion()
                     )
             );
         });
