@@ -41,26 +41,30 @@ public class HomeActivity extends AppCompatActivity {
 
         });
 
+
+
+        notificationHome = findViewById(R.id.notificationHome);
+        auth = FirebaseAuth.getInstance();
+
         if(getIntent().getExtras() != null){
             Boolean seDesconecto = getIntent().getExtras().getBoolean("DESCONEXION");
 
             if(seDesconecto){
                 NotificationHelper.show(
                         notificationHome,
-                        "Te has desconectado de la partida, volviendo a Home",
+                        "Te expulsamos por desconexion",
                         NotificationHelper.WARNING
                 );
             }
+        }else{
+            //obtenemos nombre del usuario logueado
+            if(VerificacionesAuth.VerificarInicioSesion(auth)){
+                VerificacionesAuth.CargarYMostrarUsuarioLogueado(notificationHome, auth);
+            }
         }
 
-        notificationHome = findViewById(R.id.notificationHome);
-        auth = FirebaseAuth.getInstance();
 
 
-        //obtenemos nombre del usuario logueado
-        if(VerificacionesAuth.VerificarInicioSesion(auth)){
-            VerificacionesAuth.CargarYMostrarUsuarioLogueado(notificationHome, auth);
-        }
 
 
         bottomNavigationView = findViewById(R.id.bottom_navigation);

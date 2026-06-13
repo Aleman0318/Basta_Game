@@ -3,7 +3,6 @@ package com.example.basta_game;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
-import android.widget.Toast;
 
 import androidx.activity.EdgeToEdge;
 import androidx.annotation.NonNull;
@@ -13,8 +12,6 @@ import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 
 import com.example.basta_game.Fragments.LobbyFragment;
-import com.example.basta_game.models.JugadorSala;
-import com.example.basta_game.models.Usuario;
 import com.example.basta_game.utils.VerificacionesAuth;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DataSnapshot;
@@ -26,146 +23,138 @@ import com.google.firebase.database.ValueEventListener;
 public class SalaActivity extends AppCompatActivity {
 
     private FirebaseAuth auth;
+    private String idSala;
+    private DatabaseReference nodoJugadorSala;
+    private ValueEventListener listenerDesconexion;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         EdgeToEdge.enable(this);
         setContentView(R.layout.activity_sala);
+
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -> {
             Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
             return insets;
         });
 
-
+        auth = FirebaseAuth.getInstance();
 
         Bundle bundle = getIntent().getBundleExtra("DATOS_SALA");
 
-        if(bundle != null){
+        if (bundle != null) {
+            idSala = bundle.getString("IDSALA", "");
             mostrarLobby(bundle);
         }
 
+        if (VerificacionesAuth.VerificarInicioSesion(auth) && idSala != null && !idSala.isEmpty()) {
+            String uid = auth.getCurrentUser().getUid();
 
+            nodoJugadorSala = FirebaseDatabase.getInstance()
+                    .getReference("salas")
+                    .child(idSala)
+                    .child("jugadores")
+                    .child(uid);
 
+            VerificarSiUsuarioSeDesconecto();
+        }
     }
 
-    public void mostrarLobby(Bundle datosSala){
+    public void mostrarLobby(Bundle datosSala) {
         LobbyFragment lobby = new LobbyFragment();
         lobby.setArguments(datosSala);
 
-        getSupportFragmentManager().beginTransaction()
+        getSupportFragmentManager()
+                .beginTransaction()
                 .replace(R.id.sala_fragment_container, lobby)
-                .addToBackStack(null)
                 .commit();
     }
-
-    //controlando si el usuario sale de la pantalla
-
 
     @Override
     protected void onPause() {
         super.onPause();
-        Log.d("ONPAUSE", "ENTRO AL ON PAUSE");
-      if(!isFinishing()){
-          try {
-              auth = FirebaseAuth.getInstance();
 
-              if(VerificacionesAuth.VerificarInicioSesion(auth)){
-                  String uidUsuario = auth.getCurrentUser().getUid();
+        Log.d("ONPAUSE", "Entró al onPause");
 
-                  Bundle bundle = getIntent().getBundleExtra("DATOS_SALA");
-                  if(bundle != null){
-                      String idSala = bundle.getString("IDSALA");
+        if (VerificacionesAuth.VerificarInicioSesion(auth) && nodoJugadorSala != null && !isFinishing()) {
+            nodoJugadorSala.addListenerForSingleValueEvent(new ValueEventListener() {
+                @Override
+                public void onDataChange(@NonNull DataSnapshot snapshot) {
+                    if (snapshot.exists()) {
+                        nodoJugadorSala.child("estaConectado").setValue(false)
+                                .addOnSuccessListener(unused -> Log.d("ONPAUSE", "Jugador marcado como desconectado"));
+                    }
+                }
 
-                      DatabaseReference nodoSalas = FirebaseDatabase.getInstance().getReference("salas").child(idSala).child("jugadores").child(uidUsuario);
-                      nodoSalas.addListenerForSingleValueEvent(new ValueEventListener() {
-                          @Override
-                          public void onDataChange(@NonNull DataSnapshot snapshot) {
-                              JugadorSala jugador = snapshot.getValue(JugadorSala.class);
-                              if(jugador != null){
-                                  jugador.setEstaConectado(false);
-                                  nodoSalas.setValue(jugador).addOnCompleteListener(task -> {
-                                      if(task.isSuccessful()){
-                                          Log.d("ONPAUSE", "se cambio el estado del jugador");
-                                      }
-                                  });
-                              }
-                              else{
-                                  Toast.makeText(SalaActivity.this, "Snapshot esta vacio", Toast.LENGTH_SHORT).show();
-                                  Log.d("ONPAUSE", "EL SNAPSHOT ESTA VACIO");
-                              }
-                          }
-
-                          @Override
-                          public void onCancelled(@NonNull DatabaseError error) {
-
-                          }
-                      });
-                  }
-              }else{
-                  Log.d("ONPAUSE", "NO ESTA AUTENTICADO");
-              }
-          }catch (Exception e){
-              Log.d("ONPAUSE", "ocurrio un error: " + e.getMessage());
-          }
-      }else{
-          Log.d("ONPAUSE", "NO SE EJECUTO EL ON FINISHING");
-      }
+                @Override
+                public void onCancelled(@NonNull DatabaseError error) {
+                    Log.d("ONPAUSE", "Error: " + error.getMessage());
+                }
+            });
+        }
     }
 
     @Override
     protected void onResume() {
         super.onResume();
-        auth = FirebaseAuth.getInstance();
 
-        if(VerificacionesAuth.VerificarInicioSesion(auth)){
-            String uidUsuario = auth.getCurrentUser().getUid();
+        Log.d("ONRESUME", "Entró al onResume");
 
-            Bundle bundle = getIntent().getBundleExtra("DATOS_SALA");
-            if(bundle != null){
-                String idSala = bundle.getString("IDSALA");
-
-                DatabaseReference nodoSalas = FirebaseDatabase.getInstance().getReference("salas").child(idSala).child("jugadores").child(uidUsuario);
-                nodoSalas.addListenerForSingleValueEvent(new ValueEventListener() {
-                    @Override
-                    public void onDataChange(@NonNull DataSnapshot snapshot) {
-                        JugadorSala jugador = snapshot.getValue(JugadorSala.class);
-                        jugador.setEstaConectado(true);
-                        nodoSalas.setValue(jugador).addOnCompleteListener(task -> {
-                            if(task.isSuccessful()){
-                                Log.d("ONPAUSE", "se cambio el estado del jugador");
-                            }
-                        });
+        if (VerificacionesAuth.VerificarInicioSesion(auth) && nodoJugadorSala != null) {
+            nodoJugadorSala.addListenerForSingleValueEvent(new ValueEventListener() {
+                @Override
+                public void onDataChange(@NonNull DataSnapshot snapshot) {
+                    if (snapshot.exists()) {
+                        nodoJugadorSala.child("estaConectado").setValue(true)
+                                .addOnSuccessListener(unused -> Log.d("ONRESUME", "Jugador marcado como conectado"));
+                    } else {
+                        mandarHomePorDesconexion();
                     }
+                }
 
-                    @Override
-                    public void onCancelled(@NonNull DatabaseError error) {
-
-                    }
-                });
-            }
+                @Override
+                public void onCancelled(@NonNull DatabaseError error) {
+                    Log.d("ONRESUME", "Error: " + error.getMessage());
+                }
+            });
         }
     }
 
-    public void VerificarSiUsuarioSeDesconecto(FirebaseAuth auth, String idSala){
-        if(VerificacionesAuth.VerificarInicioSesion(auth)){
-           DatabaseReference nodoJugadorSala = FirebaseDatabase.getInstance().getReference("salas").child(idSala).child("jugadores").child(auth.getCurrentUser().getUid());
-           nodoJugadorSala.addValueEventListener(new ValueEventListener() {
-               @Override
-               public void onDataChange(@NonNull DataSnapshot snapshot) {
-                   if(!snapshot.exists()){
-                       Intent intent = new Intent(SalaActivity.this, HomeActivity.class);
-                       intent.putExtra("DESCONEXION", true);
-                       startActivity(intent);
-                   }
-               }
+    public void VerificarSiUsuarioSeDesconecto() {
+        //para evitar que la app EXPLOTE si el nodo esta vacio
+        if (nodoJugadorSala == null) {
+            return;
+        }
 
-               @Override
-               public void onCancelled(@NonNull DatabaseError error) {
+        listenerDesconexion = nodoJugadorSala.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                if (!snapshot.exists()) {
+                    mandarHomePorDesconexion();
+                }
+            }
 
-               }
-           });
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+                Log.d("DESCONECTADO", "Error: " + error.getMessage());
+            }
+        });
+    }
+
+    private void mandarHomePorDesconexion() {
+        Intent intent = new Intent(SalaActivity.this, HomeActivity.class);
+        intent.putExtra("DESCONEXION", true);
+        startActivity(intent);
+        finish();
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+
+        if (nodoJugadorSala != null && listenerDesconexion != null) {
+            nodoJugadorSala.removeEventListener(listenerDesconexion);
         }
     }
 }
