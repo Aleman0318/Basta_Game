@@ -21,13 +21,16 @@ import androidx.viewpager2.widget.ViewPager2;
 import com.example.basta_game.Adapters.CategoriaPartidaAdapter;
 import com.example.basta_game.Adapters.JugadorPartidaAdapter;
 import com.example.basta_game.Adapters.JugadorSalaAdapter;
-//import com.example.basta_game.Adapters.TarjetasValidacionAdapter;
+import com.example.basta_game.Adapters.TarjetasValidacionAdapter;
+import com.example.basta_game.SalaActivity;
 import com.example.basta_game.models.Categoria;
 import com.example.basta_game.models.Jugador;
 import com.example.basta_game.R;
 import com.example.basta_game.models.JugadorSala;
 import com.example.basta_game.models.Sala;
+import com.example.basta_game.utils.CustomDialogHelper;
 import com.example.basta_game.utils.VerificacionesAuth;
+import com.google.android.material.button.MaterialButton;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
@@ -49,6 +52,8 @@ public class PartidaFragment extends Fragment {
     private int rondasMaximas;
     private boolean esCreador;
     private boolean esAnexo;
+
+    private MaterialButton btnAbandonar;
 
     private ArrayList<String> listaNombresCategorias;
 
@@ -109,7 +114,7 @@ public class PartidaFragment extends Fragment {
         txtEstadoPartida = view.findViewById(R.id.txtEstadoPartida);
         txtTiempoRestante = view.findViewById(R.id.txtTiempoRestante);
         txtInstruccionLetra = view.findViewById(R.id.txtInstruccionLetra);
-
+        btnAbandonar = view.findViewById(R.id.btnSalida);
         imgLetraActual = view.findViewById(R.id.imgLetraActual);
 
         btnBasta = view.findViewById(R.id.btnBasta);
@@ -162,7 +167,33 @@ public class PartidaFragment extends Fragment {
             categoriasPrueba.add("Animal");
             categoriasPrueba.add("Color");
 
-           // mostrarModalValidacionCarrusel(categoriasPrueba);
+           mostrarModalValidacionCarrusel(categoriasPrueba);
+        });
+
+        btnAbandonar.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                CustomDialogHelper.show(
+                        requireContext(),
+                        "¿Deseas salir?",
+                        "Si sales de la sala abandonarás la partida y no podras volver",
+                        true,
+                        new CustomDialogHelper.DialogButton(
+                                "No",
+                                Color.parseColor("#888888"),
+                                Color.WHITE,
+                                true,
+                                null
+                        ),
+                        new CustomDialogHelper.DialogButton(
+                                "Sí, salir",
+                                Color.parseColor("#E53935"),
+                                Color.WHITE,
+                                true,
+                                () -> ((SalaActivity) requireActivity()).mandarHomePorDesconexion()
+                        )
+                );
+            }
         });
     }
 
@@ -262,10 +293,7 @@ public class PartidaFragment extends Fragment {
         }
     }
 
-    // ==============================================================
-    // LÓGICA DE DAIGO: VALIDACIÓN TIPO CARRUSEL (ViewPager2)
-    // ==============================================================
-    /*private void mostrarModalValidacionCarrusel(List<String> categorias) {
+    private void mostrarModalValidacionCarrusel(List<String> categorias) {
         Dialog dialog = new Dialog(requireContext());
         dialog.setContentView(R.layout.dialogo_respuestas);
 
@@ -290,5 +318,5 @@ public class PartidaFragment extends Fragment {
 
         dialog.setCancelable(false);
         dialog.show();
-    }*/
+    }
 }
