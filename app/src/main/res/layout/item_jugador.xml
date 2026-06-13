@@ -48,7 +48,7 @@
                 android:layout_width="12dp"
                 android:layout_height="12dp"
                 app:cardCornerRadius="6dp"
-                app:cardBackgroundColor="#4CAF50"
+                app:cardBackgroundColor="@color/verde_puntos"
                 app:cardElevation="0dp"
                 app:strokeWidth="0dp" />
 
@@ -59,7 +59,7 @@
                 android:layout_marginStart="6dp"
                 android:fontFamily="@font/manrope_regular"
                 android:text="Listo"
-                android:textColor="#4CAF50"
+                android:textColor="@color/verde_puntos"
                 android:textSize="14sp"
                 android:textStyle="bold" />
         </LinearLayout>

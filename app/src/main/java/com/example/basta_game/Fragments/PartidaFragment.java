@@ -1,17 +1,20 @@
 package com.example.basta_game.Fragments;
 
+import android.app.Dialog;
+import android.graphics.Color;
+import android.graphics.drawable.ColorDrawable;
+import androidx.viewpager2.widget.ViewPager2;
+import com.example.basta_game.Adapters.TarjetasValidacionAdapter;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
-
 import androidx.appcompat.widget.AppCompatButton;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
-
 import com.example.basta_game.Adapters.CategoriaPartidaAdapter;
 import com.example.basta_game.Adapters.JugadorPartidaAdapter;
 import com.example.basta_game.models.Categoria;
@@ -19,7 +22,6 @@ import com.example.basta_game.models.Jugador;
 import com.example.basta_game.R;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
@@ -126,6 +128,13 @@ public class PartidaFragment extends Fragment {
     private void configurarBotones() {
         btnBasta.setOnClickListener(v -> {
             // Más adelante: guardar respuestas, cambiar estado de ronda...
+
+            List<String> categoriasPrueba = new ArrayList<>(); //cat de prueba
+            categoriasPrueba.add("Fruta");
+            categoriasPrueba.add("Animal");
+            categoriasPrueba.add("Color");
+
+            mostrarModalValidacionCarrusel(categoriasPrueba);
         });
     }
 
@@ -159,5 +168,31 @@ public class PartidaFragment extends Fragment {
             default:
                 return R.drawable.perfil_menuu;
         }
+    }
+    private void mostrarModalValidacionCarrusel(List<String> categorias) {
+        Dialog dialog = new Dialog(requireContext());
+        dialog.setContentView(R.layout.dialogo_respuestas);
+
+        if (dialog.getWindow() != null) {
+            dialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+            dialog.getWindow().setLayout(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT);
+        }
+
+        ViewPager2 vpCategorias = dialog.findViewById(R.id.vpCategoriasValidacion);
+        androidx.appcompat.widget.AppCompatButton btnSalir = dialog.findViewById(R.id.btnSalirRevision);
+
+        btnSalir.setOnClickListener(v -> dialog.dismiss());
+
+        Runnable accionMostrarBotonSalir = () -> {
+            btnSalir.setVisibility(View.VISIBLE);
+        };
+
+        TarjetasValidacionAdapter adapter = new TarjetasValidacionAdapter(categorias, vpCategorias, accionMostrarBotonSalir);
+        vpCategorias.setAdapter(adapter);
+
+        vpCategorias.setOffscreenPageLimit(1);
+
+        dialog.setCancelable(false);
+        dialog.show();
     }
 }
