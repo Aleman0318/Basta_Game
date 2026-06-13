@@ -16,14 +16,19 @@
         android:paddingTop="18dp"
         android:paddingBottom="50dp">
 
-        <ImageView
-            android:id="@+id/imgLogoBasta"
+        <FrameLayout
             android:layout_width="match_parent"
-            android:layout_height="120dp"
-            android:adjustViewBounds="true"
-            android:scaleType="fitCenter"
-            android:src="@drawable/logo_basta" />
+            android:layout_height="wrap_content">
 
+            <ImageView
+                android:id="@+id/imgLogoBasta"
+                android:layout_width="match_parent"
+                android:layout_height="120dp"
+                android:adjustViewBounds="true"
+                android:scaleType="fitCenter"
+                android:src="@drawable/logo_basta" />
+
+        </FrameLayout>
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -48,9 +53,6 @@
                 android:textColor="#064DDB"
                 android:textSize="14sp">
             </TextView>
-
-
-
 
             <TextView
                 android:id="@+id/txtRondaActual"
@@ -137,22 +139,7 @@
             <FrameLayout
                 android:layout_width="0dp"
                 android:layout_height="140dp"
-                android:layout_weight="1"
-                android:clipChildren="false">
-                <View
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:layout_marginTop="10dp"
-                android:layout_marginEnd="8dp"
-                android:background="@drawable/bg_chip_blanco_azul" />
-
-                <ImageView
-                    android:layout_width="50dp"
-                    android:layout_height="50dp"
-                    android:layout_marginTop="-6dp"
-                    android:layout_marginEnd="4dp"
-                    android:layout_gravity="top|end"
-                    android:src="@drawable/ic_crono" />
+                android:layout_weight="1">
 
                 <LinearLayout
                     android:id="@+id/cardTiempo"
@@ -162,7 +149,7 @@
                     android:layout_marginEnd="8dp"
                     android:orientation="vertical"
                     android:gravity="center"
-                    android:background="@color/colorTransparente">
+                    android:background="@drawable/bg_chip_blanco_azul">
 
                     <TextView
                         android:layout_width="wrap_content"
@@ -200,6 +187,14 @@
                         android:textStyle="bold" />
 
                 </LinearLayout>
+
+                <ImageView
+                    android:layout_width="55dp"
+                    android:layout_height="55dp"
+                    android:layout_marginTop="-5dp"
+                    android:layout_marginRight="6dp"
+                    android:layout_gravity="top|end"
+                    android:src="@drawable/ic_crono" />
             </FrameLayout>
 
         </LinearLayout>
@@ -236,8 +231,25 @@
             android:text="¡BASTA!"
             android:textAllCaps="false"
             android:textColor="@color/blanco"
-            android:textSize="32sp"
-            android:elevation="6dp" />
+            android:textSize="32sp"/>
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnSalida"
+            android:layout_width="match_parent"
+            android:layout_height="62dp"
+            android:layout_marginTop="20dp"
+            android:background="@drawable/bg_boton_exit"
+            app:backgroundTint="@null"
+            android:fontFamily="@font/lilitaone_regular"
+            android:text="Salir"
+            android:textAllCaps="false"
+            android:textColor="@color/blanco"
+            android:textSize="36sp"
+            app:icon="@drawable/salida"
+            app:iconSize="46dp"
+            app:iconGravity="textEnd"
+            app:iconTint="@color/blanco" />
+
 
     </LinearLayout>
 
