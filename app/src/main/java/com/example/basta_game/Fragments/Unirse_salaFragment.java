@@ -109,8 +109,10 @@ public class Unirse_salaFragment extends Fragment {
                                                                     DatabaseReference nodoJugadorSala = FirebaseDatabase.getInstance().getReference("salas").child(codigoElegido.getIdSala()).child("jugadores").child(user.getUid());
                                                                     nodoJugadorSala.setValue(jugador).addOnCompleteListener(taskJugadorSala -> {
                                                                         if(taskJugadorSala.isSuccessful()){
-                                                                            Intent intent = new Intent(requireContext(), SalaActivity.class);
 
+                                                                            nodoJugadorSala.onDisconnect().removeValue();
+
+                                                                            Intent intent = new Intent(requireContext(), SalaActivity.class);
                                                                             Bundle bundle = new Bundle();
 
                                                                             bundle.putBoolean("ES_ANFITRION", false);

@@ -14,6 +14,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
 import androidx.appcompat.widget.AppCompatButton;
@@ -50,6 +51,9 @@ public class LobbyFragment extends Fragment {
     private RecyclerView rvJugadoresLobby;
 
     private String idSalaMetodo;
+    private Button btnComenzarPartida;
+
+    private Bundle bundleDatosPartida;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -64,16 +68,18 @@ public class LobbyFragment extends Fragment {
         String idSala = "";
         Boolean esAnexo = false;
 
-        if (getArguments() != null) {
-            esAnfitrion = getArguments().getBoolean("ES_ANFITRION", false);
-            categoriasStr = getArguments().getStringArrayList("CATEGORIAS");
-            tiempoStr = getArguments().getInt("TIEMPO", 60);
-            jugadoresStr = getArguments().getInt("JUGADORES", 4);
-            rondasStr = getArguments().getInt("RONDAS", 5);
-            esCreador = getArguments().getBoolean("CREADOR", false);
-            codigoSala = getArguments().getString("CODIGO_SALA", "Esperando...");
-            idSala = getArguments().getString("IDSALA");
-            esAnexo = getArguments().getBoolean("ANEXO", false);
+        bundleDatosPartida = getArguments();
+
+        if (bundleDatosPartida != null) {
+            esAnfitrion = bundleDatosPartida.getBoolean("ES_ANFITRION", false);
+            categoriasStr = bundleDatosPartida.getStringArrayList("CATEGORIAS");
+            tiempoStr = bundleDatosPartida.getInt("TIEMPO", 60);
+            jugadoresStr = bundleDatosPartida.getInt("JUGADORES", 4);
+            rondasStr = bundleDatosPartida.getInt("RONDAS", 5);
+            esCreador = bundleDatosPartida.getBoolean("CREADOR", false);
+            codigoSala = bundleDatosPartida.getString("CODIGO_SALA", "Esperando...");
+            idSala = bundleDatosPartida.getString("IDSALA");
+            esAnexo = bundleDatosPartida.getBoolean("ANEXO", false);
         }
 
 
@@ -88,6 +94,7 @@ public class LobbyFragment extends Fragment {
         tvValorDuracionLobby = view.findViewById(R.id.tvValorDuracionLobby);
         tvValorJugadoresLobby = view.findViewById(R.id.tvValorJugadoresLobby);
         tvValorRondasLobby = view.findViewById(R.id.tvValorRondasLobby);
+        btnComenzarPartida = view.findViewById(R.id.btnComenzarPartida);
 
         tvValorCategoriasLobby.setText(categoriasFormateadas);
         tvValorRondasLobby.setText(String.valueOf(rondasStr));
@@ -163,6 +170,17 @@ public class LobbyFragment extends Fragment {
             );
         });
 
+        btnComenzarPartida.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                PartidaFragment partida = new PartidaFragment();
+                partida.setArguments(bundleDatosPartida);
+
+                getParentFragmentManager().beginTransaction()
+                        .replace(R.id.sala_fragment_container, partida)
+                        .commit();
+            }
+        });
 
 
         btnToggleListo.setOnClickListener(v -> {
@@ -293,4 +311,5 @@ public class LobbyFragment extends Fragment {
             });
         }
     }
+
 }

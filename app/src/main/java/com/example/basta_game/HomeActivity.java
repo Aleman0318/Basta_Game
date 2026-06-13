@@ -12,6 +12,7 @@ import androidx.fragment.app.Fragment;
 import com.example.basta_game.Fragments.JugarFragment;
 import com.example.basta_game.Fragments.PerfilFragment;
 import com.example.basta_game.Fragments.RankingFragment;
+import com.example.basta_game.utils.NotificationHelper;
 import com.example.basta_game.utils.VerificacionesAuth;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 
@@ -39,6 +40,18 @@ public class HomeActivity extends AppCompatActivity {
             return insets;
 
         });
+
+        if(getIntent().getExtras() != null){
+            Boolean seDesconecto = getIntent().getExtras().getBoolean("DESCONEXION");
+
+            if(seDesconecto){
+                NotificationHelper.show(
+                        notificationHome,
+                        "Te has desconectado de la partida, volviendo a Home",
+                        NotificationHelper.WARNING
+                );
+            }
+        }
 
         notificationHome = findViewById(R.id.notificationHome);
         auth = FirebaseAuth.getInstance();

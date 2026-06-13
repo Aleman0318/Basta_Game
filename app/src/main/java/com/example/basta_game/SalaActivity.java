@@ -1,5 +1,6 @@
 package com.example.basta_game;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 import android.widget.Toast;
@@ -38,11 +39,14 @@ public class SalaActivity extends AppCompatActivity {
         });
 
 
+
         Bundle bundle = getIntent().getBundleExtra("DATOS_SALA");
 
         if(bundle != null){
             mostrarLobby(bundle);
         }
+
+
 
     }
 
@@ -141,6 +145,27 @@ public class SalaActivity extends AppCompatActivity {
                     }
                 });
             }
+        }
+    }
+
+    public void VerificarSiUsuarioSeDesconecto(FirebaseAuth auth, String idSala){
+        if(VerificacionesAuth.VerificarInicioSesion(auth)){
+           DatabaseReference nodoJugadorSala = FirebaseDatabase.getInstance().getReference("salas").child(idSala).child("jugadores").child(auth.getCurrentUser().getUid());
+           nodoJugadorSala.addValueEventListener(new ValueEventListener() {
+               @Override
+               public void onDataChange(@NonNull DataSnapshot snapshot) {
+                   if(!snapshot.exists()){
+                       Intent intent = new Intent(SalaActivity.this, HomeActivity.class);
+                       intent.putExtra("DESCONEXION", true);
+                       startActivity(intent);
+                   }
+               }
+
+               @Override
+               public void onCancelled(@NonNull DatabaseError error) {
+
+               }
+           });
         }
     }
 }
