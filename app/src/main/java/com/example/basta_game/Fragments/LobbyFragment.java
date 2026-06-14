@@ -57,6 +57,7 @@ public class LobbyFragment extends Fragment {
     private Button btnComenzarPartida;
 
     private Bundle bundleDatosPartida;
+    private Boolean yaEntroAPartida = false;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -70,6 +71,7 @@ public class LobbyFragment extends Fragment {
         String codigoSala = "";
         String idSala = "";
         Boolean esAnexo = false;
+
 
         bundleDatosPartida = getArguments();
 
@@ -329,21 +331,32 @@ public class LobbyFragment extends Fragment {
 
     public void ObtenerEstadoPartida(FirebaseAuth auth, String salaID){
         if(VerificacionesAuth.VerificarInicioSesion(auth)){
-            DatabaseReference nodoEstado = FirebaseDatabase.getInstance().getReference("salas").child(salaID);
+            DatabaseReference nodoEstado = FirebaseDatabase.getInstance().getReference("salas").child(salaID).child("estadoPartida");
             nodoEstado.addValueEventListener(new ValueEventListener() {
                 @Override
                 public void onDataChange(@NonNull DataSnapshot snapshot) {
-                    Sala sala = snapshot.getValue(Sala.class);
-                    if(sala != null && sala.getEstadoPartida().equals("En juego")){
-                        PartidaFragment partida = new PartidaFragment();
-                        partida.setArguments(bundleDatosPartida);
+                    if(yaEntroAPartida){
+                        Log.d("OBTENER","ENTRO AL RETURN DE YA ENTRO A PARTIDA");
+                        return;
+                    }else{
+                        Log.d("OBTENER","NO ENTRO AL RETURN DE YA ENTRO A PARTIDA");
+                        String estado = snapshot.getValue(String.class);
+                        Log.d("OBTENER","EL VALOR DE LA SALA ES: " + estado);
+                        if("En juego".equals(estado)){
+                            Log.d("OBTENER","ENTRO AL IF DE CREAR PARTIDA");
+                            PartidaFragment partida = new PartidaFragment();
+                            partida.setArguments(bundleDatosPartida);
 
-                        getParentFragmentManager().beginTransaction()
-                                .replace(R.id.sala_fragment_container, partida)
-                                .commit();
+                            getParentFragmentManager().beginTransaction()
+                                    .replace(R.id.sala_fragment_container, partida)
+                                    .commit();
+                            yaEntroAPartida = true;
+                            Log.d("OBTENER","SE CREO LA PARTIDA A PARTIDA");
+                        }else{
+                            Log.d("OBTENER","NO ENTRO AL IF DE CREAR PARTIDA PARTIDA");
+                        }
                     }
                 }
-
                 @Override
                 public void onCancelled(@NonNull DatabaseError error) {
 
