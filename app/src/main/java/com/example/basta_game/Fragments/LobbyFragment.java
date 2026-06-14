@@ -341,8 +341,6 @@ public class LobbyFragment extends Fragment {
                         getParentFragmentManager().beginTransaction()
                                 .replace(R.id.sala_fragment_container, partida)
                                 .commit();
-                    }else{
-                        ((SalaActivity) requireActivity()).mandarHomePorDesconexion();
                     }
                 }
 
