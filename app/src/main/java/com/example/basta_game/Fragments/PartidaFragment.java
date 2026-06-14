@@ -316,4 +316,5 @@ public class PartidaFragment extends Fragment {
         dialog.setCancelable(false);
         dialog.show();
     }
+
 }
