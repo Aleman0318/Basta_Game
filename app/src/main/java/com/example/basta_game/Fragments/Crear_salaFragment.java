@@ -30,6 +30,7 @@ import com.example.basta_game.models.CodigoSalaSearch;
 import com.example.basta_game.models.JugadorSala;
 import com.example.basta_game.models.Sala;
 import com.example.basta_game.models.Usuario;
+import com.example.basta_game.utils.Animations;
 import com.example.basta_game.utils.CodigoSala;
 import com.example.basta_game.utils.LetraSala;
 import com.example.basta_game.utils.NotificationHelper;
@@ -111,6 +112,7 @@ public class Crear_salaFragment extends Fragment {
         btnRegresar = view.findViewById(R.id.btnRegresar);
 
         notificationCrearSala = view.findViewById(R.id.notificationCrearSala);
+        Animations.animacionAparicion(btnCrearSalaFinal);
     }
 
     private void configurarCategorias() {

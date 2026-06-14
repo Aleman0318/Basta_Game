@@ -185,7 +185,6 @@ public class LobbyFragment extends Fragment {
         });
 
         btnComenzarPartida.setOnClickListener(v -> {
-            Animations.animacionLanzada(btnComenzarPartida);
             if(VerificacionesAuth.VerificarInicioSesion(auth)){
                 DatabaseReference nodoJugadores = FirebaseDatabase.getInstance().getReference("salas").child(idSalaMetodo).child("jugadores");
                 nodoJugadores.addListenerForSingleValueEvent(new ValueEventListener() {
@@ -231,7 +230,6 @@ public class LobbyFragment extends Fragment {
 
 
         btnToggleListo.setOnClickListener(v -> {
-            Animations.animacionLanzada(btnToggleListo);
             estoyListo = !estoyListo;
             if (estoyListo) {
                 if(auth != null && VerificacionesAuth.VerificarInicioSesion(auth)){
