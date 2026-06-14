@@ -86,6 +86,7 @@ public class PartidaFragment extends Fragment {
         auth = FirebaseAuth.getInstance();
 
         obtenerArgumentos();
+        ObtenerJugadoresYLlenarPartida(idSala);
         CambiarEstadoPartida(auth, idSala);
         inicializarVistas(view);
         configurarFirebase();
@@ -132,28 +133,20 @@ public class PartidaFragment extends Fragment {
 
     private void cargarDatosIniciales() {
         txtCodigoSala.setText("Sala " + codigoSala);
-        // 1. CONFIGURAR JUGADORES (Arriba)
-        rvJugadoresPartida.setLayoutManager(new LinearLayoutManager(getContext(), LinearLayoutManager.HORIZONTAL, false));
-        ObtenerJugadoresYLlenarPartida(idSala);
-        /*List<Jugador> listaJugadores = new ArrayList<>();
-        listaJugadores.add(new Jugador("Marlon", false));
-        listaJugadores.add(new Jugador("Diego", true));
-        listaJugadores.add(new Jugador("Diana", true));
-        listaJugadores.add(new Jugador("Steven", true));
-        rvJugadoresPartida.setAdapter(new JugadorPartidaAdapter(listaJugadores));*/
 
-        // 2. CONFIGURAR CATEGORÍAS (Centro - 1 Columna con Scroll)
+        rvJugadoresPartida.setLayoutManager(new LinearLayoutManager(getContext(), LinearLayoutManager.HORIZONTAL, false));
+
+
         rvCategoriasJuego.setLayoutManager(new LinearLayoutManager(getContext()));
         List<Categoria> listaCategorias = new ArrayList<>();
 
-        // Verificamos si nos pasaron categorías desde el Lobby
+
         if (listaNombresCategorias != null && !listaNombresCategorias.isEmpty()) {
             for (String nombreCat : listaNombresCategorias) {
                 int iconoId = obtenerIconoParaCategoria(nombreCat);
                 listaCategorias.add(new Categoria(nombreCat, iconoId));
             }
         } else {
-            // Un fallback por si entras a la pantalla sin datos (solo para pruebas)
             listaCategorias.add(new Categoria("Sin categorías", R.drawable.outline_person_24));
         }
         rvCategoriasJuego.setAdapter(new CategoriaPartidaAdapter(listaCategorias));
@@ -161,8 +154,7 @@ public class PartidaFragment extends Fragment {
 
     private void configurarBotones() {
         btnBasta.setOnClickListener(v -> {
-            // LÓGICA DE DAIGO: Lanzar el modal del carrusel con datos de prueba
-            List<String> categoriasPrueba = new ArrayList<>(); //cat de prueba
+            List<String> categoriasPrueba = new ArrayList<>();
             categoriasPrueba.add("Fruta");
             categoriasPrueba.add("Animal");
             categoriasPrueba.add("Color");
