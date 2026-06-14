@@ -33,6 +33,7 @@ import com.example.basta_game.models.Usuario;
 import com.example.basta_game.utils.CodigoSala;
 import com.example.basta_game.utils.LetraSala;
 import com.example.basta_game.utils.NotificationHelper;
+import com.example.basta_game.utils.Sounds;
 import com.example.basta_game.utils.VerificacionesAuth;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DataSnapshot;
@@ -368,6 +369,7 @@ public class Crear_salaFragment extends Fragment {
                                    "¡No se pudo crear la sala!",
                                    NotificationHelper.ERROR
                            );
+                           Sounds.playNotificaciones();
                        }
                     });
                 }
@@ -389,6 +391,7 @@ public class Crear_salaFragment extends Fragment {
         "¡Debes seleccionar al menos una categoría!",
                  NotificationHelper.WARNING
             );
+            Sounds.playNotificaciones();
             return false;
         }
 

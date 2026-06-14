@@ -21,6 +21,7 @@ import androidx.appcompat.widget.AppCompatButton;
 import com.bumptech.glide.Glide;
 import com.example.basta_game.Adapters.AvatarAdapter;
 import com.example.basta_game.models.Avatar;
+import com.example.basta_game.utils.Animations;
 import com.example.basta_game.utils.NotificationHelper;
 import com.example.basta_game.utils.Sounds;
 import com.google.android.material.card.MaterialCardView;
@@ -61,6 +62,10 @@ public class PerfilFragment extends Fragment {
         tvPartidasGanadas = view.findViewById(R.id.tvPartidasGanadas);
         tvPromedioPuntos = view.findViewById(R.id.tvPromedioPuntos);
         perfilNotification = view.findViewById(R.id.perfilNotification);
+
+
+    //    Animations.animacionLanzada(tvCorreo);
+     //   Animations.animacionZoom(tvUsername);
 
         inicializarOpcionesAvatares();
         cargarPerfilUsuario();
@@ -147,7 +152,6 @@ public class PerfilFragment extends Fragment {
             });
         }
     }
-
     private void guardarAvatarEnFirebase(Dialog dialog) {
         if (FirebaseAuth.getInstance().getCurrentUser() == null || getContext() == null) return;
 
