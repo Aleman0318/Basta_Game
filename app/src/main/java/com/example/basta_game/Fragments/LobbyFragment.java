@@ -39,6 +39,7 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
+import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -90,7 +91,6 @@ public class LobbyFragment extends Fragment {
 
             ObtenerEstadoPartida(auth, idSala);
         }
-
 
 
         String tiempoFormateado = String.format("%d:%02d min", tiempoStr / 60, tiempoStr % 60);
@@ -187,12 +187,45 @@ public class LobbyFragment extends Fragment {
         btnComenzarPartida.setOnClickListener(v -> {
             Animations.animacionLanzada(btnComenzarPartida);
             if(VerificacionesAuth.VerificarInicioSesion(auth)){
-                DatabaseReference nodoEstado = FirebaseDatabase.getInstance()
-                        .getReference("salas")
-                        .child(idSalaMetodo)
-                        .child("estadoPartida");
+                DatabaseReference nodoJugadores = FirebaseDatabase.getInstance().getReference("salas").child(idSalaMetodo).child("jugadores");
+                nodoJugadores.addListenerForSingleValueEvent(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(@NonNull DataSnapshot snapshot) {
+                        int contadorListos = 0;
+                        ArrayList<JugadorSala> jugadores = new ArrayList<>();
+                        for (DataSnapshot hijo: snapshot.getChildren()) {
+                            JugadorSala player = hijo.getValue(JugadorSala.class);
+                            if(hijo.exists()){
+                                if(player.isEstaListo()){
+                                    jugadores.add(player);
+                                }
+                                contadorListos ++;
+                            }
+                        }
 
-                nodoEstado.setValue("En juego");
+                        if(jugadores.size() < contadorListos){
+                            NotificationHelper.show(
+                                    notificationLobby,
+                                    "Todos los jugadores deben estar listos",
+                                    NotificationHelper.ERROR
+                            );
+                        }else{
+                            //abrimos la partida
+                            DatabaseReference nodoEstado = FirebaseDatabase.getInstance()
+                                    .getReference("salas")
+                                    .child(idSalaMetodo)
+                                    .child("estadoPartida");
+
+                            nodoEstado.setValue("En juego");
+                        }
+                    }
+
+                    @Override
+                    public void onCancelled(@NonNull DatabaseError error) {
+
+                    }
+                });
+
             }
         });
 

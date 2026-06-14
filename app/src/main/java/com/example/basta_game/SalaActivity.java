@@ -24,6 +24,7 @@ public class SalaActivity extends AppCompatActivity {
 
     private FirebaseAuth auth;
     private String idSala;
+    private boolean esHost;
     private DatabaseReference nodoJugadorSala;
     private ValueEventListener listenerDesconexion;
 
@@ -46,6 +47,7 @@ public class SalaActivity extends AppCompatActivity {
         if (bundle != null) {
             idSala = bundle.getString("IDSALA", "");
             mostrarLobby(bundle);
+            esHost = bundle.getBoolean("ES_ANFITRION");
         }
 
         if (VerificacionesAuth.VerificarInicioSesion(auth) && idSala != null && !idSala.isEmpty()) {
@@ -58,6 +60,8 @@ public class SalaActivity extends AppCompatActivity {
                     .child(uid);
 
             VerificarSiUsuarioSeDesconecto();
+        }else{
+            mandarHomePorDesconexion();
         }
     }
 
@@ -143,10 +147,25 @@ public class SalaActivity extends AppCompatActivity {
     }
 
     public void mandarHomePorDesconexion() {
-        Intent intent = new Intent(SalaActivity.this, HomeActivity.class);
-        intent.putExtra("DESCONEXION", true);
-        startActivity(intent);
-        finish();
+        if(esHost && VerificacionesAuth.VerificarInicioSesion(auth)){
+            DatabaseReference nodoSalaEliminada = FirebaseDatabase.getInstance().getReference("salas").child(idSala);
+            nodoSalaEliminada.removeValue().addOnCompleteListener(task -> {
+               if(task.isSuccessful()){
+                   Intent intent = new Intent(SalaActivity.this, HomeActivity.class);
+                   intent.putExtra("DESCONEXION", false);
+                   intent.putExtra("CREADOR_DESCONEXION", true);
+                   startActivity(intent);
+                   finish();
+               }
+            });
+        }else{
+            Intent intent = new Intent(SalaActivity.this, HomeActivity.class);
+            intent.putExtra("DESCONEXION", true);
+            intent.putExtra("CREADOR_DESCONEXION", false);
+            startActivity(intent);
+            finish();
+        }
+
     }
 
     @Override
