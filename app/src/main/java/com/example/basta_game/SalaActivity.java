@@ -77,7 +77,7 @@ public class SalaActivity extends AppCompatActivity {
     protected void onPause() {
         super.onPause();
 
-        Log.d("ONPAUSE", "Entró al onPause");
+        Log.d("ONRESUME", "Entró al onPause");
 
         if (VerificacionesAuth.VerificarInicioSesion(auth) && nodoJugadorSala != null && !isFinishing()) {
             nodoJugadorSala.addListenerForSingleValueEvent(new ValueEventListener() {
