@@ -159,11 +159,16 @@ public class SalaActivity extends AppCompatActivity {
                }
             });
         }else{
-            Intent intent = new Intent(SalaActivity.this, HomeActivity.class);
-            intent.putExtra("DESCONEXION", true);
-            intent.putExtra("CREADOR_DESCONEXION", false);
-            startActivity(intent);
-            finish();
+            DatabaseReference nodoSalaEliminada = FirebaseDatabase.getInstance().getReference("salas").child(idSala);
+            nodoSalaEliminada.removeValue().addOnCompleteListener(task -> {
+                if(task.isSuccessful()){
+                    Intent intent = new Intent(SalaActivity.this, HomeActivity.class);
+                    intent.putExtra("DESCONEXION", true);
+                    intent.putExtra("CREADOR_DESCONEXION", false);
+                    startActivity(intent);
+                    finish();
+                }
+            });
         }
 
     }
