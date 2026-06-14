@@ -19,7 +19,6 @@ import com.example.basta_game.models.Sala;
 import com.example.basta_game.models.Usuario;
 import com.example.basta_game.utils.Animations;
 import com.example.basta_game.utils.NotificationHelper;
-import com.example.basta_game.utils.Sounds;
 import com.example.basta_game.utils.VerificacionesAuth;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DataSnapshot;
@@ -157,24 +156,12 @@ public class Unirse_salaFragment extends Fragment {
                                                         @Override
                                                         public void onCancelled(@NonNull DatabaseError error) {
 
-                                                                }
-                                                            });
-                                                        } else {
-                                                            NotificationHelper.show(
-                                                                    unirseSalaNotification,
-                                                                    "La sala está llena",
-                                                                    NotificationHelper.ERROR
-                                                            );
-                                                            Sounds.playNotificaciones();
-
-                                                        }
-                                                    }
                                                         }
                                                     });
                                                 } else {
                                                     NotificationHelper.show(
                                                             unirseSalaNotification,
-                                                            "La sala está llena",
+                                                            "La sala estÃ¡ llena",
                                                             NotificationHelper.ERROR
                                                     );
                                                 }
@@ -192,18 +179,6 @@ public class Unirse_salaFragment extends Fragment {
 
                                     }
                                 });
-                                            }
-                                        });
-                                    }else{
-                                        NotificationHelper.show(
-                                                unirseSalaNotification,
-                                                "La sala requerida no existe",
-                                                NotificationHelper.ERROR
-                                        );
-                                        Sounds.playNotificaciones();
-                                    }
-
-                                }
                             }
 
                         }

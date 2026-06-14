@@ -155,10 +155,7 @@ public class PartidaFragment extends Fragment {
 
     private void configurarBotones() {
         btnBasta.setOnClickListener(v -> {
-            List<String> categoriasPrueba = new ArrayList<>();
-
             Animations.animacionLanzada(btnBasta);
-
             // LÓGICA DE DAIGO: Lanzar el modal del carrusel con datos de prueba
             List<String> categoriasPrueba = new ArrayList<>(); //cat de prueba
             categoriasPrueba.add("Fruta");
