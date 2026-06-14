@@ -241,6 +241,8 @@ public class PartidaFragment extends Fragment {
         }
     }
 
+
+
     public void ObtenerEstadoPartida(FirebaseAuth auth, String salaID){
         if(VerificacionesAuth.VerificarInicioSesion(auth)){
             DatabaseReference nodoEstado = FirebaseDatabase.getInstance().getReference("salas").child(salaID);
