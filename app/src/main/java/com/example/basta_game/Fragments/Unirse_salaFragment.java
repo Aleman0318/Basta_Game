@@ -34,6 +34,7 @@ public class Unirse_salaFragment extends Fragment {
     private EditText etCodigoSala;
     private FirebaseAuth auth;
 
+    private CodigoSalaSearch codigoElegidoFiltrado;
     private View unirseSalaNotification;
 
     @Override
@@ -69,93 +70,101 @@ public class Unirse_salaFragment extends Fragment {
                         @Override
                         public void onDataChange(@NonNull DataSnapshot snapshot) {
                             String codigoSalaUsuario = etCodigoSala.getText().toString();
+                            boolean encontrado = false;
                             for (DataSnapshot hijo: snapshot.getChildren()) {
                                 if(hijo!=null){
                                     CodigoSalaSearch codigoElegido = hijo.getValue(CodigoSalaSearch.class);
                                     if(codigoElegido.getCodigoSala().equals(codigoSalaUsuario) && codigoElegido.getEstaActiva()){
-                                        DatabaseReference nodoSala = FirebaseDatabase.getInstance().getReference("salas").child(codigoElegido.getIdSala());
-                                        nodoSala.addListenerForSingleValueEvent(new ValueEventListener() {
+                                        encontrado = true;
+                                        codigoElegidoFiltrado = codigoElegido;
+
+                                    }
+                                }
+                            }
+
+                            if(!encontrado){
+                                NotificationHelper.show(
+                                        unirseSalaNotification,
+                                        "No se encontro la sala requerida",
+                                        NotificationHelper.ERROR
+                                );
+                            }else{
+                                DatabaseReference nodoSala = FirebaseDatabase.getInstance().getReference("salas").child(codigoElegidoFiltrado.getIdSala());
+                                nodoSala.addListenerForSingleValueEvent(new ValueEventListener() {
+                                    @Override
+                                    public void onDataChange(@NonNull DataSnapshot snapshot) {
+                                        Sala sala = snapshot.getValue(Sala.class);
+
+                                        DatabaseReference nodoJugadoresSala = FirebaseDatabase.getInstance().getReference("salas").child(codigoElegidoFiltrado.getIdSala()).child("jugadores");
+                                        nodoJugadoresSala.addListenerForSingleValueEvent(new ValueEventListener() {
                                             @Override
                                             public void onDataChange(@NonNull DataSnapshot snapshot) {
-                                                Sala sala = snapshot.getValue(Sala.class);
+                                                ArrayList<JugadorSala> jugadoresEnSala = new ArrayList<>();
 
-                                                DatabaseReference nodoJugadoresSala = FirebaseDatabase.getInstance().getReference("salas").child(codigoElegido.getIdSala()).child("jugadores");
-                                                nodoJugadoresSala.addListenerForSingleValueEvent(new ValueEventListener() {
-                                                    @Override
-                                                    public void onDataChange(@NonNull DataSnapshot snapshot) {
-                                                        ArrayList<JugadorSala> jugadoresEnSala = new ArrayList<>();
+                                                for (DataSnapshot jugadorSnapshot : snapshot.getChildren()) {
+                                                    JugadorSala jugadorSala = jugadorSnapshot.getValue(JugadorSala.class);
 
-                                                        for (DataSnapshot jugadorSnapshot : snapshot.getChildren()) {
-                                                            JugadorSala jugadorSala = jugadorSnapshot.getValue(JugadorSala.class);
+                                                    if (jugadorSala != null) {
+                                                        jugadoresEnSala.add(jugadorSala);
+                                                    }
+                                                }
 
-                                                            if (jugadorSala != null) {
-                                                                jugadoresEnSala.add(jugadorSala);
-                                                            }
-                                                        }
+                                                if (jugadoresEnSala.size() < sala.getMaxJugadores()) {
+                                                    String uidUsuario = auth.getCurrentUser().getUid();
+                                                    DatabaseReference nodoUsuarios = FirebaseDatabase.getInstance().getReference("usuarios").child(uidUsuario);
+                                                    nodoUsuarios.addListenerForSingleValueEvent(new ValueEventListener() {
+                                                        @Override
+                                                        public void onDataChange(@NonNull DataSnapshot snapshot) {
+                                                            Usuario user = snapshot.getValue(Usuario.class);
 
-                                                        if (jugadoresEnSala.size() < sala.getMaxJugadores()) {
-                                                            String uidUsuario = auth.getCurrentUser().getUid();
-                                                            DatabaseReference nodoUsuarios = FirebaseDatabase.getInstance().getReference("usuarios").child(uidUsuario);
-                                                            nodoUsuarios.addListenerForSingleValueEvent(new ValueEventListener() {
-                                                                @Override
-                                                                public void onDataChange(@NonNull DataSnapshot snapshot) {
-                                                                    Usuario user = snapshot.getValue(Usuario.class);
+                                                            JugadorSala jugador = new JugadorSala(
+                                                                    user.getUid(),
+                                                                    user.getNombre(),
+                                                                    0,
+                                                                    false,
+                                                                    false,
+                                                                    true,
+                                                                    user.getFotoPerfilUrl()
+                                                            );
 
-                                                                    JugadorSala jugador = new JugadorSala(
-                                                                            user.getUid(),
-                                                                            user.getNombre(),
-                                                                            0,
-                                                                            false,
-                                                                            false,
-                                                                            true,
-                                                                            user.getFotoPerfilUrl()
-                                                                    );
+                                                            DatabaseReference nodoJugadorSala = FirebaseDatabase.getInstance().getReference("salas").child(codigoElegidoFiltrado.getIdSala()).child("jugadores").child(user.getUid());
+                                                            nodoJugadorSala.setValue(jugador).addOnCompleteListener(taskJugadorSala -> {
+                                                                if(taskJugadorSala.isSuccessful()){
 
-                                                                    DatabaseReference nodoJugadorSala = FirebaseDatabase.getInstance().getReference("salas").child(codigoElegido.getIdSala()).child("jugadores").child(user.getUid());
-                                                                    nodoJugadorSala.setValue(jugador).addOnCompleteListener(taskJugadorSala -> {
-                                                                        if(taskJugadorSala.isSuccessful()){
+                                                                    nodoJugadorSala.onDisconnect().removeValue();
 
-                                                                            nodoJugadorSala.onDisconnect().removeValue();
+                                                                    Intent intent = new Intent(requireContext(), SalaActivity.class);
+                                                                    Bundle bundle = new Bundle();
 
-                                                                            Intent intent = new Intent(requireContext(), SalaActivity.class);
-                                                                            Bundle bundle = new Bundle();
+                                                                    bundle.putBoolean("ES_ANFITRION", false);
+                                                                    bundle.putStringArrayList("CATEGORIAS", sala.getCategoriasActivas());
+                                                                    bundle.putInt("TIEMPO", sala.getTiempoRonda());
+                                                                    bundle.putInt("JUGADORES", sala.getMaxJugadores());
+                                                                    bundle.putInt("RONDAS", sala.getCantidadRondas());
+                                                                    bundle.putBoolean("CREADOR", false);
+                                                                    bundle.putBoolean("ANEXO", true);
+                                                                    bundle.putString("CODIGO_SALA", sala.getCodigoSala());
+                                                                    bundle.putString("IDSALA", sala.getIdSala());
 
-                                                                            bundle.putBoolean("ES_ANFITRION", false);
-                                                                            bundle.putStringArrayList("CATEGORIAS", sala.getCategoriasActivas());
-                                                                            bundle.putInt("TIEMPO", sala.getTiempoRonda());
-                                                                            bundle.putInt("JUGADORES", sala.getMaxJugadores());
-                                                                            bundle.putInt("RONDAS", sala.getCantidadRondas());
-                                                                            bundle.putBoolean("CREADOR", false);
-                                                                            bundle.putBoolean("ANEXO", true);
-                                                                            bundle.putString("CODIGO_SALA", sala.getCodigoSala());
-                                                                            bundle.putString("IDSALA", sala.getIdSala());
+                                                                    intent.putExtra("DATOS_SALA", bundle);
 
-                                                                            intent.putExtra("DATOS_SALA", bundle);
-
-                                                                            startActivity(intent);
-                                                                        }
-                                                                    });
-                                                                }
-
-                                                                @Override
-                                                                public void onCancelled(@NonNull DatabaseError error) {
-
+                                                                    startActivity(intent);
                                                                 }
                                                             });
-                                                        } else {
-                                                            NotificationHelper.show(
-                                                                    unirseSalaNotification,
-                                                                    "La sala está llena",
-                                                                    NotificationHelper.ERROR
-                                                            );
                                                         }
-                                                    }
 
-                                                    @Override
-                                                    public void onCancelled(@NonNull DatabaseError error) {
+                                                        @Override
+                                                        public void onCancelled(@NonNull DatabaseError error) {
 
-                                                    }
-                                                });
+                                                        }
+                                                    });
+                                                } else {
+                                                    NotificationHelper.show(
+                                                            unirseSalaNotification,
+                                                            "La sala está llena",
+                                                            NotificationHelper.ERROR
+                                                    );
+                                                }
                                             }
 
                                             @Override
@@ -163,15 +172,13 @@ public class Unirse_salaFragment extends Fragment {
 
                                             }
                                         });
-                                    }else{
-                                        NotificationHelper.show(
-                                                unirseSalaNotification,
-                                                "La sala requerida no existe",
-                                                NotificationHelper.ERROR
-                                        );
                                     }
 
-                                }
+                                    @Override
+                                    public void onCancelled(@NonNull DatabaseError error) {
+
+                                    }
+                                });
                             }
 
                         }
