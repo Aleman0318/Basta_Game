@@ -91,7 +91,6 @@ public class LobbyFragment extends Fragment {
         }
 
 
-
         String tiempoFormateado = String.format("%d:%02d min", tiempoStr / 60, tiempoStr % 60);
 
         String categoriasFormateadas = android.text.TextUtils.join(", ", categoriasStr);

@@ -47,11 +47,18 @@ public class HomeActivity extends AppCompatActivity {
         auth = FirebaseAuth.getInstance();
 
         if (getIntent().getExtras() != null) {
-            Boolean seDesconecto = getIntent().getExtras().getBoolean("DESCONEXION");
-            if (seDesconecto) {
+            boolean seDesconecto = getIntent().getExtras().getBoolean("DESCONEXION");
+            boolean seDesconectoSiendoHost = getIntent().getExtras().getBoolean("CREADOR_DESCONEXION");
+            if (seDesconecto && !seDesconectoSiendoHost) {
                 NotificationHelper.show(
                         notificationHome,
                         "Has abandonado la partida",
+                        NotificationHelper.WARNING
+                );
+            }else if(seDesconectoSiendoHost && !seDesconecto){
+                NotificationHelper.show(
+                        notificationHome,
+                        "Se ha eliminado la sala, volviendo a home",
                         NotificationHelper.WARNING
                 );
             }
