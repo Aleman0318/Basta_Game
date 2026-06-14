@@ -103,26 +103,27 @@ public class SalaActivity extends AppCompatActivity {
     @Override
     protected void onResume() {
         super.onResume();
+        if(!salida){
+            Log.d("ONRESUME", "Entró al onResume");
 
-        Log.d("ONRESUME", "Entró al onResume");
-
-        if (VerificacionesAuth.VerificarInicioSesion(auth) && nodoJugadorSala != null) {
-            nodoJugadorSala.addListenerForSingleValueEvent(new ValueEventListener() {
-                @Override
-                public void onDataChange(@NonNull DataSnapshot snapshot) {
-                    if (snapshot.exists()) {
-                        nodoJugadorSala.child("estaConectado").setValue(true)
-                                .addOnSuccessListener(unused -> Log.d("ONRESUME", "Jugador marcado como conectado"));
-                    } else {
-                        mandarHomePorDesconexion();
+            if (VerificacionesAuth.VerificarInicioSesion(auth) && nodoJugadorSala != null) {
+                nodoJugadorSala.addListenerForSingleValueEvent(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(@NonNull DataSnapshot snapshot) {
+                        if (snapshot.exists()) {
+                            nodoJugadorSala.child("estaConectado").setValue(true)
+                                    .addOnSuccessListener(unused -> Log.d("ONRESUME", "Jugador marcado como conectado"));
+                        } else {
+                            mandarHomePorDesconexion();
+                        }
                     }
-                }
 
-                @Override
-                public void onCancelled(@NonNull DatabaseError error) {
-                    Log.d("ONRESUME", "Error: " + error.getMessage());
-                }
-            });
+                    @Override
+                    public void onCancelled(@NonNull DatabaseError error) {
+                        Log.d("ONRESUME", "Error: " + error.getMessage());
+                    }
+                });
+            }
         }
     }
 
@@ -148,32 +149,34 @@ public class SalaActivity extends AppCompatActivity {
     }
 
     public void mandarHomePorDesconexion() {
-        if(esHost && VerificacionesAuth.VerificarInicioSesion(auth)){
-            DatabaseReference nodoSalaEliminada = FirebaseDatabase.getInstance().getReference("salas").child(idSala);
-            nodoSalaEliminada.removeValue().addOnCompleteListener(task -> {
-               if(task.isSuccessful()){
-                   salida = true;
-                   Intent intent = new Intent(SalaActivity.this, HomeActivity.class);
-                   intent.putExtra("DESCONEXION", false);
-                   intent.putExtra("CREADOR_DESCONEXION", true);
-                   startActivity(intent);
-                   finish();
-               }
-            });
-        }else{
-            String uidUsuarioEliminar = auth.getCurrentUser().getUid();
-            DatabaseReference nodoSalaEliminada = FirebaseDatabase.getInstance().getReference("salas").child(idSala).child("jugadores").child(uidUsuarioEliminar);
-            nodoSalaEliminada.removeValue().addOnCompleteListener(task -> {
-                if(task.isSuccessful()){
-                    salida = true;
-                    Intent intent = new Intent(SalaActivity.this, HomeActivity.class);
-                    intent.putExtra("DESCONEXION", true);
-                    intent.putExtra("CREADOR_DESCONEXION", false);
-                    startActivity(intent);
-                    finish();
-                }
-            });
-        }
+       if(!salida){
+           if(esHost && VerificacionesAuth.VerificarInicioSesion(auth)){
+               DatabaseReference nodoSalaEliminada = FirebaseDatabase.getInstance().getReference("salas").child(idSala);
+               nodoSalaEliminada.removeValue().addOnCompleteListener(task -> {
+                   if(task.isSuccessful()){
+                       salida = true;
+                       Intent intent = new Intent(SalaActivity.this, HomeActivity.class);
+                       intent.putExtra("DESCONEXION", false);
+                       intent.putExtra("CREADOR_DESCONEXION", true);
+                       startActivity(intent);
+                       finish();
+                   }
+               });
+           }else{
+               String uidUsuarioEliminar = auth.getCurrentUser().getUid();
+               DatabaseReference nodoSalaEliminada = FirebaseDatabase.getInstance().getReference("salas").child(idSala).child("jugadores").child(uidUsuarioEliminar);
+               nodoSalaEliminada.removeValue().addOnCompleteListener(task -> {
+                   if(task.isSuccessful()){
+                       salida = true;
+                       Intent intent = new Intent(SalaActivity.this, HomeActivity.class);
+                       intent.putExtra("DESCONEXION", true);
+                       intent.putExtra("CREADOR_DESCONEXION", false);
+                       startActivity(intent);
+                       finish();
+                   }
+               });
+           }
+       }
     }
 
     @Override
