@@ -22,6 +22,7 @@ import com.bumptech.glide.Glide;
 import com.example.basta_game.Adapters.AvatarAdapter;
 import com.example.basta_game.models.Avatar;
 import com.example.basta_game.utils.NotificationHelper;
+import com.example.basta_game.utils.Sounds;
 import com.google.android.material.card.MaterialCardView;
 import com.example.basta_game.R;
 import com.google.firebase.auth.FirebaseAuth;
@@ -141,6 +142,7 @@ public class PerfilFragment extends Fragment {
                             "Error al enlazar: " + avatar.getNombreArchivo(),
                             NotificationHelper.SUCCESS
                     );
+                    Sounds.playNotificaciones();
                 }
             });
         }
@@ -167,7 +169,7 @@ public class PerfilFragment extends Fragment {
                             "¡Avatar actualizado con exito!",
                             NotificationHelper.SUCCESS
                     );
-
+                    Sounds.playNotificaciones();
 
                     Glide.with(PerfilFragment.this)
                             .load(urlDescarga)
@@ -181,6 +183,7 @@ public class PerfilFragment extends Fragment {
                             "Error al guardar avatar.",
                             NotificationHelper.ERROR
                     );
+                    Sounds.playNotificaciones();
                     dialog.dismiss();
                 });
     }
