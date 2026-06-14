@@ -26,6 +26,7 @@ import com.example.basta_game.R;
 import com.example.basta_game.Adapters.JugadorSalaAdapter;
 import com.example.basta_game.models.JugadorSala;
 import com.example.basta_game.models.Sala;
+import com.example.basta_game.utils.Animations;
 import com.example.basta_game.utils.CustomDialogHelper;
 import com.example.basta_game.utils.NotificationHelper;
 import com.example.basta_game.utils.Sounds;
@@ -124,6 +125,9 @@ public class LobbyFragment extends Fragment {
 
         txtCodigoSala.setText(codigoSala);
 
+        Animations.animacionAparicion(btnComenzarPartida);
+        Animations.animacionAparicion(btnToggleListo);
+
         //confirmamos valor cuando cargamos la pantalla
         if (estoyListo) {
             btnToggleListo.setText("NO ESTOY LISTO");
@@ -181,6 +185,7 @@ public class LobbyFragment extends Fragment {
         });
 
         btnComenzarPartida.setOnClickListener(v -> {
+            Animations.animacionLanzada(btnComenzarPartida);
             if(VerificacionesAuth.VerificarInicioSesion(auth)){
                 DatabaseReference nodoEstado = FirebaseDatabase.getInstance()
                         .getReference("salas")
@@ -193,6 +198,7 @@ public class LobbyFragment extends Fragment {
 
 
         btnToggleListo.setOnClickListener(v -> {
+            Animations.animacionLanzada(btnToggleListo);
             estoyListo = !estoyListo;
             if (estoyListo) {
                 if(auth != null && VerificacionesAuth.VerificarInicioSesion(auth)){

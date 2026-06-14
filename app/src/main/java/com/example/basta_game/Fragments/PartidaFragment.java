@@ -28,6 +28,7 @@ import com.example.basta_game.models.Jugador;
 import com.example.basta_game.R;
 import com.example.basta_game.models.JugadorSala;
 import com.example.basta_game.models.Sala;
+import com.example.basta_game.utils.Animations;
 import com.example.basta_game.utils.CustomDialogHelper;
 import com.example.basta_game.utils.VerificacionesAuth;
 import com.google.android.material.button.MaterialButton;
@@ -161,6 +162,9 @@ public class PartidaFragment extends Fragment {
 
     private void configurarBotones() {
         btnBasta.setOnClickListener(v -> {
+
+            Animations.animacionLanzada(btnBasta);
+
             // LÓGICA DE DAIGO: Lanzar el modal del carrusel con datos de prueba
             List<String> categoriasPrueba = new ArrayList<>(); //cat de prueba
             categoriasPrueba.add("Fruta");

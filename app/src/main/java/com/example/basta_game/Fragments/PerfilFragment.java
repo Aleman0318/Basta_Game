@@ -24,6 +24,7 @@ import com.example.basta_game.models.Avatar;
 import com.example.basta_game.utils.Animations;
 import com.example.basta_game.utils.NotificationHelper;
 import com.example.basta_game.utils.Sounds;
+import com.google.android.material.button.MaterialButton;
 import com.google.android.material.card.MaterialCardView;
 import com.example.basta_game.R;
 import com.google.firebase.auth.FirebaseAuth;
@@ -62,10 +63,16 @@ public class PerfilFragment extends Fragment {
         tvPartidasGanadas = view.findViewById(R.id.tvPartidasGanadas);
         tvPromedioPuntos = view.findViewById(R.id.tvPromedioPuntos);
         perfilNotification = view.findViewById(R.id.perfilNotification);
+        MaterialButton btnCerrarSesion = view.findViewById(R.id.btnCerrarSesion);
 
 
-    //    Animations.animacionLanzada(tvCorreo);
-     //   Animations.animacionZoom(tvUsername);
+
+        Animations.animacionAparicion(tvCorreo);
+        Animations.animacionAparicion(tvUsername);
+        Animations.animacionAparicion(tvPartidasGanadas);
+        Animations.animacionAparicion(tvPartidasJugadas);
+        Animations.animacionAparicion(tvPromedioPuntos);
+        Animations.animacionAparicion(btnCerrarSesion);
 
         inicializarOpcionesAvatares();
         cargarPerfilUsuario();

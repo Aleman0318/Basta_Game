@@ -5,6 +5,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:padding="10dp"
     android:background="@color/colorTransparente">
 
     <include
@@ -17,7 +18,6 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent" />
 
-    <!-- HEADER -->
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/headerLobby"
         android:layout_width="0dp"
@@ -69,7 +69,6 @@
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 
-    <!-- CONTENIDO -->
     <ScrollView
         android:id="@+id/scrollLobby"
         android:layout_width="0dp"
@@ -90,7 +89,6 @@
             android:paddingTop="10dp"
             android:paddingBottom="18dp">
 
-            <!-- ID SALA -->
             <TextView
                 android:id="@+id/tvLabelSala"
                 android:layout_width="match_parent"
@@ -127,7 +125,6 @@
 
             </com.google.android.material.card.MaterialCardView>
 
-            <!-- REGLAS -->
             <com.google.android.material.card.MaterialCardView
                 android:id="@+id/cardReglasLobby"
                 android:layout_width="match_parent"
@@ -166,7 +163,6 @@
                         android:layout_marginBottom="14dp"
                         android:background="@color/colorPrimary" />
 
-                    <!-- CATEGORÍAS -->
                     <LinearLayout
                         android:id="@+id/layoutReglaCategorias"
                         android:layout_width="match_parent"
@@ -208,7 +204,6 @@
 
                     </LinearLayout>
 
-                    <!-- RONDAS -->
                     <LinearLayout
                         android:id="@+id/layoutReglaRondas"
                         android:layout_width="match_parent"
@@ -247,7 +242,6 @@
 
                     </LinearLayout>
 
-                    <!-- DURACIÓN -->
                     <LinearLayout
                         android:id="@+id/layoutReglaDuracion"
                         android:layout_width="match_parent"
@@ -287,7 +281,6 @@
 
                     </LinearLayout>
 
-                    <!-- JUGADORES -->
                     <LinearLayout
                         android:id="@+id/layoutReglaJugadores"
                         android:layout_width="match_parent"
@@ -330,7 +323,6 @@
 
             </com.google.android.material.card.MaterialCardView>
 
-            <!-- JUGADORES CONECTADOS -->
             <TextView
                 android:id="@+id/tvTituloJugadoresConectados"
                 android:layout_width="match_parent"
@@ -338,14 +330,16 @@
                 android:layout_marginTop="26dp"
                 android:fontFamily="@font/lilitaone_regular"
                 android:text="Jugadores conectados"
+                android:gravity="center"
                 android:textColor="@color/colorTextoP"
                 android:textSize="22sp" />
 
             <View
-                android:layout_width="190dp"
+                android:layout_width="150dp"
                 android:layout_height="2dp"
+                android:layout_gravity="center"
                 android:layout_marginTop="4dp"
-                android:layout_marginBottom="10dp"
+                android:layout_marginBottom="4dp"
                 android:background="@color/colorPrimary" />
 
             <androidx.recyclerview.widget.RecyclerView
@@ -361,7 +355,6 @@
 
     </ScrollView>
 
-    <!-- BOTONES INFERIORES -->
     <LinearLayout
         android:id="@+id/bottomBarLobby"
         android:layout_width="0dp"
