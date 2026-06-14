@@ -25,6 +25,7 @@ import com.example.basta_game.models.Jugador;
 import com.example.basta_game.R;
 import com.example.basta_game.Adapters.JugadorSalaAdapter;
 import com.example.basta_game.models.JugadorSala;
+import com.example.basta_game.models.Sala;
 import com.example.basta_game.utils.CustomDialogHelper;
 import com.example.basta_game.utils.NotificationHelper;
 import com.example.basta_game.utils.VerificacionesAuth;
@@ -71,6 +72,8 @@ public class LobbyFragment extends Fragment {
 
         bundleDatosPartida = getArguments();
 
+        auth = FirebaseAuth.getInstance();
+
         if (bundleDatosPartida != null) {
             esAnfitrion = bundleDatosPartida.getBoolean("ES_ANFITRION", false);
             categoriasStr = bundleDatosPartida.getStringArrayList("CATEGORIAS");
@@ -80,7 +83,10 @@ public class LobbyFragment extends Fragment {
             esCreador = bundleDatosPartida.getBoolean("CREADOR", false);
             codigoSala = bundleDatosPartida.getString("CODIGO_SALA", "Esperando...");
             idSala = bundleDatosPartida.getString("IDSALA");
+
             esAnexo = bundleDatosPartida.getBoolean("ANEXO", false);
+
+            ObtenerEstadoPartida(auth, idSala);
         }
 
 
@@ -171,15 +177,14 @@ public class LobbyFragment extends Fragment {
             );
         });
 
-        btnComenzarPartida.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                PartidaFragment partida = new PartidaFragment();
-                partida.setArguments(bundleDatosPartida);
+        btnComenzarPartida.setOnClickListener(v -> {
+            if(VerificacionesAuth.VerificarInicioSesion(auth)){
+                DatabaseReference nodoEstado = FirebaseDatabase.getInstance()
+                        .getReference("salas")
+                        .child(idSalaMetodo)
+                        .child("estadoPartida");
 
-                getParentFragmentManager().beginTransaction()
-                        .replace(R.id.sala_fragment_container, partida)
-                        .commit();
+                nodoEstado.setValue("En juego");
             }
         });
 
@@ -257,30 +262,6 @@ public class LobbyFragment extends Fragment {
         return view;
     }
 
-
-    public void SalirDeLobbyYCerrarPartida(){
-        auth = FirebaseAuth.getInstance();
-
-        if(VerificacionesAuth.VerificarInicioSesion(auth)){
-            String uidUsuario = auth.getCurrentUser().getUid();
-                String idSala = idSalaMetodo;
-
-                DatabaseReference nodoSalas = FirebaseDatabase.getInstance().getReference("salas").child(idSala).child("jugadores").child(uidUsuario);
-                nodoSalas.removeValue().addOnCompleteListener(task -> {
-                   if(task.isSuccessful()){
-                       requireActivity().finish();
-                       Intent intent = new Intent(requireContext(), HomeActivity.class);
-                       startActivity(intent);
-                   }else{
-                       NotificationHelper.show(
-                               notificationLobby,
-                               "No pudiste abandonar la partida",
-                               NotificationHelper.ERROR
-                       );
-                   }
-                });
-        }
-    }
     public void ObtenerJugadoresYLlenarLobby(String idSala){
         auth = FirebaseAuth.getInstance();
         if(VerificacionesAuth.VerificarInicioSesion(auth)){
@@ -303,6 +284,31 @@ public class LobbyFragment extends Fragment {
                         rvJugadoresLobby.setAdapter(adaptador);
                     }
 
+                }
+
+                @Override
+                public void onCancelled(@NonNull DatabaseError error) {
+
+                }
+            });
+        }
+    }
+
+    public void ObtenerEstadoPartida(FirebaseAuth auth, String salaID){
+        if(VerificacionesAuth.VerificarInicioSesion(auth)){
+            DatabaseReference nodoEstado = FirebaseDatabase.getInstance().getReference("salas").child(salaID);
+            nodoEstado.addValueEventListener(new ValueEventListener() {
+                @Override
+                public void onDataChange(@NonNull DataSnapshot snapshot) {
+                    Sala sala = snapshot.getValue(Sala.class);
+                    if(sala != null && sala.getEstadoPartida().equals("En juego")){
+                        PartidaFragment partida = new PartidaFragment();
+                        partida.setArguments(bundleDatosPartida);
+
+                        getParentFragmentManager().beginTransaction()
+                                .replace(R.id.sala_fragment_container, partida)
+                                .commit();
+                    }
                 }
 
                 @Override

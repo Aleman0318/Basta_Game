@@ -411,7 +411,7 @@ public class Crear_salaFragment extends Fragment {
         bundle.putBoolean("CREADOR", true);
         bundle.putString("CODIGO_SALA",codigoSalaLobby);
         bundle.putString("IDSALA", idSalaLobby);
-        bundle.putBoolean("ANEXO", true); //indica si se unio a la partida
+        bundle.putBoolean("ANEXO", false); //indica si se unio a la partida
         bundle.putString("ESTADO_SALA", estadoPartida);
 
         intent.putExtra("DATOS_SALA", bundle);
