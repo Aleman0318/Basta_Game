@@ -46,8 +46,8 @@ public class SalaActivity extends AppCompatActivity {
 
         if (bundle != null) {
             idSala = bundle.getString("IDSALA", "");
-            mostrarLobby(bundle);
             esHost = bundle.getBoolean("ES_ANFITRION");
+            mostrarLobby(bundle);
         }
 
         if (VerificacionesAuth.VerificarInicioSesion(auth) && idSala != null && !idSala.isEmpty()) {
@@ -60,8 +60,6 @@ public class SalaActivity extends AppCompatActivity {
                     .child(uid);
 
             VerificarSiUsuarioSeDesconecto();
-        }else{
-            mandarHomePorDesconexion();
         }
     }
 
@@ -159,16 +157,11 @@ public class SalaActivity extends AppCompatActivity {
                }
             });
         }else{
-            DatabaseReference nodoSalaEliminada = FirebaseDatabase.getInstance().getReference("salas").child(idSala);
-            nodoSalaEliminada.removeValue().addOnCompleteListener(task -> {
-                if(task.isSuccessful()){
-                    Intent intent = new Intent(SalaActivity.this, HomeActivity.class);
-                    intent.putExtra("DESCONEXION", true);
-                    intent.putExtra("CREADOR_DESCONEXION", false);
-                    startActivity(intent);
-                    finish();
-                }
-            });
+            Intent intent = new Intent(SalaActivity.this, HomeActivity.class);
+            intent.putExtra("DESCONEXION", true);
+            intent.putExtra("CREADOR_DESCONEXION", false);
+            startActivity(intent);
+            finish();
         }
 
     }
