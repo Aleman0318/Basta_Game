@@ -17,6 +17,7 @@ import com.example.basta_game.models.CodigoSalaSearch;
 import com.example.basta_game.models.JugadorSala;
 import com.example.basta_game.models.Sala;
 import com.example.basta_game.models.Usuario;
+import com.example.basta_game.utils.Animations;
 import com.example.basta_game.utils.NotificationHelper;
 import com.example.basta_game.utils.VerificacionesAuth;
 import com.google.firebase.auth.FirebaseAuth;
@@ -53,6 +54,10 @@ public class Unirse_salaFragment extends Fragment {
         auth = FirebaseAuth.getInstance();
 
         AppCompatButton btnUnirseSalaFinal = view.findViewById(R.id.btnUnirseSalaFinal);
+
+        Animations.animacionAparicion(etCodigoSala);
+        Animations.animacionAparicion(btnUnirseSalaFinal);
+
         btnUnirseSalaFinal.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
