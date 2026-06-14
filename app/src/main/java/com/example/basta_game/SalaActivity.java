@@ -28,6 +28,8 @@ public class SalaActivity extends AppCompatActivity {
     private DatabaseReference nodoJugadorSala;
     private ValueEventListener listenerDesconexion;
 
+    private boolean salida = false;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -76,24 +78,25 @@ public class SalaActivity extends AppCompatActivity {
     @Override
     protected void onPause() {
         super.onPause();
+        if(!salida){
+            Log.d("ONRESUME", "Entró al onPause");
 
-        Log.d("ONRESUME", "Entró al onPause");
-
-        if (VerificacionesAuth.VerificarInicioSesion(auth) && nodoJugadorSala != null && !isFinishing()) {
-            nodoJugadorSala.addListenerForSingleValueEvent(new ValueEventListener() {
-                @Override
-                public void onDataChange(@NonNull DataSnapshot snapshot) {
-                    if (snapshot.exists()) {
-                        nodoJugadorSala.child("estaConectado").setValue(false)
-                                .addOnSuccessListener(unused -> Log.d("ONPAUSE", "Jugador marcado como desconectado"));
+            if (VerificacionesAuth.VerificarInicioSesion(auth) && nodoJugadorSala != null && !isFinishing()) {
+                nodoJugadorSala.addListenerForSingleValueEvent(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(@NonNull DataSnapshot snapshot) {
+                        if (snapshot.exists()) {
+                            nodoJugadorSala.child("estaConectado").setValue(false)
+                                    .addOnSuccessListener(unused -> Log.d("ONPAUSE", "Jugador marcado como desconectado"));
+                        }
                     }
-                }
 
-                @Override
-                public void onCancelled(@NonNull DatabaseError error) {
-                    Log.d("ONPAUSE", "Error: " + error.getMessage());
-                }
-            });
+                    @Override
+                    public void onCancelled(@NonNull DatabaseError error) {
+                        Log.d("ONPAUSE", "Error: " + error.getMessage());
+                    }
+                });
+            }
         }
     }
 
@@ -149,6 +152,7 @@ public class SalaActivity extends AppCompatActivity {
             DatabaseReference nodoSalaEliminada = FirebaseDatabase.getInstance().getReference("salas").child(idSala);
             nodoSalaEliminada.removeValue().addOnCompleteListener(task -> {
                if(task.isSuccessful()){
+                   salida = true;
                    Intent intent = new Intent(SalaActivity.this, HomeActivity.class);
                    intent.putExtra("DESCONEXION", false);
                    intent.putExtra("CREADOR_DESCONEXION", true);
@@ -161,6 +165,7 @@ public class SalaActivity extends AppCompatActivity {
             DatabaseReference nodoSalaEliminada = FirebaseDatabase.getInstance().getReference("salas").child(idSala).child("jugadores").child(uidUsuarioEliminar);
             nodoSalaEliminada.removeValue().addOnCompleteListener(task -> {
                 if(task.isSuccessful()){
+                    salida = true;
                     Intent intent = new Intent(SalaActivity.this, HomeActivity.class);
                     intent.putExtra("DESCONEXION", true);
                     intent.putExtra("CREADOR_DESCONEXION", false);
