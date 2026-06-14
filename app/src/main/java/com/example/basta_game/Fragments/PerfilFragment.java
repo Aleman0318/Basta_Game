@@ -21,6 +21,7 @@ import androidx.appcompat.widget.AppCompatButton;
 import com.bumptech.glide.Glide;
 import com.example.basta_game.Adapters.AvatarAdapter;
 import com.example.basta_game.models.Avatar;
+import com.example.basta_game.utils.NotificationHelper;
 import com.google.android.material.card.MaterialCardView;
 import com.example.basta_game.R;
 import com.google.firebase.auth.FirebaseAuth;
@@ -43,6 +44,7 @@ public class PerfilFragment extends Fragment {
     private ImageView ivAvatarActual;
     private AvatarAdapter adapter;
     private RecyclerView rvListaAvatares;
+    private View perfilNotification;
     private TextView tvUsername, tvCorreo, tvPartidasJugadas, tvPartidasGanadas, tvPromedioPuntos;
 
     @Override
@@ -57,6 +59,7 @@ public class PerfilFragment extends Fragment {
         tvPartidasJugadas = view.findViewById(R.id.tvPartidasJugadas);
         tvPartidasGanadas = view.findViewById(R.id.tvPartidasGanadas);
         tvPromedioPuntos = view.findViewById(R.id.tvPromedioPuntos);
+        perfilNotification = view.findViewById(R.id.perfilNotification);
 
         inicializarOpcionesAvatares();
         cargarPerfilUsuario();
@@ -133,7 +136,11 @@ public class PerfilFragment extends Fragment {
                 }
             }).addOnFailureListener(e -> {
                 if (getContext() != null) {
-                    Toast.makeText(getContext(), "Error al enlazar: " + avatar.getNombreArchivo(), Toast.LENGTH_SHORT).show();
+                    NotificationHelper.show(
+                            perfilNotification,
+                            "Error al enlazar: " + avatar.getNombreArchivo(),
+                            NotificationHelper.SUCCESS
+                    );
                 }
             });
         }
@@ -155,7 +162,11 @@ public class PerfilFragment extends Fragment {
 
         userRef.updateChildren(actualizaciones)
                 .addOnSuccessListener(aVoid -> {
-                    Toast.makeText(getContext(), "¡Perfil actualizado con éxito!", Toast.LENGTH_SHORT).show();
+                    NotificationHelper.show(
+                            perfilNotification,
+                            "¡Avatar actualizado con exito!",
+                            NotificationHelper.SUCCESS
+                    );
 
 
                     Glide.with(PerfilFragment.this)
@@ -165,7 +176,11 @@ public class PerfilFragment extends Fragment {
                     dialog.dismiss();
                 })
                 .addOnFailureListener(e -> {
-                    Toast.makeText(getContext(), "Error al guardar: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                    NotificationHelper.show(
+                            perfilNotification,
+                            "Error al guardar avatar.",
+                            NotificationHelper.ERROR
+                    );
                     dialog.dismiss();
                 });
     }
@@ -198,7 +213,7 @@ public class PerfilFragment extends Fragment {
                 if (fotoUrl != null && !fotoUrl.trim().isEmpty()) {
                     Glide.with(PerfilFragment.this)
                             .load(fotoUrl)
-                            .placeholder(R.drawable.outline_person_24)
+                            .dontAnimate()
                             .into(ivAvatarActual);
                 } else {
                     ivAvatarActual.setImageResource(R.drawable.outline_person_24);
