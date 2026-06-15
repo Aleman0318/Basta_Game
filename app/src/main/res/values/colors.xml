@@ -18,9 +18,9 @@
     <color name="colorAmarilloRanking">#FBF3E6</color>
 
     <color name="blanco">#FFFFFF</color>
-    <color name="verde_puntos">#4CAF50</color>
+    <color name="verde_puntos">#2AA514</color>
     <color name="crema">#F5F1E8</color>
-
+    <color name="amarillochillon">#FFD530</color>
     <color name="colorCajaTexto">#E6FFFFFF</color>
     <color name="colorTransparente">#00FFFFFF</color>
     <color name="colorCelestePalido">#d3efed</color>

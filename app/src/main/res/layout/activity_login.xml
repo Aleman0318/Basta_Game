@@ -65,7 +65,7 @@
                     android:background="@drawable/bg_fondo_icono"
                     android:padding="8dp"
                     android:src="@drawable/outline_person_24"
-                    app:tint="@color/colorPrimary" />
+                     />
 
                 <com.google.android.material.textfield.TextInputLayout
                     android:id="@+id/cajaUsuario"
@@ -105,7 +105,7 @@
                     android:layout_height="42dp"
                     android:background="@drawable/bg_fondo_icono"
                     android:padding="8dp"
-                    android:src="@android:drawable/ic_lock_idle_lock"
+                    android:src="@drawable/ic_candado"
                     app:tint="@color/colorPrimary" />
 
                 <com.google.android.material.textfield.TextInputLayout
