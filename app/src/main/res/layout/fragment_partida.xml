@@ -128,11 +128,12 @@
 
                 <ImageView
                     android:id="@+id/imgLetraActual"
-                    android:layout_width="80dp"
-                    android:layout_height="80dp"
+                    android:layout_width="110dp"
+                    android:layout_height="110dp"
                     android:layout_gravity="center"
                     android:scaleType="fitCenter"
-                    android:src="@drawable/letra_m" />
+                    android:src="@drawable/letra_m"
+                    android:rotation="-9"/>
 
             </FrameLayout>
 

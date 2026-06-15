@@ -34,6 +34,7 @@ public class Unirse_salaFragment extends Fragment {
     private EditText etCodigoSala;
     private FirebaseAuth auth;
 
+    private String letraElegida;
     private CodigoSalaSearch codigoElegidoFiltrado;
     private View unirseSalaNotification;
 
@@ -77,7 +78,6 @@ public class Unirse_salaFragment extends Fragment {
                                     if(codigoElegido.getCodigoSala().equals(codigoSalaUsuario) && codigoElegido.getEstaActiva()){
                                         encontrado = true;
                                         codigoElegidoFiltrado = codigoElegido;
-
                                     }
                                 }
                             }
@@ -116,7 +116,7 @@ public class Unirse_salaFragment extends Fragment {
                                                         @Override
                                                         public void onDataChange(@NonNull DataSnapshot snapshot) {
                                                             Usuario user = snapshot.getValue(Usuario.class);
-
+                                                            letraElegida = sala.getLetraActual();
                                                             JugadorSala jugador = new JugadorSala(
                                                                     user.getUid(),
                                                                     user.getNombre(),
@@ -145,6 +145,7 @@ public class Unirse_salaFragment extends Fragment {
                                                                     bundle.putBoolean("ANEXO", true);
                                                                     bundle.putString("CODIGO_SALA", sala.getCodigoSala());
                                                                     bundle.putString("IDSALA", sala.getIdSala());
+                                                                    bundle.putString("LETRA", letraElegida);
 
                                                                     intent.putExtra("DATOS_SALA", bundle);
 
