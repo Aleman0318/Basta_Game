@@ -24,6 +24,7 @@ public class SalaActivity extends AppCompatActivity {
 
     private FirebaseAuth auth;
     private String idSala;
+    private String codigoSala;
     private boolean esHost;
     private DatabaseReference nodoJugadorSala;
     private ValueEventListener listenerDesconexion;
@@ -49,6 +50,7 @@ public class SalaActivity extends AppCompatActivity {
         if (bundle != null) {
             idSala = bundle.getString("IDSALA", "");
             esHost = bundle.getBoolean("ES_ANFITRION");
+            codigoSala = bundle.getString("CODIGO_SALA");
             mostrarLobby(bundle);
         }
 
@@ -128,6 +130,7 @@ public class SalaActivity extends AppCompatActivity {
     }
 
     public void VerificarSiUsuarioSeDesconecto() {
+        Log.d("DESCONECTADO", "Mi nodo jugador desapareció. salida=" + salida + " esHost=" + esHost + " idSala=" + idSala);
         //para evitar que la app EXPLOTE si el nodo esta vacio
         if (nodoJugadorSala == null) {
             return;
@@ -164,11 +167,16 @@ public class SalaActivity extends AppCompatActivity {
             DatabaseReference nodoSalaEliminada = FirebaseDatabase.getInstance().getReference("salas").child(idSala);
             nodoSalaEliminada.removeValue().addOnCompleteListener(task -> {
                 if(task.isSuccessful()){
-                    Intent intent = new Intent(SalaActivity.this, HomeActivity.class);
-                    intent.putExtra("DESCONEXION", false);
-                    intent.putExtra("CREADOR_DESCONEXION", true);
-                    startActivity(intent);
-                    finish();
+                    DatabaseReference nodoCodigoSala = FirebaseDatabase.getInstance().getReference("codigosSalas").child(codigoSala);
+                    nodoCodigoSala.removeValue().addOnCompleteListener(task2 ->{
+                        if(task2.isSuccessful()){
+                            Intent intent = new Intent(SalaActivity.this, HomeActivity.class);
+                            intent.putExtra("DESCONEXION", false);
+                            intent.putExtra("CREADOR_DESCONEXION", true);
+                            startActivity(intent);
+                            finish();
+                        }
+                    });
                 }
             });
         }else{

@@ -75,6 +75,8 @@ public class Crear_salaFragment extends Fragment {
 
     private String estadoPartida;
 
+    private int rondaActual;
+
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
 
@@ -289,7 +291,7 @@ public class Crear_salaFragment extends Fragment {
                     String letraElegida = LetraSala.ElegirLetraAlAzar();
                     String codigoSala = CodigoSala.GenerarCodigoSala();
                     codigoSalaLobby = codigoSala;
-                    int rondaActual  = 1;
+                    rondaActual  = 1;
                     long fechaCreacion = System.currentTimeMillis();
                     int jugadoresMaximos = ObtenerJugadoresMaximos();
                     int rondasMaximas = ObtenerRondasMaximas();
@@ -418,6 +420,7 @@ public class Crear_salaFragment extends Fragment {
         bundle.putString("IDSALA", idSalaLobby);
         bundle.putBoolean("ANEXO", false); //indica si se unio a la partida
         bundle.putString("ESTADO_SALA", estadoPartida);
+        bundle.putInt("RONDA_ACTUAL", rondaActual);
 
         intent.putExtra("DATOS_SALA", bundle);
 

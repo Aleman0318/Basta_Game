@@ -28,7 +28,6 @@ import com.example.basta_game.models.Jugador;
 import com.example.basta_game.R;
 import com.example.basta_game.models.JugadorSala;
 import com.example.basta_game.models.Sala;
-import com.example.basta_game.utils.Animations;
 import com.example.basta_game.utils.CustomDialogHelper;
 import com.example.basta_game.utils.VerificacionesAuth;
 import com.google.android.material.button.MaterialButton;
@@ -53,6 +52,7 @@ public class PartidaFragment extends Fragment {
     private int rondasMaximas;
     private boolean esCreador;
     private boolean esAnexo;
+    private int rondaActual;
 
     private MaterialButton btnAbandonar;
 
@@ -87,12 +87,15 @@ public class PartidaFragment extends Fragment {
         auth = FirebaseAuth.getInstance();
 
         obtenerArgumentos();
-        ObtenerJugadoresYLlenarPartida(idSala);
-        CambiarEstadoPartida(auth, idSala);
         inicializarVistas(view);
         configurarFirebase();
         cargarDatosIniciales();
         configurarBotones();
+
+        ObtenerEstadoPartida(auth, idSala);
+        ObtenerJugadoresYLlenarPartida(idSala);
+        CambiarEstadoPartida(auth, idSala);
+        cambiarEstadoUsuarios();
     }
 
     private void obtenerArgumentos() {
@@ -106,7 +109,7 @@ public class PartidaFragment extends Fragment {
             esCreador = getArguments().getBoolean("CREADOR", false);
             idSala = getArguments().getString("IDSALA");
             esAnexo = getArguments().getBoolean("ANEXO", false);
-            ObtenerEstadoPartida(auth, idSala);
+            rondaActual = getArguments().getInt("RONDA_ACTUAL", 1);
         }
     }
 
@@ -133,7 +136,8 @@ public class PartidaFragment extends Fragment {
     }
 
     private void cargarDatosIniciales() {
-        txtCodigoSala.setText("Sala " + codigoSala);
+        txtCodigoSala.setText(codigoSala);
+        txtRondaActual.setText("Ronda " + rondaActual + "/" + rondasMaximas);
 
         rvJugadoresPartida.setLayoutManager(new LinearLayoutManager(getContext(), LinearLayoutManager.HORIZONTAL, false));
 
@@ -155,9 +159,7 @@ public class PartidaFragment extends Fragment {
 
     private void configurarBotones() {
         btnBasta.setOnClickListener(v -> {
-            Animations.animacionLanzada(btnBasta);
-            // LÓGICA DE DAIGO: Lanzar el modal del carrusel con datos de prueba
-            List<String> categoriasPrueba = new ArrayList<>(); //cat de prueba
+            List<String> categoriasPrueba = new ArrayList<>();
             categoriasPrueba.add("Fruta");
             categoriasPrueba.add("Animal");
             categoriasPrueba.add("Color");
@@ -315,6 +317,18 @@ public class PartidaFragment extends Fragment {
 
         dialog.setCancelable(false);
         dialog.show();
+    }
+
+    private void cambiarEstadoUsuarios(){
+        Log.d("CAMBIAR", "Voy a poner estaListo=false en sala=" + idSala + " uid=" + auth.getCurrentUser().getUid());
+        if(VerificacionesAuth.VerificarInicioSesion(auth)){
+            DatabaseReference nodoEstadoUsuario = FirebaseDatabase.getInstance().getReference("salas").child(idSala).child("jugadores").child(auth.getCurrentUser().getUid()).child("estaListo");
+            nodoEstadoUsuario.setValue(false).addOnCompleteListener(task -> {
+               if(task.isSuccessful()){
+                   Log.d("CAMBIAR", "ESTADO DE USUARIO CAMBIADO A DESACTIVADO");
+               }
+            });
+        }
     }
 
 }
