@@ -64,6 +64,7 @@ public class PartidaFragment extends Fragment {
     private TextView txtRondaActual;
     private TextView txtEstadoPartida;
     private TextView txtTiempoRestante;
+    private String letraElegida;
     private TextView txtInstruccionLetra;
 
     private ImageView imgLetraActual;
@@ -110,6 +111,7 @@ public class PartidaFragment extends Fragment {
             idSala = getArguments().getString("IDSALA");
             esAnexo = getArguments().getBoolean("ANEXO", false);
             rondaActual = getArguments().getInt("RONDA_ACTUAL", 1);
+            letraElegida = getArguments().getString("LETRA", "a");
         }
     }
 
@@ -138,6 +140,7 @@ public class PartidaFragment extends Fragment {
     private void cargarDatosIniciales() {
         txtCodigoSala.setText(codigoSala);
         txtRondaActual.setText("Ronda " + rondaActual + "/" + rondasMaximas);
+        mostrarLetra(letraElegida);
 
         rvJugadoresPartida.setLayoutManager(new LinearLayoutManager(getContext(), LinearLayoutManager.HORIZONTAL, false));
 
@@ -196,7 +199,6 @@ public class PartidaFragment extends Fragment {
 
     private void mostrarLetra(String letra) {
         txtInstruccionLetra.setText("Escribe respuestas que empiecen con la letra " + letra);
-
         String nombreDrawable = "letra_" + letra.toLowerCase(Locale.ROOT);
         int idDrawable = getResources().getIdentifier(nombreDrawable, "drawable", requireContext().getPackageName());
 

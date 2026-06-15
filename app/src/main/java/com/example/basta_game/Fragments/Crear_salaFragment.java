@@ -55,6 +55,8 @@ public class Crear_salaFragment extends Fragment {
     private TextView tvCantRondas;
     private TextView tvCantJugadores;
 
+    private String letraElegidabundle;
+
     private AppCompatButton btnRestarRonda;
     private AppCompatButton btnSumarRonda;
     private AppCompatButton btnRestarJugador;
@@ -286,6 +288,7 @@ public class Crear_salaFragment extends Fragment {
                     String estadoSala = "En espera";
                     estadoPartida = estadoSala;
                     String letraElegida = LetraSala.ElegirLetraAlAzar();
+                    letraElegidabundle = letraElegida;
                     String codigoSala = CodigoSala.GenerarCodigoSala();
                     codigoSalaLobby = codigoSala;
                     rondaActual  = 1;
@@ -416,6 +419,7 @@ public class Crear_salaFragment extends Fragment {
         bundle.putBoolean("ANEXO", false); //indica si se unio a la partida
         bundle.putString("ESTADO_SALA", estadoPartida);
         bundle.putInt("RONDA_ACTUAL", rondaActual);
+        bundle.putString("LETRA", letraElegidabundle);
 
         intent.putExtra("DATOS_SALA", bundle);
 
