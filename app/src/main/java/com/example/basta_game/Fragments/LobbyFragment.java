@@ -37,6 +37,7 @@ import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ServerValue;
 import com.google.firebase.database.ValueEventListener;
 
 import java.lang.reflect.Array;
@@ -211,13 +212,19 @@ public class LobbyFragment extends Fragment {
                                     NotificationHelper.ERROR
                             );
                         }else{
-                            //abrimos la partida
+                            //abrimos la partida e insertamos el tiempo de inicio de la ronda
                             DatabaseReference nodoEstado = FirebaseDatabase.getInstance()
                                     .getReference("salas")
                                     .child(idSalaMetodo)
                                     .child("estadoPartida");
 
                             nodoEstado.setValue("En juego");
+
+                            DatabaseReference nodoTiempoInicio = FirebaseDatabase.getInstance()
+                                    .getReference("salas").child(idSalaMetodo)
+                                    .child("inicioRonda");
+
+                            nodoTiempoInicio.setValue(ServerValue.TIMESTAMP);
                         }
                     }
 
