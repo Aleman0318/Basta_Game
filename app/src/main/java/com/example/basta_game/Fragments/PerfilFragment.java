@@ -1,6 +1,8 @@
 package com.example.basta_game.Fragments;
 
 import android.app.Dialog;
+import android.content.Intent;
+import com.example.basta_game.LoginActivity;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
@@ -73,6 +75,22 @@ public class PerfilFragment extends Fragment {
         Animations.animacionAparicion(tvPartidasJugadas);
         Animations.animacionAparicion(tvPromedioPuntos);
         Animations.animacionAparicion(btnCerrarSesion);
+
+        btnCerrarSesion.setOnClickListener(v -> {
+            Animations.animacionZoom(v);
+
+            FirebaseAuth authObj = FirebaseAuth.getInstance();
+            if (authObj.getCurrentUser() != null) {
+                authObj.signOut();
+            }
+
+            if (getActivity() != null) {
+                Intent intent = new Intent(getActivity(), LoginActivity.class);
+                intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                startActivity(intent);
+            }
+        });
+
 
         inicializarOpcionesAvatares();
         cargarPerfilUsuario();
