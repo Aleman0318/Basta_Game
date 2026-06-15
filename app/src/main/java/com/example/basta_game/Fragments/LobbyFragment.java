@@ -211,23 +211,14 @@ public class LobbyFragment extends Fragment {
                                     NotificationHelper.ERROR
                             );
                         }else{
-                            //abrimos la partida
-                            getParentFragmentManager()
-                                    .beginTransaction()
-                                    .replace(
-                                            R.id.fragment_container,
-                                            new LoadingGameFragment()
-                                    )
-                                    .commit();
 
-                            view.postDelayed(()->{
+
                                 DatabaseReference nodoEstado = FirebaseDatabase.getInstance()
                                         .getReference("salas")
                                         .child(idSalaMetodo)
                                         .child("estadoPartida");
 
                                 nodoEstado.setValue("En juego");
-                            }, 4000);
                         }
                     }
 
