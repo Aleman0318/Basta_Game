@@ -375,7 +375,7 @@ public class PartidaFragment extends Fragment {
                         JugadorSala jugador = hijo.getValue(JugadorSala.class);
 
                         if (jugador != null) {
-                            jugadoresActivos.add(new Jugador(jugador.getNombre(), jugador.isEstaListo(), jugador.getUrlAvatar()));
+                            jugadoresActivos.add(new Jugador(jugador.getNombre(), jugador.isEstaListo(), jugador.getUrlAvatar(), jugador.isEsHost()));
                         }
                     }
 

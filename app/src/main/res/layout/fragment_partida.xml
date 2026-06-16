@@ -166,7 +166,7 @@
                         android:layout_height="wrap_content"
                         android:layout_marginTop="2dp"
                         android:fontFamily="@font/summer"
-                        android:text="00:37"
+                        android:text="--:--"
                         android:textColor="#E91D2C"
                         android:textSize="40sp" />
 
