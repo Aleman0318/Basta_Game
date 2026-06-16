@@ -23,17 +23,22 @@ public class HistorialAdapter extends RecyclerView.Adapter<HistorialAdapter.View
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
 
+        JugadorHistorialAdapter adaptadorJugadores = new JugadorHistorialAdapter();
+        holder.rvJugadoresPartida.setAdapter(adaptadorJugadores);
     }
 
     @Override
     public int getItemCount() {
-        return 3;
+        return 2;
     }
 
     public static class ViewHolder extends RecyclerView.ViewHolder {
+
+        RecyclerView rvJugadoresPartida;
+
         public ViewHolder(@NonNull View itemView) {
             super(itemView);
-
+            rvJugadoresPartida = itemView.findViewById(R.id.rvJugadoresPartidaHistorial);
         }
     }
 }

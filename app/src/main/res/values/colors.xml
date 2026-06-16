@@ -16,7 +16,7 @@
     <color name="colorRojoFuerte">#DC080C</color>
     <color name="colorNaranjaBrillante">#FC691F</color>
     <color name="colorAmarilloRanking">#FBF3E6</color>
-
+    <color name="verde_bg">#F1FFF0</color>
     <color name="blanco">#FFFFFF</color>
     <color name="verde_puntos">#2AA514</color>
     <color name="crema">#F5F1E8</color>
