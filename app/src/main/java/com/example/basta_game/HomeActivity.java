@@ -14,6 +14,7 @@ import com.example.basta_game.Fragments.JugarFragment;
 import com.example.basta_game.Fragments.PerfilFragment;
 import com.example.basta_game.Fragments.RankingFragment;
 import com.example.basta_game.utils.NotificationHelper;
+import com.example.basta_game.utils.Sounds;
 import com.example.basta_game.utils.VerificacionesAuth;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.firebase.auth.FirebaseAuth;
@@ -61,6 +62,7 @@ public class HomeActivity extends AppCompatActivity {
                         "Se ha eliminado la sala, volviendo a home",
                         NotificationHelper.WARNING
                 );
+                Sounds.playNotificaciones();
             }
         } else {
             if (VerificacionesAuth.VerificarInicioSesion(auth)) {

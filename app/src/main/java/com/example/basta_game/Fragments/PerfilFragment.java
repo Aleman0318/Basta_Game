@@ -1,6 +1,8 @@
 package com.example.basta_game.Fragments;
 
 import android.app.Dialog;
+import android.content.Intent;
+import com.example.basta_game.LoginActivity;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
@@ -21,8 +23,10 @@ import androidx.appcompat.widget.AppCompatButton;
 import com.bumptech.glide.Glide;
 import com.example.basta_game.Adapters.AvatarAdapter;
 import com.example.basta_game.models.Avatar;
+import com.example.basta_game.utils.Animations;
 import com.example.basta_game.utils.NotificationHelper;
 import com.example.basta_game.utils.Sounds;
+import com.google.android.material.button.MaterialButton;
 import com.google.android.material.card.MaterialCardView;
 import com.example.basta_game.R;
 import com.google.firebase.auth.FirebaseAuth;
@@ -61,6 +65,32 @@ public class PerfilFragment extends Fragment {
         tvPartidasGanadas = view.findViewById(R.id.tvPartidasGanadas);
         tvPromedioPuntos = view.findViewById(R.id.tvPromedioPuntos);
         perfilNotification = view.findViewById(R.id.perfilNotification);
+        MaterialButton btnCerrarSesion = view.findViewById(R.id.btnCerrarSesion);
+
+
+
+        Animations.animacionAparicion(tvCorreo);
+        Animations.animacionAparicion(tvUsername);
+        Animations.animacionAparicion(tvPartidasGanadas);
+        Animations.animacionAparicion(tvPartidasJugadas);
+        Animations.animacionAparicion(tvPromedioPuntos);
+        Animations.animacionAparicion(btnCerrarSesion);
+
+        btnCerrarSesion.setOnClickListener(v -> {
+            Animations.animacionZoom(v);
+
+            FirebaseAuth authObj = FirebaseAuth.getInstance();
+            if (authObj.getCurrentUser() != null) {
+                authObj.signOut();
+            }
+
+            if (getActivity() != null) {
+                Intent intent = new Intent(getActivity(), LoginActivity.class);
+                intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                startActivity(intent);
+            }
+        });
+
 
         inicializarOpcionesAvatares();
         cargarPerfilUsuario();
@@ -147,7 +177,6 @@ public class PerfilFragment extends Fragment {
             });
         }
     }
-
     private void guardarAvatarEnFirebase(Dialog dialog) {
         if (FirebaseAuth.getInstance().getCurrentUser() == null || getContext() == null) return;
 

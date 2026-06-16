@@ -13,7 +13,7 @@
         android:orientation="vertical"
         android:paddingStart="18dp"
         android:paddingEnd="18dp"
-        android:paddingTop="18dp"
+        android:paddingTop="8dp"
         android:paddingBottom="50dp">
 
         <FrameLayout
@@ -90,7 +90,7 @@
             android:id="@+id/cardJugadores"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="12dp"
+            android:layout_marginTop="8dp"
             app:cardCornerRadius="22dp"
             app:cardBackgroundColor="#FFFFFF"
             app:strokeWidth="1dp"
@@ -108,7 +108,7 @@
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="16dp"
+            android:layout_marginTop="6dp"
             android:orientation="horizontal"
             android:gravity="center_vertical">
 
@@ -204,10 +204,10 @@
             android:id="@+id/cardRespuestas"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="16dp"
+            android:layout_marginTop="8dp"
             app:cardCornerRadius="22dp"
             app:cardBackgroundColor="#FFFFFF"
-            app:strokeWidth="1.5dp"
+            app:strokeWidth="1dp"
             app:strokeColor="#D6E0FF">
 
             <androidx.recyclerview.widget.RecyclerView
@@ -226,7 +226,7 @@
             android:id="@+id/btnBasta"
             android:layout_width="match_parent"
             android:layout_height="62dp"
-            android:layout_marginTop="20dp"
+            android:layout_marginTop="15dp"
             android:background="@drawable/bg_boton_basta"
             android:fontFamily="@font/lilitaone_regular"
             android:text="¡BASTA!"
@@ -238,7 +238,7 @@
             android:id="@+id/btnSalida"
             android:layout_width="match_parent"
             android:layout_height="62dp"
-            android:layout_marginTop="20dp"
+            android:layout_marginTop="15dp"
             android:background="@drawable/bg_boton_exit"
             app:backgroundTint="@null"
             android:fontFamily="@font/lilitaone_regular"

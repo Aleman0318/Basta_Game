@@ -12,15 +12,15 @@
     <color name="colorAzulPabotones">#1fa8d9</color>
     <color name="colorCelestePapel">#C1F2F9</color>
     <color name="colorCelesteOscuro">#7596A7</color>
-    <color name="colorGrisAzulado">#E9F5F5</color>
+    <color name="colorGrisAzulado">#E0E0E0</color>
     <color name="colorRojoFuerte">#DC080C</color>
     <color name="colorNaranjaBrillante">#FC691F</color>
     <color name="colorAmarilloRanking">#FBF3E6</color>
 
     <color name="blanco">#FFFFFF</color>
-    <color name="verde_puntos">#4CAF50</color>
+    <color name="verde_puntos">#2AA514</color>
     <color name="crema">#F5F1E8</color>
-
+    <color name="amarillochillon">#FFD530</color>
     <color name="colorCajaTexto">#E6FFFFFF</color>
     <color name="colorTransparente">#00FFFFFF</color>
     <color name="colorCelestePalido">#d3efed</color>

@@ -162,7 +162,7 @@ public class Unirse_salaFragment extends Fragment {
                                                 } else {
                                                     NotificationHelper.show(
                                                             unirseSalaNotification,
-                                                            "La sala está llena",
+                                                            "La sala estÃ¡ llena",
                                                             NotificationHelper.ERROR
                                                     );
                                                 }

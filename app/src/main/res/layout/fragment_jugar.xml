@@ -10,7 +10,8 @@
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:paddingBottom="40dp"> <TextView
+        android:paddingBottom="40dp">
+        <TextView
         android:id="@+id/tvTituloModos"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -44,7 +45,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:gravity="center"
-                android:background="@color/colorGrisAzulado"
+                android:background="@color/colorCelestePalido"
                 android:orientation="vertical"
                 android:padding="20dp">
 

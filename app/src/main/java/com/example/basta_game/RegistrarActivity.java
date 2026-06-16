@@ -15,6 +15,7 @@ import androidx.core.view.WindowInsetsCompat;
 
 //import de firebase
 import com.example.basta_game.models.Usuario;
+import com.example.basta_game.utils.Sounds;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DatabaseReference;
 
@@ -75,6 +76,7 @@ public class RegistrarActivity extends AppCompatActivity {
                             "Debes llenar todos los campos primero",
                             NotificationHelper.WARNING
                     );
+                    Sounds.playNotificaciones();
 
                     Log.d("REGISTRO_FIREBASE", "Pasando filtro de no vacios");
 
@@ -119,6 +121,7 @@ public class RegistrarActivity extends AppCompatActivity {
                                                 "Usuario registrado correctamente",
                                                 NotificationHelper.SUCCESS
                                         );
+                                        Sounds.playNotificaciones();
 
                                         DatabaseReference usuarioRef = FirebaseDatabase.getInstance().getReference("usuarios");
 
@@ -141,6 +144,7 @@ public class RegistrarActivity extends AppCompatActivity {
                                                 "¡Ocurrio un error al registrar el usuario!",
                                                 NotificationHelper.ERROR
                                         );
+                                        Sounds.playNotificaciones();
                                     }
                                 });
                     }else{

@@ -16,6 +16,7 @@ import androidx.core.view.WindowInsetsCompat;
 
 import com.example.basta_game.models.Usuario;
 import com.example.basta_game.utils.NotificationHelper;
+import com.example.basta_game.utils.Sounds;
 import com.example.basta_game.utils.VerificacionesAuth;
 import com.google.android.material.textfield.TextInputEditText;
 
@@ -90,6 +91,7 @@ public class LoginActivity extends AppCompatActivity {
                             "Debes llenar todos los campos primero",
                             NotificationHelper.WARNING
                     );
+                    Sounds.playNotificaciones();
                 }else {
 
                     auth.signInWithEmailAndPassword(usuarioIngresado, passwordIngresada)
@@ -106,6 +108,7 @@ public class LoginActivity extends AppCompatActivity {
                                             "Las credenciales son invalidas",
                                             NotificationHelper.ERROR
                                     );
+                                    Sounds.playNotificaciones();
                                     etCorreoUsuario.setText("");
                                     etPassword.setText("");
                                 }else if (exception instanceof FirebaseNetworkException) {
@@ -114,6 +117,7 @@ public class LoginActivity extends AppCompatActivity {
                                             "Revisa tu conexión a internet",
                                             NotificationHelper.ERROR
                                     );
+                                    Sounds.playNotificaciones();
                                     etCorreoUsuario.setText("");
                                     etPassword.setText("");
                                 }

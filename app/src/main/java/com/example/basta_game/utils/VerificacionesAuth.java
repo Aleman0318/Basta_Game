@@ -40,6 +40,7 @@ public  class VerificacionesAuth {
                                             "¡Bienvenido " + nombreUsuarioNotificacion + "!",
                                             NotificationHelper.SUCCESS
                                     );
+                                    Sounds.playNotificaciones();
                                 }
                                 else{
                                     Log.d("NOMBRE_DEBUG", "NO SE CARGO CORRECTAMENTE EL NOMBRE");

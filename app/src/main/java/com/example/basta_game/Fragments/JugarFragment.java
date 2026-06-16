@@ -7,6 +7,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import com.example.basta_game.R;
+import com.example.basta_game.utils.Animations;
 import com.google.android.material.card.MaterialCardView;
 
 public class JugarFragment extends Fragment {
@@ -18,6 +19,9 @@ public class JugarFragment extends Fragment {
 
         MaterialCardView cardCrearSala = view.findViewById(R.id.cardCrearSala);
         MaterialCardView cardUnirseSala = view.findViewById(R.id.cardUnirseSala);
+
+        Animations.animacionAparicion(cardCrearSala);
+        Animations.animacionAparicion(cardUnirseSala);
 
         cardCrearSala.setOnClickListener(new View.OnClickListener() {
             @Override

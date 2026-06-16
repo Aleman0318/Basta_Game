@@ -26,8 +26,10 @@ import com.example.basta_game.R;
 import com.example.basta_game.Adapters.JugadorSalaAdapter;
 import com.example.basta_game.models.JugadorSala;
 import com.example.basta_game.models.Sala;
+import com.example.basta_game.utils.Animations;
 import com.example.basta_game.utils.CustomDialogHelper;
 import com.example.basta_game.utils.NotificationHelper;
+import com.example.basta_game.utils.Sounds;
 import com.example.basta_game.utils.VerificacionesAuth;
 import com.google.android.material.card.MaterialCardView;
 import com.google.firebase.auth.FirebaseAuth;
@@ -126,6 +128,9 @@ public class LobbyFragment extends Fragment {
 
         txtCodigoSala.setText(codigoSala);
 
+        Animations.animacionAparicion(btnComenzarPartida);
+        Animations.animacionAparicion(btnToggleListo);
+
         //confirmamos valor cuando cargamos la pantalla
         if (estoyListo) {
             btnToggleListo.setText("NO ESTOY LISTO");
@@ -141,6 +146,7 @@ public class LobbyFragment extends Fragment {
                     "Sala creada Correctamente",
                     NotificationHelper.SUCCESS
             );
+            Sounds.playNotificaciones();
         }
 
         if(esAnexo){
@@ -149,6 +155,7 @@ public class LobbyFragment extends Fragment {
                     "Te has unido a la sala correctamente",
                     NotificationHelper.SUCCESS
             );
+            Sounds.playNotificaciones();
         }
 
         if (esAnfitrion) {
@@ -254,6 +261,7 @@ public class LobbyFragment extends Fragment {
                                                "Hubo un error al cambiar de estado",
                                                NotificationHelper.ERROR
                                        );
+                                       Sounds.playNotificaciones();
                                    }
                                 });
                             }
@@ -287,6 +295,7 @@ public class LobbyFragment extends Fragment {
                                                 "Hubo un error al cambiar de estado",
                                                 NotificationHelper.ERROR
                                         );
+                                        Sounds.playNotificaciones();
                                     }
                                 });
                             }
@@ -371,5 +380,6 @@ public class LobbyFragment extends Fragment {
             });
         }
     }
+
 
 }
