@@ -11,26 +11,44 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.viewpager2.widget.ViewPager2;
 import com.example.basta_game.R;
+import com.example.basta_game.models.RespuestaValidacion;
+
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 public class TarjetasValidacionAdapter extends RecyclerView.Adapter<TarjetasValidacionAdapter.ViewHolder> {
 
     private List<String> categorias;
+    private Map<String, List<RespuestaValidacion>> respuestasPorCategoria;
     private ViewPager2 viewPager2;
     private Runnable onUltimaCategoriaRevelada;
     private boolean[] categoriasReveladas;
 
     private ValidacionAdapter[] subAdaptadores;
 
-    public TarjetasValidacionAdapter(List<String> categorias, ViewPager2 viewPager2, Runnable onUltimaCategoriaRevelada) {
+    public TarjetasValidacionAdapter(
+            List<String> categorias,
+            Map<String, List<RespuestaValidacion>> respuestasPorCategoria,
+            ViewPager2 viewPager2,
+            Runnable onUltimaCategoriaRevelada
+    ) {
         this.categorias = categorias;
+        this.respuestasPorCategoria = respuestasPorCategoria;
         this.viewPager2 = viewPager2;
         this.onUltimaCategoriaRevelada = onUltimaCategoriaRevelada;
         this.categoriasReveladas = new boolean[categorias.size()];
         this.subAdaptadores = new ValidacionAdapter[categorias.size()];
 
         for(int i = 0; i < categorias.size(); i++) {
-            subAdaptadores[i] = new ValidacionAdapter(4);
+            String categoria = categorias.get(i);
+            List<RespuestaValidacion> respuestas = respuestasPorCategoria.get(categoria);
+
+            if (respuestas == null) {
+                respuestas = new ArrayList<>();
+            }
+
+            subAdaptadores[i] = new ValidacionAdapter(respuestas);
         }
 
         viewPager2.registerOnPageChangeCallback(new ViewPager2.OnPageChangeCallback() {
@@ -44,13 +62,13 @@ public class TarjetasValidacionAdapter extends RecyclerView.Adapter<TarjetasVali
 
     @NonNull
     @Override
-    public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+    public TarjetasValidacionAdapter.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_tarjeta_revision, parent, false);
         return new ViewHolder(view);
     }
 
     @Override
-    public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
+    public void onBindViewHolder(@NonNull TarjetasValidacionAdapter.ViewHolder holder, int position) {
         holder.txtNombreCategoria.setText(categorias.get(position));
 
         holder.rvRespuestas.setLayoutManager(new LinearLayoutManager(holder.itemView.getContext()));
@@ -58,6 +76,7 @@ public class TarjetasValidacionAdapter extends RecyclerView.Adapter<TarjetasVali
 
         if (categoriasReveladas[position]) {
             subAdaptadores[position].revelarTodos();
+
             if (position == categorias.size() - 1) {
                 holder.txtDeslizar.setText("¡Revisión terminada!");
                 holder.txtDeslizar.setVisibility(View.VISIBLE);
@@ -90,13 +109,17 @@ public class TarjetasValidacionAdapter extends RecyclerView.Adapter<TarjetasVali
                     if (position == categorias.size() - 1) {
                         viewPager2.setUserInputEnabled(true);
                         notifyItemChanged(position);
-                        if (onUltimaCategoriaRevelada != null) onUltimaCategoriaRevelada.run();
+
+                        if (onUltimaCategoriaRevelada != null) {
+                            onUltimaCategoriaRevelada.run();
+                        }
                     } else {
                         viewPager2.setCurrentItem(position + 1, true);
                     }
                 }
             }
         };
+
         handler.postDelayed(revelarRunnable, 1000);
     }
 
