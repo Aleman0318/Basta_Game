@@ -4,6 +4,7 @@ import android.app.Dialog;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
+import android.os.CountDownTimer;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -60,10 +61,13 @@ public class PartidaFragment extends Fragment {
 
     private DatabaseReference salaRef;
 
+    private CountDownTimer cronometroRonda;
+
     private TextView txtCodigoSala;
     private TextView txtRondaActual;
     private TextView txtEstadoPartida;
     private TextView txtTiempoRestante;
+    private String letraElegida;
     private TextView txtInstruccionLetra;
 
     private ImageView imgLetraActual;
@@ -90,6 +94,7 @@ public class PartidaFragment extends Fragment {
         inicializarVistas(view);
         configurarFirebase();
         cargarDatosIniciales();
+        setearCronometroGlobal();
         configurarBotones();
 
         ObtenerEstadoPartida(auth, idSala);
@@ -110,6 +115,7 @@ public class PartidaFragment extends Fragment {
             idSala = getArguments().getString("IDSALA");
             esAnexo = getArguments().getBoolean("ANEXO", false);
             rondaActual = getArguments().getInt("RONDA_ACTUAL", 1);
+            letraElegida = getArguments().getString("LETRA", "a");
         }
     }
 
@@ -138,6 +144,7 @@ public class PartidaFragment extends Fragment {
     private void cargarDatosIniciales() {
         txtCodigoSala.setText(codigoSala);
         txtRondaActual.setText("Ronda " + rondaActual + "/" + rondasMaximas);
+        mostrarLetra(letraElegida);
 
         rvJugadoresPartida.setLayoutManager(new LinearLayoutManager(getContext(), LinearLayoutManager.HORIZONTAL, false));
 
@@ -196,7 +203,6 @@ public class PartidaFragment extends Fragment {
 
     private void mostrarLetra(String letra) {
         txtInstruccionLetra.setText("Escribe respuestas que empiecen con la letra " + letra);
-
         String nombreDrawable = "letra_" + letra.toLowerCase(Locale.ROOT);
         int idDrawable = getResources().getIdentifier(nombreDrawable, "drawable", requireContext().getPackageName());
 
@@ -238,6 +244,102 @@ public class PartidaFragment extends Fragment {
         }
     }
 
+    public void setearCronometroGlobal(){
+        DatabaseReference offsetRef = FirebaseDatabase.getInstance()
+                .getReference(".info/serverTimeOffset");
+
+        offsetRef.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot offsetSnapshot) {
+                Long offset = offsetSnapshot.getValue(Long.class);
+
+                if(offset == null){
+                    offset = 0L;
+                }
+
+                long offsetFinal = offset;
+
+                DatabaseReference nodoTiempoInicioRonda = FirebaseDatabase.getInstance()
+                        .getReference("salas")
+                        .child(idSala)
+                        .child("inicioRonda");
+
+                nodoTiempoInicioRonda.addListenerForSingleValueEvent(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(@NonNull DataSnapshot snapshot) {
+                        Long inicioRonda = snapshot.getValue(Long.class);
+
+                        if(inicioRonda != null){
+                            long horaActualServidor = System.currentTimeMillis() + offsetFinal;
+
+                            long duracionRondaMs = tiempoSeconds * 1000L;
+                            long tiempoPasadoMs = horaActualServidor - inicioRonda;
+                            long tiempoRestanteMs = duracionRondaMs - tiempoPasadoMs;
+
+                            if(tiempoRestanteMs <= 0){
+                                txtTiempoRestante.setText("00:00");
+                                return;
+                            }
+
+                            if(cronometroRonda != null){
+                                cronometroRonda.cancel();
+                            }
+
+                            cronometroRonda = new CountDownTimer(tiempoRestanteMs, 1000) {
+                                @Override
+                                public void onTick(long millisUntilFinished) {
+                                    long segundosRestantes = millisUntilFinished / 1000;
+                                    txtTiempoRestante.setText(formatearTiempo(segundosRestantes));
+                                }
+
+                                @Override
+                                public void onFinish() {
+                                    txtTiempoRestante.setText("00:00");
+
+                                    // Aquí después podemos poner:
+                                    // si es host, cambiar estadoPartida a "Validando"
+                                }
+                            };
+
+                            cronometroRonda.start();
+                        }
+                    }
+
+                    @Override
+                    public void onCancelled(@NonNull DatabaseError error) {
+
+                    }
+                });
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+
+            }
+        });
+    }
+
+    @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+
+        if(cronometroRonda != null){
+            cronometroRonda.cancel();
+            cronometroRonda = null;
+        }
+    }
+
+    private String formatearTiempo(long totalSegundos){
+        if(totalSegundos < 0){
+            totalSegundos = 0;
+        }
+
+        long minutos = totalSegundos / 60;
+        long segundos = totalSegundos % 60;
+
+        return String.format(Locale.ROOT, "%02d:%02d", minutos, segundos);
+    }
+
 
 
     public void ObtenerEstadoPartida(FirebaseAuth auth, String salaID){
@@ -273,7 +375,7 @@ public class PartidaFragment extends Fragment {
                         JugadorSala jugador = hijo.getValue(JugadorSala.class);
 
                         if (jugador != null) {
-                            jugadoresActivos.add(new Jugador(jugador.getNombre(), jugador.isEstaListo(), jugador.getUrlAvatar()));
+                            jugadoresActivos.add(new Jugador(jugador.getNombre(), jugador.isEstaListo(), jugador.getUrlAvatar(), jugador.isEsHost()));
                         }
                     }
 

@@ -38,6 +38,12 @@ public class JugadorPartidaAdapter extends RecyclerView.Adapter<JugadorPartidaAd
                 .error(R.drawable.outline_person_24)
                 .into(holder.imgAvatar);
 
+        if(jugador.isEsHost()){
+            holder.imgCoronaHost.setVisibility(View.VISIBLE);
+        }else{
+            holder.imgCoronaHost.setVisibility(View.INVISIBLE);
+        }
+
         // ¡AQUÍ ESTÁ LA SOLUCIÓN DEL TEXTO!
         if (jugador.isEstaListo()) {
             holder.txtEstado.setText("Listo");
@@ -51,13 +57,14 @@ public class JugadorPartidaAdapter extends RecyclerView.Adapter<JugadorPartidaAd
 
     public static class ViewHolder extends RecyclerView.ViewHolder {
         TextView txtNombre, txtEstado;
-        ImageView imgAvatar;
+        ImageView imgAvatar, imgCoronaHost;
         public ViewHolder(@NonNull View itemView) {
             super(itemView);
             txtNombre = itemView.findViewById(R.id.txtNombreJugador);
             // Aseguramos que el adaptador encuentre el TextView del estado
             txtEstado = itemView.findViewById(R.id.txtEstadoJugador);
             imgAvatar = itemView.findViewById(R.id.imgAvatarJugadorPartida);
+            imgCoronaHost = itemView.findViewById(R.id.imgCoronaHost);
         }
     }
 }

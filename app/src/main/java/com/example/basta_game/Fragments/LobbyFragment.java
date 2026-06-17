@@ -26,10 +26,8 @@ import com.example.basta_game.R;
 import com.example.basta_game.Adapters.JugadorSalaAdapter;
 import com.example.basta_game.models.JugadorSala;
 import com.example.basta_game.models.Sala;
-import com.example.basta_game.utils.Animations;
 import com.example.basta_game.utils.CustomDialogHelper;
 import com.example.basta_game.utils.NotificationHelper;
-import com.example.basta_game.utils.Sounds;
 import com.example.basta_game.utils.VerificacionesAuth;
 import com.google.android.material.card.MaterialCardView;
 import com.google.firebase.auth.FirebaseAuth;
@@ -37,6 +35,7 @@ import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ServerValue;
 import com.google.firebase.database.ValueEventListener;
 
 import java.lang.reflect.Array;
@@ -127,9 +126,6 @@ public class LobbyFragment extends Fragment {
 
         txtCodigoSala.setText(codigoSala);
 
-        Animations.animacionAparicion(btnComenzarPartida);
-        Animations.animacionAparicion(btnToggleListo);
-
         //confirmamos valor cuando cargamos la pantalla
         if (estoyListo) {
             btnToggleListo.setText("NO ESTOY LISTO");
@@ -145,7 +141,6 @@ public class LobbyFragment extends Fragment {
                     "Sala creada Correctamente",
                     NotificationHelper.SUCCESS
             );
-            Sounds.playNotificaciones();
         }
 
         if(esAnexo){
@@ -154,7 +149,6 @@ public class LobbyFragment extends Fragment {
                     "Te has unido a la sala correctamente",
                     NotificationHelper.SUCCESS
             );
-            Sounds.playNotificaciones();
         }
 
         if (esAnfitrion) {
@@ -211,14 +205,19 @@ public class LobbyFragment extends Fragment {
                                     NotificationHelper.ERROR
                             );
                         }else{
+                            //abrimos la partida e insertamos el tiempo de inicio de la ronda
+                            DatabaseReference nodoEstado = FirebaseDatabase.getInstance()
+                                    .getReference("salas")
+                                    .child(idSalaMetodo)
+                                    .child("estadoPartida");
 
+                            nodoEstado.setValue("En juego");
 
-                                DatabaseReference nodoEstado = FirebaseDatabase.getInstance()
-                                        .getReference("salas")
-                                        .child(idSalaMetodo)
-                                        .child("estadoPartida");
+                            DatabaseReference nodoTiempoInicio = FirebaseDatabase.getInstance()
+                                    .getReference("salas").child(idSalaMetodo)
+                                    .child("inicioRonda");
 
-                                nodoEstado.setValue("En juego");
+                            nodoTiempoInicio.setValue(ServerValue.TIMESTAMP);
                         }
                     }
 
@@ -255,7 +254,6 @@ public class LobbyFragment extends Fragment {
                                                "Hubo un error al cambiar de estado",
                                                NotificationHelper.ERROR
                                        );
-                                       Sounds.playNotificaciones();
                                    }
                                 });
                             }
@@ -289,7 +287,6 @@ public class LobbyFragment extends Fragment {
                                                 "Hubo un error al cambiar de estado",
                                                 NotificationHelper.ERROR
                                         );
-                                        Sounds.playNotificaciones();
                                     }
                                 });
                             }
