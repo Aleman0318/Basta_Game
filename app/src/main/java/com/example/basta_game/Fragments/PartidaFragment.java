@@ -21,13 +21,13 @@ import androidx.viewpager2.widget.ViewPager2;
 
 import com.example.basta_game.Adapters.CategoriaPartidaAdapter;
 import com.example.basta_game.Adapters.JugadorPartidaAdapter;
-import com.example.basta_game.Adapters.JugadorSalaAdapter;
 import com.example.basta_game.Adapters.TarjetasValidacionAdapter;
 import com.example.basta_game.SalaActivity;
 import com.example.basta_game.models.Categoria;
 import com.example.basta_game.models.Jugador;
 import com.example.basta_game.R;
 import com.example.basta_game.models.JugadorSala;
+import com.example.basta_game.models.RespuestaValidacion;
 import com.example.basta_game.models.Sala;
 import com.example.basta_game.utils.CustomDialogHelper;
 import com.example.basta_game.utils.VerificacionesAuth;
@@ -37,11 +37,16 @@ import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.MutableData;
+import com.google.firebase.database.ServerValue;
+import com.google.firebase.database.Transaction;
 import com.google.firebase.database.ValueEventListener;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 
 public class PartidaFragment extends Fragment {
 
@@ -54,6 +59,7 @@ public class PartidaFragment extends Fragment {
     private boolean esCreador;
     private boolean esAnexo;
     private int rondaActual;
+    private boolean bastaActivado = false;
 
     private MaterialButton btnAbandonar;
 
@@ -74,9 +80,16 @@ public class PartidaFragment extends Fragment {
 
     private AppCompatButton btnBasta;
 
-    // Declaramos los RecyclerViews
     private RecyclerView rvJugadoresPartida;
     private RecyclerView rvCategoriasJuego;
+
+    private HashMap<String, String> respuestasJugador = new HashMap<>();
+
+    private boolean modalValidacionMostrado = false;
+    private boolean respuestasGuardadas = false;
+
+    private ValueEventListener listenerRespuestasValidacion;
+    private DatabaseReference nodoRespuestasRondaRef;
 
     private FirebaseAuth auth;
 
@@ -95,6 +108,7 @@ public class PartidaFragment extends Fragment {
         configurarFirebase();
         cargarDatosIniciales();
         setearCronometroGlobal();
+        escucharBastaParaCronometro();
         configurarBotones();
 
         ObtenerEstadoPartida(auth, idSala);
@@ -130,7 +144,6 @@ public class PartidaFragment extends Fragment {
 
         btnBasta = view.findViewById(R.id.btnBasta);
 
-        // Enlazamos los RecyclerViews
         rvJugadoresPartida = view.findViewById(R.id.rvJugadoresPartida);
         rvCategoriasJuego = view.findViewById(R.id.rvCategoriasJuego);
     }
@@ -144,14 +157,15 @@ public class PartidaFragment extends Fragment {
     private void cargarDatosIniciales() {
         txtCodigoSala.setText(codigoSala);
         txtRondaActual.setText("Ronda " + rondaActual + "/" + rondasMaximas);
+        txtTiempoRestante.setText(formatearTiempo(tiempoSeconds));
         mostrarLetra(letraElegida);
 
-        rvJugadoresPartida.setLayoutManager(new LinearLayoutManager(getContext(), LinearLayoutManager.HORIZONTAL, false));
-
+        rvJugadoresPartida.setLayoutManager(
+                new LinearLayoutManager(getContext(), LinearLayoutManager.HORIZONTAL, false)
+        );
 
         rvCategoriasJuego.setLayoutManager(new LinearLayoutManager(getContext()));
         List<Categoria> listaCategorias = new ArrayList<>();
-
 
         if (listaNombresCategorias != null && !listaNombresCategorias.isEmpty()) {
             for (String nombreCat : listaNombresCategorias) {
@@ -161,17 +175,66 @@ public class PartidaFragment extends Fragment {
         } else {
             listaCategorias.add(new Categoria("Sin categorías", R.drawable.outline_person_24));
         }
-        rvCategoriasJuego.setAdapter(new CategoriaPartidaAdapter(listaCategorias));
+
+        rvCategoriasJuego.setAdapter(new CategoriaPartidaAdapter(listaCategorias, respuestasJugador));
     }
 
     private void configurarBotones() {
         btnBasta.setOnClickListener(v -> {
-            List<String> categoriasPrueba = new ArrayList<>();
-            categoriasPrueba.add("Fruta");
-            categoriasPrueba.add("Animal");
-            categoriasPrueba.add("Color");
 
-           mostrarModalValidacionCarrusel(categoriasPrueba);
+            if (bastaActivado) {
+                return;
+            }
+
+            DatabaseReference nodoBasta = FirebaseDatabase.getInstance()
+                    .getReference("salas")
+                    .child(idSala)
+                    .child("bastaPresionado");
+
+            nodoBasta.runTransaction(new Transaction.Handler() {
+                @NonNull
+                @Override
+                public Transaction.Result doTransaction(@NonNull MutableData currentData) {
+                    Boolean valorActual = currentData.getValue(Boolean.class);
+
+                    if (valorActual != null && valorActual) {
+                        return Transaction.abort();
+                    }
+
+                    currentData.setValue(true);
+                    return Transaction.success(currentData);
+                }
+
+                @Override
+                public void onComplete(DatabaseError error, boolean committed, DataSnapshot currentData) {
+                    if (error != null) {
+                        Log.d("BASTA", "Error en transaction: " + error.getMessage());
+                        return;
+                    }
+
+                    if (committed) {
+                        bastaActivado = true;
+
+                        DatabaseReference nodoSala = FirebaseDatabase.getInstance()
+                                .getReference("salas")
+                                .child(idSala);
+
+                        Map<String, Object> datosBasta = new HashMap<>();
+                        datosBasta.put("bastaPresionadoPor", auth.getCurrentUser().getUid());
+                        datosBasta.put("bastaTimeStamp", ServerValue.TIMESTAMP);
+
+                        nodoSala.updateChildren(datosBasta).addOnCompleteListener(task -> {
+                            if (task.isSuccessful()) {
+                                Log.d("BASTA", "BASTA activado correctamente por: " + auth.getCurrentUser().getUid());
+                            } else {
+                                Log.d("BASTA", "Error guardando datos de BASTA");
+                            }
+                        });
+                    } else {
+                        Log.d("BASTA", "Otro jugador ya presionó BASTA primero");
+                    }
+                }
+            });
         });
 
         btnAbandonar.setOnClickListener(new View.OnClickListener() {
@@ -203,8 +266,13 @@ public class PartidaFragment extends Fragment {
 
     private void mostrarLetra(String letra) {
         txtInstruccionLetra.setText("Escribe respuestas que empiecen con la letra " + letra);
+
         String nombreDrawable = "letra_" + letra.toLowerCase(Locale.ROOT);
-        int idDrawable = getResources().getIdentifier(nombreDrawable, "drawable", requireContext().getPackageName());
+        int idDrawable = getResources().getIdentifier(
+                nombreDrawable,
+                "drawable",
+                requireContext().getPackageName()
+        );
 
         if (idDrawable != 0) {
             imgLetraActual.setImageResource(idDrawable);
@@ -232,19 +300,22 @@ public class PartidaFragment extends Fragment {
         }
     }
 
-    public void CambiarEstadoPartida(FirebaseAuth auth, String idSala){
+    public void CambiarEstadoPartida(FirebaseAuth auth, String idSala) {
+        if (VerificacionesAuth.VerificarInicioSesion(auth)) {
+            DatabaseReference nodoSala = FirebaseDatabase.getInstance()
+                    .getReference("salas")
+                    .child(idSala)
+                    .child("estadoPartida");
 
-        if(VerificacionesAuth.VerificarInicioSesion(auth)){
-            DatabaseReference nodoSala = FirebaseDatabase.getInstance().getReference("salas").child(idSala).child("estadoPartida");
             nodoSala.setValue("En juego").addOnCompleteListener(task -> {
-                if(task.isSuccessful()){
+                if (task.isSuccessful()) {
                     Log.d("ESTADO", "se cambio el estado de la partida correctamente");
                 }
             });
         }
     }
 
-    public void setearCronometroGlobal(){
+    public void setearCronometroGlobal() {
         DatabaseReference offsetRef = FirebaseDatabase.getInstance()
                 .getReference(".info/serverTimeOffset");
 
@@ -253,7 +324,7 @@ public class PartidaFragment extends Fragment {
             public void onDataChange(@NonNull DataSnapshot offsetSnapshot) {
                 Long offset = offsetSnapshot.getValue(Long.class);
 
-                if(offset == null){
+                if (offset == null) {
                     offset = 0L;
                 }
 
@@ -269,19 +340,20 @@ public class PartidaFragment extends Fragment {
                     public void onDataChange(@NonNull DataSnapshot snapshot) {
                         Long inicioRonda = snapshot.getValue(Long.class);
 
-                        if(inicioRonda != null){
+                        if (inicioRonda != null) {
                             long horaActualServidor = System.currentTimeMillis() + offsetFinal;
 
                             long duracionRondaMs = tiempoSeconds * 1000L;
                             long tiempoPasadoMs = horaActualServidor - inicioRonda;
                             long tiempoRestanteMs = duracionRondaMs - tiempoPasadoMs;
 
-                            if(tiempoRestanteMs <= 0){
+                            if (tiempoRestanteMs <= 0) {
                                 txtTiempoRestante.setText("00:00");
+                                guardarRespuestasJugador();
                                 return;
                             }
 
-                            if(cronometroRonda != null){
+                            if (cronometroRonda != null) {
                                 cronometroRonda.cancel();
                             }
 
@@ -295,9 +367,7 @@ public class PartidaFragment extends Fragment {
                                 @Override
                                 public void onFinish() {
                                     txtTiempoRestante.setText("00:00");
-
-                                    // Aquí después podemos poner:
-                                    // si es host, cambiar estadoPartida a "Validando"
+                                    guardarRespuestasJugador();
                                 }
                             };
 
@@ -323,14 +393,19 @@ public class PartidaFragment extends Fragment {
     public void onDestroyView() {
         super.onDestroyView();
 
-        if(cronometroRonda != null){
+        if (cronometroRonda != null) {
             cronometroRonda.cancel();
             cronometroRonda = null;
         }
+
+        if (nodoRespuestasRondaRef != null && listenerRespuestasValidacion != null) {
+            nodoRespuestasRondaRef.removeEventListener(listenerRespuestasValidacion);
+            listenerRespuestasValidacion = null;
+        }
     }
 
-    private String formatearTiempo(long totalSegundos){
-        if(totalSegundos < 0){
+    private String formatearTiempo(long totalSegundos) {
+        if (totalSegundos < 0) {
             totalSegundos = 0;
         }
 
@@ -340,16 +415,18 @@ public class PartidaFragment extends Fragment {
         return String.format(Locale.ROOT, "%02d:%02d", minutos, segundos);
     }
 
+    public void ObtenerEstadoPartida(FirebaseAuth auth, String salaID) {
+        if (VerificacionesAuth.VerificarInicioSesion(auth)) {
+            DatabaseReference nodoEstado = FirebaseDatabase.getInstance()
+                    .getReference("salas")
+                    .child(salaID);
 
-
-    public void ObtenerEstadoPartida(FirebaseAuth auth, String salaID){
-        if(VerificacionesAuth.VerificarInicioSesion(auth)){
-            DatabaseReference nodoEstado = FirebaseDatabase.getInstance().getReference("salas").child(salaID);
             nodoEstado.addValueEventListener(new ValueEventListener() {
                 @Override
                 public void onDataChange(@NonNull DataSnapshot snapshot) {
                     Sala sala = snapshot.getValue(Sala.class);
-                    if(sala != null){
+
+                    if (sala != null) {
                         txtEstadoPartida.setText("● " + sala.getEstadoPartida());
                     }
                 }
@@ -362,10 +439,15 @@ public class PartidaFragment extends Fragment {
         }
     }
 
-    public void ObtenerJugadoresYLlenarPartida(String idSala){
+    public void ObtenerJugadoresYLlenarPartida(String idSala) {
         auth = FirebaseAuth.getInstance();
-        if(VerificacionesAuth.VerificarInicioSesion(auth)){
-            DatabaseReference nodoSalas = FirebaseDatabase.getInstance().getReference("salas").child(idSala).child("jugadores");
+
+        if (VerificacionesAuth.VerificarInicioSesion(auth)) {
+            DatabaseReference nodoSalas = FirebaseDatabase.getInstance()
+                    .getReference("salas")
+                    .child(idSala)
+                    .child("jugadores");
+
             nodoSalas.addValueEventListener(new ValueEventListener() {
                 @Override
                 public void onDataChange(@NonNull DataSnapshot snapshot) {
@@ -375,15 +457,21 @@ public class PartidaFragment extends Fragment {
                         JugadorSala jugador = hijo.getValue(JugadorSala.class);
 
                         if (jugador != null) {
-                            jugadoresActivos.add(new Jugador(jugador.getNombre(), jugador.isEstaListo(), jugador.getUrlAvatar(), jugador.isEsHost()));
+                            jugadoresActivos.add(
+                                    new Jugador(
+                                            jugador.getNombre(),
+                                            jugador.isEstaListo(),
+                                            jugador.getUrlAvatar(),
+                                            jugador.isEsHost()
+                                    )
+                            );
                         }
                     }
 
-                    if(!jugadoresActivos.isEmpty()){
+                    if (!jugadoresActivos.isEmpty()) {
                         JugadorPartidaAdapter adaptador = new JugadorPartidaAdapter(jugadoresActivos);
                         rvJugadoresPartida.setAdapter(adaptador);
                     }
-
                 }
 
                 @Override
@@ -394,13 +482,19 @@ public class PartidaFragment extends Fragment {
         }
     }
 
-    private void mostrarModalValidacionCarrusel(List<String> categorias) {
+    private void mostrarModalValidacionCarrusel(
+            List<String> categorias,
+            Map<String, List<RespuestaValidacion>> respuestasPorCategoria
+    ) {
         Dialog dialog = new Dialog(requireContext());
         dialog.setContentView(R.layout.dialogo_respuestas);
 
         if (dialog.getWindow() != null) {
             dialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
-            dialog.getWindow().setLayout(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT);
+            dialog.getWindow().setLayout(
+                    ViewGroup.LayoutParams.MATCH_PARENT,
+                    ViewGroup.LayoutParams.MATCH_PARENT
+            );
         }
 
         ViewPager2 vpCategorias = dialog.findViewById(R.id.vpCategoriasValidacion);
@@ -412,25 +506,305 @@ public class PartidaFragment extends Fragment {
             btnSalir.setVisibility(View.VISIBLE);
         };
 
-        TarjetasValidacionAdapter adapter = new TarjetasValidacionAdapter(categorias, vpCategorias, accionMostrarBotonSalir);
-        vpCategorias.setAdapter(adapter);
+        TarjetasValidacionAdapter adapter = new TarjetasValidacionAdapter(
+                categorias,
+                respuestasPorCategoria,
+                vpCategorias,
+                accionMostrarBotonSalir
+        );
 
+        vpCategorias.setAdapter(adapter);
         vpCategorias.setOffscreenPageLimit(1);
 
         dialog.setCancelable(false);
         dialog.show();
     }
 
-    private void cambiarEstadoUsuarios(){
+    private void cambiarEstadoUsuarios() {
         Log.d("CAMBIAR", "Voy a poner estaListo=false en sala=" + idSala + " uid=" + auth.getCurrentUser().getUid());
-        if(VerificacionesAuth.VerificarInicioSesion(auth)){
-            DatabaseReference nodoEstadoUsuario = FirebaseDatabase.getInstance().getReference("salas").child(idSala).child("jugadores").child(auth.getCurrentUser().getUid()).child("estaListo");
+
+        if (VerificacionesAuth.VerificarInicioSesion(auth)) {
+            DatabaseReference nodoEstadoUsuario = FirebaseDatabase.getInstance()
+                    .getReference("salas")
+                    .child(idSala)
+                    .child("jugadores")
+                    .child(auth.getCurrentUser().getUid())
+                    .child("estaListo");
+
             nodoEstadoUsuario.setValue(false).addOnCompleteListener(task -> {
-               if(task.isSuccessful()){
-                   Log.d("CAMBIAR", "ESTADO DE USUARIO CAMBIADO A DESACTIVADO");
-               }
+                if (task.isSuccessful()) {
+                    Log.d("CAMBIAR", "ESTADO DE USUARIO CAMBIADO A DESACTIVADO");
+                }
             });
         }
     }
 
+    private void guardarRespuestasJugador() {
+        if (respuestasGuardadas) {
+            return;
+        }
+
+        respuestasGuardadas = true;
+
+        if (!VerificacionesAuth.VerificarInicioSesion(auth)) {
+            return;
+        }
+
+        String uid = auth.getCurrentUser().getUid();
+
+        HashMap<String, String> respuestasFinales = new HashMap<>();
+
+        if (listaNombresCategorias != null) {
+            for (String categoria : listaNombresCategorias) {
+                String respuesta = respuestasJugador.get(categoria);
+
+                if (respuesta == null) {
+                    respuesta = "";
+                }
+
+                respuestasFinales.put(categoria, respuesta.trim());
+            }
+        }
+
+        DatabaseReference nodoRespuestaJugador = FirebaseDatabase.getInstance()
+                .getReference("salas")
+                .child(idSala)
+                .child("respuestas")
+                .child("ronda_" + rondaActual)
+                .child(uid);
+
+        nodoRespuestaJugador.setValue(respuestasFinales).addOnCompleteListener(task -> {
+            if (task.isSuccessful()) {
+                Log.d("RESPUESTAS", "Respuestas guardadas correctamente");
+                esperarRespuestasYMostrarModal();
+            } else {
+                Log.d("RESPUESTAS", "Error al guardar respuestas");
+                respuestasGuardadas = false;
+            }
+        });
+    }
+
+    private void esperarRespuestasYMostrarModal() {
+        nodoRespuestasRondaRef = FirebaseDatabase.getInstance()
+                .getReference("salas")
+                .child(idSala)
+                .child("respuestas")
+                .child("ronda_" + rondaActual);
+
+        listenerRespuestasValidacion = nodoRespuestasRondaRef.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshotRespuestas) {
+                long cantidadRespuestas = snapshotRespuestas.getChildrenCount();
+
+                DatabaseReference nodoJugadores = FirebaseDatabase.getInstance()
+                        .getReference("salas")
+                        .child(idSala)
+                        .child("jugadores");
+
+                nodoJugadores.addListenerForSingleValueEvent(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(@NonNull DataSnapshot snapshotJugadores) {
+                        long cantidadJugadores = snapshotJugadores.getChildrenCount();
+
+                        if (cantidadJugadores > 0 && cantidadRespuestas >= cantidadJugadores) {
+                            if (modalValidacionMostrado) {
+                                return;
+                            }
+
+                            modalValidacionMostrado = true;
+
+                            if (!isAdded()) {
+                                return;
+                            }
+
+                            cargarRespuestasValidacionYMostrarModal();
+                        }
+                    }
+
+                    @Override
+                    public void onCancelled(@NonNull DatabaseError error) {
+
+                    }
+                });
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+
+            }
+        });
+    }
+
+    private void cargarRespuestasValidacionYMostrarModal() {
+        DatabaseReference nodoSala = FirebaseDatabase.getInstance()
+                .getReference("salas")
+                .child(idSala);
+
+        nodoSala.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshotSala) {
+                DataSnapshot snapshotJugadores = snapshotSala.child("jugadores");
+                DataSnapshot snapshotRespuestas = snapshotSala
+                        .child("respuestas")
+                        .child("ronda_" + rondaActual);
+
+                HashMap<String, List<RespuestaValidacion>> respuestasPorCategoria = new HashMap<>();
+
+                if (listaNombresCategorias == null || listaNombresCategorias.isEmpty()) {
+                    Log.d("VALIDACION", "No hay categorías para validar");
+                    return;
+                }
+
+                for (String categoria : listaNombresCategorias) {
+                    respuestasPorCategoria.put(categoria, new ArrayList<>());
+                }
+
+                for (DataSnapshot jugadorSnapshot : snapshotJugadores.getChildren()) {
+                    JugadorSala jugador = jugadorSnapshot.getValue(JugadorSala.class);
+                    String uidJugador = jugadorSnapshot.getKey();
+
+                    if (jugador != null && uidJugador != null) {
+                        String nombreJugador = jugador.getNombre();
+                        String fotoJugador = jugador.getUrlAvatar();
+
+                        for (String categoria : listaNombresCategorias) {
+                            String respuesta = snapshotRespuestas
+                                    .child(uidJugador)
+                                    .child(categoria)
+                                    .getValue(String.class);
+
+                            if (respuesta == null || respuesta.trim().isEmpty()) {
+                                respuesta = "Sin respuesta";
+                            }
+
+                            List<RespuestaValidacion> lista = respuestasPorCategoria.get(categoria);
+
+                            if (lista != null) {
+                                lista.add(
+                                        new RespuestaValidacion(
+                                                nombreJugador,
+                                                respuesta,
+                                                fotoJugador
+                                        )
+                                );
+                            }
+                        }
+                    }
+                }
+
+                if (!isAdded()) {
+                    return;
+                }
+
+                mostrarModalValidacionCarrusel(listaNombresCategorias, respuestasPorCategoria);
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+                Log.d("VALIDACION", "Error cargando respuestas: " + error.getMessage());
+            }
+        });
+    }
+
+    private void escucharBastaParaCronometro() {
+        DatabaseReference nodoBastaTimestamp = FirebaseDatabase.getInstance()
+                .getReference("salas")
+                .child(idSala)
+                .child("bastaTimeStamp");
+
+        nodoBastaTimestamp.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                Long bastaTimeStamp = snapshot.getValue(Long.class);
+
+                if (bastaTimeStamp != null) {
+                    recalcularCronometroConBasta(bastaTimeStamp);
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+                Log.d("BASTA", "Error escuchando bastaTimeStamp: " + error.getMessage());
+            }
+        });
+    }
+
+    private void recalcularCronometroConBasta(long bastaTimeStamp) {
+        DatabaseReference offsetRef = FirebaseDatabase.getInstance()
+                .getReference(".info/serverTimeOffset");
+
+        offsetRef.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot offsetSnapshot) {
+                Long offset = offsetSnapshot.getValue(Long.class);
+
+                if (offset == null) {
+                    offset = 0L;
+                }
+
+                long offsetFinal = offset;
+
+                DatabaseReference nodoInicioRonda = FirebaseDatabase.getInstance()
+                        .getReference("salas")
+                        .child(idSala)
+                        .child("inicioRonda");
+
+                nodoInicioRonda.addListenerForSingleValueEvent(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(@NonNull DataSnapshot snapshot) {
+                        Long inicioRonda = snapshot.getValue(Long.class);
+
+                        if (inicioRonda == null) {
+                            return;
+                        }
+
+                        long horaActualServidor = System.currentTimeMillis() + offsetFinal;
+
+                        long finOriginal = inicioRonda + (tiempoSeconds * 1000L);
+                        long finBasta = bastaTimeStamp + 10000L;
+
+                        long finReal = Math.min(finOriginal, finBasta);
+
+                        long tiempoRestanteMs = finReal - horaActualServidor;
+
+                        if (tiempoRestanteMs <= 0) {
+                            txtTiempoRestante.setText("00:00");
+                            guardarRespuestasJugador();
+                            return;
+                        }
+
+                        if (cronometroRonda != null) {
+                            cronometroRonda.cancel();
+                        }
+
+                        cronometroRonda = new CountDownTimer(tiempoRestanteMs, 1000) {
+                            @Override
+                            public void onTick(long millisUntilFinished) {
+                                long segundosRestantes = millisUntilFinished / 1000;
+                                txtTiempoRestante.setText(formatearTiempo(segundosRestantes));
+                            }
+
+                            @Override
+                            public void onFinish() {
+                                txtTiempoRestante.setText("00:00");
+                                guardarRespuestasJugador();
+                            }
+                        };
+
+                        cronometroRonda.start();
+                    }
+
+                    @Override
+                    public void onCancelled(@NonNull DatabaseError error) {
+
+                    }
+                });
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+
+            }
+        });
+    }
 }

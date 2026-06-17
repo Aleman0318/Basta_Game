@@ -213,6 +213,12 @@ public class LobbyFragment extends Fragment {
 
                             nodoEstado.setValue("En juego");
 
+                            DatabaseReference nodoSala = FirebaseDatabase.getInstance().getReference("salas").child(idSalaMetodo).child("bastaPresionado");
+                            nodoSala.setValue(false);
+
+                            DatabaseReference nodoTimeStamp = FirebaseDatabase.getInstance().getReference("salas").child(idSalaMetodo).child("bastaTimeStamp");
+                            nodoTimeStamp.setValue(null);
+
                             DatabaseReference nodoTiempoInicio = FirebaseDatabase.getInstance()
                                     .getReference("salas").child(idSalaMetodo)
                                     .child("inicioRonda");
