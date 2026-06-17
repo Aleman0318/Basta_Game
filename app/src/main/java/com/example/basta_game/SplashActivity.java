@@ -10,9 +10,21 @@ import androidx.core.view.WindowInsetsCompat;
 import android.content.Intent;
 import android.os.Handler;
 import android.os.Looper;
+import android.util.Log;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.widget.ImageView;
+
+import com.example.basta_game.models.ApiService;
+import com.example.basta_game.models.DiccionarioResponse;
+import com.example.basta_game.models.Palabra;
+import com.example.basta_game.models.RetrofitClient;
+
+import java.util.List;
+
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 
 public class SplashActivity extends AppCompatActivity {
     public ImageView img_logo_splash;
@@ -40,5 +52,33 @@ public class SplashActivity extends AppCompatActivity {
 
             finish();
         }, 3000);
+
+        ApiService apiService = RetrofitClient
+                .getClient()
+                        .create(ApiService.class);
+        Call<DiccionarioResponse> call = apiService.obtenerPalabras();
+
+        call.enqueue(new Callback<DiccionarioResponse>() {
+            @Override
+            public void onResponse(Call<DiccionarioResponse> call, Response<DiccionarioResponse> response) {
+
+                if (response.isSuccessful() && response.body() != null){
+
+                    List<Palabra> palabras = response.body().getData();
+                    Log.d("API", "Cantidad: " + palabras.size());
+
+                    for (Palabra p : palabras){
+                        Log.d("API", p.getPalabra() + " - " +
+                                p.getCategoria());
+                    }
+                }
+            }
+
+            @Override
+            public void onFailure(Call<DiccionarioResponse> call, Throwable throwable) {
+                Log.e("API", throwable.getMessage());
+            }
+        });
     }
+
 }
