@@ -64,8 +64,7 @@
                     android:layout_height="42dp"
                     android:background="@drawable/bg_fondo_icono"
                     android:padding="8dp"
-                    android:src="@drawable/outline_person_24"
-                    app:tint="@color/colorPrimary" />
+                    android:src="@drawable/outline_person_24"/>
 
                 <com.google.android.material.textfield.TextInputLayout
                     android:id="@+id/cajaNombre"
@@ -105,8 +104,7 @@
                     android:layout_height="42dp"
                     android:background="@drawable/bg_fondo_icono"
                     android:padding="8dp"
-                    android:src="@android:drawable/ic_dialog_email"
-                    app:tint="@color/colorPrimary" />
+                    android:src="@drawable/ic_correoelectro" />
 
                 <com.google.android.material.textfield.TextInputLayout
                     android:id="@+id/cajaCorreoReg"
@@ -146,7 +144,7 @@
                     android:layout_height="42dp"
                     android:background="@drawable/bg_fondo_icono"
                     android:padding="8dp"
-                    android:src="@android:drawable/ic_lock_idle_lock"
+                    android:src="@drawable/ic_candado"
                     app:tint="@color/colorPrimary" />
 
                 <com.google.android.material.textfield.TextInputLayout

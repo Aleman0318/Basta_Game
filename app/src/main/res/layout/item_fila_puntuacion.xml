@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:orientation="vertical">
+
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:paddingVertical="14dp"
+        android:gravity="center_vertical"
+        android:background="?attr/selectableItemBackground">
+
+        <TextView
+            android:id="@+id/txtPosicion"
+            android:layout_width="50dp"
+            android:layout_height="wrap_content"
+            android:fontFamily="@font/lilitaone_regular"
+            android:textAlignment="center"
+            android:textColor="@color/colorPrimary"
+            android:textSize="18sp"
+            tools:text="1°" />
+
+        <TextView
+            android:id="@+id/txtNombreJugadorTabla"
+            android:layout_width="130dp"
+            android:layout_height="wrap_content"
+            android:fontFamily="@font/manrope_regular"
+            android:paddingStart="8dp"
+            android:textColor="@color/colorTextoP"
+            android:textSize="16sp"
+            android:textStyle="bold"
+            android:maxLines="1"
+            android:ellipsize="end"
+            tools:text="JugadorDaigo" />
+
+        <TextView android:id="@+id/txtR1" android:layout_width="60dp" android:layout_height="wrap_content" android:fontFamily="@font/manrope_regular" android:textAlignment="center" android:textColor="@color/colorContenidoInputs" android:textSize="16sp" tools:text="45" />
+        <TextView android:id="@+id/txtR2" android:layout_width="60dp" android:layout_height="wrap_content" android:fontFamily="@font/manrope_regular" android:textAlignment="center" android:textColor="@color/colorContenidoInputs" android:textSize="16sp" tools:text="50" />
+        <TextView android:id="@+id/txtR3" android:layout_width="60dp" android:layout_height="wrap_content" android:fontFamily="@font/manrope_regular" android:textAlignment="center" android:textColor="@color/colorContenidoInputs" android:textSize="16sp" tools:text="30" />
+        <TextView android:id="@+id/txtR4" android:layout_width="60dp" android:layout_height="wrap_content" android:fontFamily="@font/manrope_regular" android:textAlignment="center" android:textColor="@color/colorContenidoInputs" android:textSize="16sp" tools:text="60" />
+        <TextView android:id="@+id/txtR5" android:layout_width="60dp" android:layout_height="wrap_content" android:fontFamily="@font/manrope_regular" android:textAlignment="center" android:textColor="@color/colorContenidoInputs" android:textSize="16sp" tools:text="10" />
+
+        <TextView
+            android:id="@+id/txtTotalPuntos"
+            android:layout_width="80dp"
+            android:layout_height="wrap_content"
+            android:fontFamily="@font/lilitaone_regular"
+            android:textAlignment="center"
+            android:textColor="@color/verde_puntos"
+            android:textSize="22sp"
+            tools:text="195" />
+    </LinearLayout>
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:background="@color/colorContenidoInputs"
+        android:layout_marginHorizontal="10dp"/>
+
+</LinearLayout>
