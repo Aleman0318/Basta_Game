@@ -1,6 +1,8 @@
 package com.example.basta_game.Adapters;
 
 import android.text.Editable;
+import android.text.InputFilter;
+import android.text.Spanned;
 import android.text.TextWatcher;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -82,6 +84,20 @@ public class CategoriaPartidaAdapter extends RecyclerView.Adapter<CategoriaParti
             txtNombre = itemView.findViewById(R.id.txtNombreCategoriaPartida);
             imgIcono = itemView.findViewById(R.id.imgIconoCategoriaPartida);
             etRespuesta = itemView.findViewById(R.id.etRespuestaCategoriaPartida);
+
+            InputFilter filtroBloquearNumeros = new InputFilter() {
+                @Override
+                public CharSequence filter(CharSequence source, int start, int end, Spanned dest, int dstart, int dend) {
+                    for (int i = start; i < end; i++) {
+                        if (Character.isDigit(source.charAt(i))) {
+                            return source.toString().replaceAll("[0-9]", "");
+                        }
+                    }
+                    return null;
+                }
+            };
+
+            etRespuesta.setFilters(new InputFilter[]{filtroBloquearNumeros});
         }
     }
 }

@@ -2,6 +2,7 @@ package com.example.basta_game.Fragments;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.text.InputFilter;
 
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
@@ -46,12 +47,17 @@ public class Unirse_salaFragment extends Fragment {
         btnRegresar.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-
                 getParentFragmentManager().popBackStack();
             }
         });
 
         etCodigoSala = view.findViewById(R.id.etSalaId);
+
+        etCodigoSala.setFilters(new InputFilter[] {
+                new InputFilter.AllCaps(),
+                new InputFilter.LengthFilter(6)
+        });
+
         unirseSalaNotification = view.findViewById(R.id.notificacionUnirseSala);
         auth = FirebaseAuth.getInstance();
 
@@ -162,7 +168,7 @@ public class Unirse_salaFragment extends Fragment {
                                                 } else {
                                                     NotificationHelper.show(
                                                             unirseSalaNotification,
-                                                            "La sala estÃ¡ llena",
+                                                            "La sala está llena",
                                                             NotificationHelper.ERROR
                                                     );
                                                 }
