@@ -211,6 +211,9 @@ public class LobbyFragment extends Fragment {
                                     "Todos los jugadores deben estar listos",
                                     NotificationHelper.ERROR
                             );
+
+
+
                         }else{
 
                             //abrimos la partida e insertamos el tiempo de inicio de la ronda
