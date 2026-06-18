@@ -12,6 +12,9 @@ public class Sounds {
     public static int celebracionSound;
     public static int perdedorSound;
     public static int notificacionesSound;
+    public static int loadingPartidaSound;
+    public static int conteoFinalSound;
+    public static int bastaSound;
 
     private static boolean initialized = false;
 
@@ -35,6 +38,9 @@ public class Sounds {
         celebracionSound = soundPool.load(context, R.raw.celebracion, 1);
         perdedorSound = soundPool.load(context, R.raw.perder, 1);
         notificacionesSound = soundPool.load(context, R.raw.notificaciones, 1);
+        loadingPartidaSound = soundPool.load(context, R.raw.loadingpartida, 1);
+        conteoFinalSound = soundPool.load(context, R.raw.conteo_final, 1);
+        bastaSound = soundPool.load(context, R.raw.bastaaa, 1);
 
         initialized = true;
     }
@@ -52,6 +58,21 @@ public class Sounds {
     public static void playNotificaciones(){
         if (soundPool != null){
             soundPool.play(notificacionesSound, 1f,1f, 1, 0, 1f);
+        }
+    }
+    public static void playLoadingPartida(){
+        if (soundPool != null){
+            soundPool.play(loadingPartidaSound, 1f, 1f, 1, 0,1f);
+        }
+    }
+    public static void conteoFinalPlay(){
+        if (soundPool != null){
+            soundPool.play(conteoFinalSound, 1f, 1f, 1, 0, 1);
+        }
+    }
+    public static void bastaPlay(){
+        if (soundPool != null){
+            soundPool.play(bastaSound, 1f, 1f, 1,0,1f);
         }
     }
     public static void release() {

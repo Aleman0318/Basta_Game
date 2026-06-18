@@ -10,8 +10,8 @@
     app:cardBackgroundColor="@color/colorBg"
     app:cardCornerRadius="20dp"
     app:cardElevation="4dp"
-    app:strokeColor="#B8C8FF"
-    app:strokeWidth="1.5dp">
+    app:strokeColor="@color/colorContenidoInputs"
+    app:strokeWidth="2dp">
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -24,7 +24,6 @@
         <com.google.android.material.card.MaterialCardView
             android:layout_width="50dp"
             android:layout_height="50dp"
-            app:cardBackgroundColor="#EAF2FF"
             app:cardCornerRadius="23dp"
             app:cardElevation="0dp">
 
@@ -55,10 +54,10 @@
             android:id="@+id/cardEstadoPill"
             android:layout_width="wrap_content"
             android:layout_height="36dp"
-            app:cardBackgroundColor="#F1FFF0"
+            app:cardBackgroundColor="@color/verde_bg"
             app:cardCornerRadius="18dp"
             app:cardElevation="0dp"
-            app:strokeColor="#BDE8B8"
+            app:strokeColor="@color/check"
             app:strokeWidth="1dp">
 
             <LinearLayout
@@ -74,8 +73,8 @@
                     android:layout_width="11dp"
                     android:layout_height="11dp"
                     android:layout_marginEnd="6dp"
-                    app:cardBackgroundColor="#4CAF50"
-                    app:cardCornerRadius="5.5dp"
+                    app:cardBackgroundColor="@color/verde_puntos"
+                    app:cardCornerRadius="5dp"
                     app:cardElevation="0dp"
                     app:strokeWidth="0dp" />
 
@@ -85,7 +84,7 @@
                     android:layout_height="wrap_content"
                     android:fontFamily="@font/manrope_regular"
                     android:text="Listo"
-                    android:textColor="#2E7D32"
+                    android:textColor="@color/verde_puntos"
                     android:textSize="14sp"
                     android:textStyle="bold"
                     tools:text="En Espera" />
