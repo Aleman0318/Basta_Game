@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/colorPrimary">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:gravity="center"
+        android:orientation="vertical">
+
+        <ImageView
+            android:layout_width="140dp"
+            android:layout_height="140dp"
+            android:src="@drawable/logo_basta" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Preparando partida..."
+            android:textColor="@android:color/white"
+            android:textSize="28sp"
+            android:fontFamily="@font/lilitaone_regular"
+            android:layout_marginTop="20dp"/>
+
+        <TextView
+            android:id="@+id/txtCuentaRegresiva"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="10"
+            android:textColor="@android:color/white"
+            android:textSize="42sp"
+            android:fontFamily="@font/lilitaone_regular"
+            android:layout_marginTop="12dp"/>
+
+        <ProgressBar
+            android:layout_width="60dp"
+            android:layout_height="60dp"
+            android:layout_marginTop="25dp"/>
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="¡Bienvenidos jugadores a Basta Online!"
+            android:textColor="@android:color/white"
+            android:textSize="18sp"
+            android:gravity="center"
+            android:paddingHorizontal="30dp"
+            android:layout_marginTop="25dp"/>
+
+    </LinearLayout>
+
+</FrameLayout>
