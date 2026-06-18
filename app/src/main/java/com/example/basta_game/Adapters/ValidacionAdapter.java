@@ -12,6 +12,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.bumptech.glide.Glide;
 import com.example.basta_game.R;
 import com.example.basta_game.models.RespuestaValidacion;
+import com.example.basta_game.utils.Animations;
 
 import java.util.List;
 
@@ -59,6 +60,12 @@ public class ValidacionAdapter extends RecyclerView.Adapter<ValidacionAdapter.Vi
             if (position == elementosRevelados - 1 && elementosRevelados <= respuestas.size()) {
                 btnValidar.setVisibility(View.VISIBLE);
                 txtPuntos.setVisibility(View.GONE);
+
+                Animations.animacionLanzada(holder.txtUsuario);
+                Animations.animacionLanzada(holder.txtRespuesta);
+                Animations.animacionLanzada(holder.imgAvatar);
+                Animations.animacionLanzada(btnValidar);
+
             } else {
                 btnValidar.setVisibility(View.GONE);
                 txtPuntos.setVisibility(View.VISIBLE);
