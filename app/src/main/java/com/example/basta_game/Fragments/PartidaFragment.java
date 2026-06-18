@@ -30,6 +30,7 @@ import com.example.basta_game.models.JugadorSala;
 import com.example.basta_game.models.RespuestaValidacion;
 import com.example.basta_game.models.Sala;
 import com.example.basta_game.utils.CustomDialogHelper;
+import com.example.basta_game.utils.Sounds;
 import com.example.basta_game.utils.VerificacionesAuth;
 import com.google.android.material.button.MaterialButton;
 import com.google.firebase.auth.FirebaseAuth;
@@ -66,6 +67,9 @@ public class PartidaFragment extends Fragment {
     private ArrayList<String> listaNombresCategorias;
 
     private DatabaseReference salaRef;
+
+    private boolean sonidoFinalReproducido = false;
+
 
     private CountDownTimer cronometroRonda;
 
@@ -361,6 +365,10 @@ public class PartidaFragment extends Fragment {
                                 @Override
                                 public void onTick(long millisUntilFinished) {
                                     long segundosRestantes = millisUntilFinished / 1000;
+                                    if(segundosRestantes == 5 && !sonidoFinalReproducido){
+                                        sonidoFinalReproducido = true;
+                                        Sounds.conteoFinalPlay();
+                                    }
                                     txtTiempoRestante.setText(formatearTiempo(segundosRestantes));
                                 }
 
@@ -706,6 +714,8 @@ public class PartidaFragment extends Fragment {
         });
     }
 
+    private boolean bastaSonidoReproducido = false;
+
     private void escucharBastaParaCronometro() {
         DatabaseReference nodoBastaTimestamp = FirebaseDatabase.getInstance()
                 .getReference("salas")
@@ -718,6 +728,12 @@ public class PartidaFragment extends Fragment {
                 Long bastaTimeStamp = snapshot.getValue(Long.class);
 
                 if (bastaTimeStamp != null) {
+
+                    if (!bastaSonidoReproducido) {
+                        bastaSonidoReproducido = true;
+                        Sounds.bastaPlay();
+                    }
+
                     recalcularCronometroConBasta(bastaTimeStamp);
                 }
             }
@@ -778,9 +794,17 @@ public class PartidaFragment extends Fragment {
                         }
 
                         cronometroRonda = new CountDownTimer(tiempoRestanteMs, 1000) {
+
                             @Override
                             public void onTick(long millisUntilFinished) {
-                                long segundosRestantes = millisUntilFinished / 1000;
+
+                                long segundosRestantes = (millisUntilFinished + 999) / 1000;
+
+                                if (segundosRestantes == 5 && !sonidoFinalReproducido) {
+                                    sonidoFinalReproducido = true;
+                                    Sounds.conteoFinalPlay();
+                                }
+
                                 txtTiempoRestante.setText(formatearTiempo(segundosRestantes));
                             }
 

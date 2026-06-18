@@ -44,6 +44,7 @@ public class HomeActivity extends AppCompatActivity {
             return insets;
         });
 
+
         notificationHome = findViewById(R.id.notificationHome);
         auth = FirebaseAuth.getInstance();
 

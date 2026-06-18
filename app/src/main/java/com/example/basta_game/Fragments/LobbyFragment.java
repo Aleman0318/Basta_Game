@@ -211,13 +211,18 @@ public class LobbyFragment extends Fragment {
                                     "Todos los jugadores deben estar listos",
                                     NotificationHelper.ERROR
                             );
+
+
+
                         }else{
+
                             //abrimos la partida e insertamos el tiempo de inicio de la ronda
                             DatabaseReference nodoEstado = FirebaseDatabase.getInstance()
                                     .getReference("salas")
                                     .child(idSalaMetodo)
                                     .child("estadoPartida");
 
+                                nodoEstado.setValue("En juego");
                             nodoEstado.setValue("En juego");
 
                             DatabaseReference nodoSala = FirebaseDatabase.getInstance().getReference("salas").child(idSalaMetodo).child("bastaPresionado");
@@ -227,10 +232,14 @@ public class LobbyFragment extends Fragment {
                             nodoTimeStamp.setValue(null);
 
                             DatabaseReference nodoTiempoInicio = FirebaseDatabase.getInstance()
-                                    .getReference("salas").child(idSalaMetodo)
+                                    .getReference("salas")
+                                    .child(idSalaMetodo)
                                     .child("inicioRonda");
 
-                            nodoTiempoInicio.setValue(ServerValue.TIMESTAMP);
+                            // Sumamos los 10 segundos del loading
+                            long tiempoInicioReal = System.currentTimeMillis() + 10000;
+
+                            nodoTiempoInicio.setValue(tiempoInicioReal);
                         }
                     }
 
@@ -366,11 +375,11 @@ public class LobbyFragment extends Fragment {
                         Log.d("OBTENER","EL VALOR DE LA SALA ES: " + estado);
                         if("En juego".equals(estado)){
                             Log.d("OBTENER","ENTRO AL IF DE CREAR PARTIDA");
-                            PartidaFragment partida = new PartidaFragment();
-                            partida.setArguments(bundleDatosPartida);
+                            LoadingPartidaFragment loading = new LoadingPartidaFragment();
+                            loading.setArguments(bundleDatosPartida);
 
                             getParentFragmentManager().beginTransaction()
-                                    .replace(R.id.sala_fragment_container, partida)
+                                    .replace(R.id.sala_fragment_container, loading)
                                     .commit();
                             yaEntroAPartida = true;
                             Log.d("OBTENER","SE CREO LA PARTIDA A PARTIDA");
