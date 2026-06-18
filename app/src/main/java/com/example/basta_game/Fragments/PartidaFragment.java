@@ -103,6 +103,8 @@ public class PartidaFragment extends Fragment {
 
     private FirebaseAuth auth;
 
+    private View notificationPartida;
+
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         return inflater.inflate(R.layout.fragment_partida, container, false);
@@ -154,6 +156,7 @@ public class PartidaFragment extends Fragment {
         btnBasta = view.findViewById(R.id.btnBasta);
         rvJugadoresPartida = view.findViewById(R.id.rvJugadoresPartida);
         rvCategoriasJuego = view.findViewById(R.id.rvCategoriasJuego);
+        notificationPartida = view.findViewById(R.id.notificationPartida);
     }
 
     private void configurarFirebase() {
@@ -750,22 +753,37 @@ public class PartidaFragment extends Fragment {
     private boolean bastaSonidoReproducido = false;
 
     private void escucharBastaParaCronometro() {
-        DatabaseReference nodoBastaTimestamp = FirebaseDatabase.getInstance()
+        DatabaseReference nodoBastaRef = FirebaseDatabase.getInstance()
                 .getReference("salas")
-                .child(idSala)
-                .child("bastaTimeStamp");
+                .child(idSala);
 
-        nodoBastaTimestamp.addValueEventListener(new ValueEventListener() {
+        nodoBastaRef.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
-                Long bastaTimeStamp = snapshot.getValue(Long.class);
+                Long bastaTimeStamp = snapshot.child("bastaTimeStamp").getValue(Long.class);
+                String uidBasta = snapshot.child("bastaPresionadoPor").getValue(String.class);
 
-                if (bastaTimeStamp != null) {
+                if (bastaTimeStamp != null && uidBasta != null) {
 
                     if (!bastaSonidoReproducido) {
                         bastaSonidoReproducido = true;
                         Sounds.bastaPlay();
                     }
+
+                    // Obtenemos el nombre del jugador usando su UID
+                    String nombreJugadorBasta = snapshot.child("jugadores").child(uidBasta).child("nombre").getValue(String.class);
+
+                    if (nombreJugadorBasta == null) {
+                        nombreJugadorBasta = "Un jugador";
+                    }
+
+                    // Lanzamos TU notificación personalizada
+                    // Usa el tipo de notificación correcto (SUCCESS, INFO, WARNING, etc.) según como lo tengas en tu NotificationHelper
+                    com.example.basta_game.utils.NotificationHelper.show(
+                            notificationPartida,
+                            "¡" + nombreJugadorBasta + " presionó BASTA!",
+                            com.example.basta_game.utils.NotificationHelper.SUCCESS
+                    );
 
                     recalcularCronometroConBasta(bastaTimeStamp);
                 }

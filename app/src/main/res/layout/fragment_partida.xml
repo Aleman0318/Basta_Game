@@ -1,257 +1,274 @@
 <?xml version="1.0" encoding="utf-8"?>
-<ScrollView
+<androidx.constraintlayout.widget.ConstraintLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:fillViewport="true"
     android:background="@drawable/bg_fondocuaderno">
 
-    <LinearLayout
+    <ScrollView
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="vertical"
-        android:paddingStart="18dp"
-        android:paddingEnd="18dp"
-        android:paddingTop="8dp"
-        android:paddingBottom="50dp">
+        android:layout_height="match_parent"
+        android:fillViewport="true"
+        android:isScrollContainer="true">
 
-        <FrameLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content">
-
-            <ImageView
-                android:id="@+id/imgLogoBasta"
-                android:layout_width="match_parent"
-                android:layout_height="120dp"
-                android:adjustViewBounds="true"
-                android:scaleType="fitCenter"
-                android:src="@drawable/logo_basta" />
-
-        </FrameLayout>
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="6dp"
-            android:orientation="horizontal"
-            android:gravity="center"
-            android:weightSum="3">
+            android:orientation="vertical"
+            android:paddingStart="18dp"
+            android:paddingEnd="18dp"
+            android:paddingTop="8dp"
+            android:paddingBottom="50dp">
 
-            <TextView
-                android:id="@+id/txtCodigoSala"
-                android:layout_width="0dp"
-                android:layout_height="35dp"
-                android:layout_weight="1"
-                android:gravity="center"
-                android:drawableStart="@drawable/ic_calendario"
-                android:paddingStart="12dp"
-                android:paddingEnd="12dp"
-                android:background="@drawable/bg_chip_blanco_azul"
-                android:fontFamily="@font/lilitaone_regular"
-                android:text="Sala TEST1"
-                android:drawableTint="@color/colorPrimary"
-                android:textColor="#064DDB"
-                android:textSize="14sp">
-            </TextView>
+            <FrameLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
 
-            <TextView
-                android:id="@+id/txtRondaActual"
-                android:layout_width="0dp"
-                android:layout_height="35dp"
-                android:layout_marginStart="8dp"
-                android:layout_marginEnd="8dp"
-                android:layout_weight="1"
-                android:gravity="center"
-                android:drawableStart="@drawable/ic_rueda"
-                android:drawableTint="@color/colorPrimary"
-                android:paddingStart="12dp"
-                android:paddingEnd="12dp"
-                android:background="@drawable/bg_chip_blanco_gris"
-                android:fontFamily="@font/lilitaone_regular"
-                android:text="Ronda 1/5"
-                android:textColor="#064DDB"
-                android:textSize="14sp" />
+                <ImageView
+                    android:id="@+id/imgLogoBasta"
+                    android:layout_width="match_parent"
+                    android:layout_height="120dp"
+                    android:adjustViewBounds="true"
+                    android:scaleType="fitCenter"
+                    android:src="@drawable/logo_basta" />
 
-            <TextView
-                android:id="@+id/txtEstadoPartida"
-                android:layout_width="0dp"
-                android:layout_height="35dp"
-                android:layout_weight="1"
-                android:gravity="center"
-                android:background="@drawable/bg_chip__blanco_verde"
-                android:fontFamily="@font/lilitaone_regular"
-                android:text="● En espera"
-                android:textColor="#3A8C24"
-                android:textSize="14sp" />
+            </FrameLayout>
 
-        </LinearLayout>
-
-        <com.google.android.material.card.MaterialCardView
-            android:id="@+id/cardJugadores"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
-            app:cardCornerRadius="22dp"
-            app:cardBackgroundColor="#FFFFFF"
-            app:strokeWidth="1dp"
-            app:strokeColor="@color/colorPrimary">
-
-            <androidx.recyclerview.widget.RecyclerView
-                android:id="@+id/rvJugadoresPartida"
+            <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:padding="8dp"
-                android:clipToPadding="false" />
+                android:layout_marginTop="6dp"
+                android:orientation="horizontal"
+                android:gravity="center"
+                android:weightSum="3">
 
-        </com.google.android.material.card.MaterialCardView>
-
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="6dp"
-            android:orientation="horizontal"
-            android:gravity="center_vertical">
-
-            <FrameLayout
-                android:id="@+id/contenedorLetra"
-                android:layout_width="0dp"
-                android:layout_height="140dp"
-                android:layout_weight="1"
-                android:layout_marginEnd="10dp">
-
-                <ImageView
-                    android:id="@+id/imgMarcoLetra"
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:scaleType="fitCenter"
-                    android:src="@drawable/marco_rojo" />
-
-                <ImageView
-                    android:id="@+id/imgLetraActual"
-                    android:layout_width="110dp"
-                    android:layout_height="110dp"
-                    android:layout_gravity="center"
-                    android:scaleType="fitCenter"
-                    android:src="@drawable/letra_m"
-                    android:rotation="-9"/>
-
-            </FrameLayout>
-
-            <FrameLayout
-                android:layout_width="0dp"
-                android:layout_height="140dp"
-                android:layout_weight="1">
-
-                <LinearLayout
-                    android:id="@+id/cardTiempo"
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:layout_marginTop="8dp"
-                    android:layout_marginEnd="8dp"
-                    android:orientation="vertical"
+                <TextView
+                    android:id="@+id/txtCodigoSala"
+                    android:layout_width="0dp"
+                    android:layout_height="35dp"
+                    android:layout_weight="1"
                     android:gravity="center"
-                    android:background="@drawable/bg_chip_blanco_azul">
+                    android:drawableStart="@drawable/ic_calendario"
+                    android:paddingStart="12dp"
+                    android:paddingEnd="12dp"
+                    android:background="@drawable/bg_chip_blanco_azul"
+                    android:fontFamily="@font/lilitaone_regular"
+                    android:text="Sala TEST1"
+                    android:drawableTint="@color/colorPrimary"
+                    android:textColor="#064DDB"
+                    android:textSize="14sp">
+                </TextView>
 
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:fontFamily="@font/lilitaone_regular"
-                        android:text="Tiempo restante"
-                        android:textColor="#064DDB"
-                        android:textSize="16sp" />
+                <TextView
+                    android:id="@+id/txtRondaActual"
+                    android:layout_width="0dp"
+                    android:layout_height="35dp"
+                    android:layout_marginStart="8dp"
+                    android:layout_marginEnd="8dp"
+                    android:layout_weight="1"
+                    android:gravity="center"
+                    android:drawableStart="@drawable/ic_rueda"
+                    android:drawableTint="@color/colorPrimary"
+                    android:paddingStart="12dp"
+                    android:paddingEnd="12dp"
+                    android:background="@drawable/bg_chip_blanco_gris"
+                    android:fontFamily="@font/lilitaone_regular"
+                    android:text="Ronda 1/5"
+                    android:textColor="#064DDB"
+                    android:textSize="14sp" />
 
-                    <TextView
-                        android:id="@+id/txtTiempoRestante"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="2dp"
-                        android:fontFamily="@font/summer"
-                        android:text="--:--"
-                        android:textColor="#E91D2C"
-                        android:textSize="40sp" />
+                <TextView
+                    android:id="@+id/txtEstadoPartida"
+                    android:layout_width="0dp"
+                    android:layout_height="35dp"
+                    android:layout_weight="1"
+                    android:gravity="center"
+                    android:background="@drawable/bg_chip__blanco_verde"
+                    android:fontFamily="@font/lilitaone_regular"
+                    android:text="● En espera"
+                    android:textColor="#3A8C24"
+                    android:textSize="14sp" />
 
-                    <View
-                        android:layout_width="110dp"
-                        android:layout_height="1dp"
-                        android:layout_marginVertical="0dp"
-                        android:background="@color/colorBasta" />
+            </LinearLayout>
 
-                    <TextView
-                        android:id="@+id/txtInstruccionLetra"
+            <com.google.android.material.card.MaterialCardView
+                android:id="@+id/cardJugadores"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                app:cardCornerRadius="22dp"
+                app:cardBackgroundColor="#FFFFFF"
+                app:strokeWidth="1dp"
+                app:strokeColor="@color/colorPrimary">
+
+                <androidx.recyclerview.widget.RecyclerView
+                    android:id="@+id/rvJugadoresPartida"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:padding="8dp"
+                    android:clipToPadding="false" />
+
+            </com.google.android.material.card.MaterialCardView>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="6dp"
+                android:orientation="horizontal"
+                android:gravity="center_vertical">
+
+                <FrameLayout
+                    android:id="@+id/contenedorLetra"
+                    android:layout_width="0dp"
+                    android:layout_height="140dp"
+                    android:layout_weight="1"
+                    android:layout_marginEnd="10dp">
+
+                    <ImageView
+                        android:id="@+id/imgMarcoLetra"
                         android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
+                        android:layout_height="match_parent"
+                        android:scaleType="fitCenter"
+                        android:src="@drawable/marco_rojo" />
+
+                    <ImageView
+                        android:id="@+id/imgLetraActual"
+                        android:layout_width="110dp"
+                        android:layout_height="110dp"
+                        android:layout_gravity="center"
+                        android:scaleType="fitCenter"
+                        android:src="@drawable/letra_m"
+                        android:rotation="-9"/>
+
+                </FrameLayout>
+
+                <FrameLayout
+                    android:layout_width="0dp"
+                    android:layout_height="140dp"
+                    android:layout_weight="1">
+
+                    <LinearLayout
+                        android:id="@+id/cardTiempo"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:layout_marginTop="8dp"
+                        android:layout_marginEnd="8dp"
+                        android:orientation="vertical"
                         android:gravity="center"
-                        android:fontFamily="@font/manrope_regular"
-                        android:text="Respuestas con la letra M"
-                        android:textColor="#064DDB"
-                        android:textSize="11sp"
-                        android:textStyle="bold" />
+                        android:background="@drawable/bg_chip_blanco_azul">
 
-                </LinearLayout>
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:fontFamily="@font/lilitaone_regular"
+                            android:text="Tiempo restante"
+                            android:textColor="#064DDB"
+                            android:textSize="16sp" />
 
-                <ImageView
-                    android:layout_width="55dp"
-                    android:layout_height="55dp"
-                    android:layout_marginTop="-5dp"
-                    android:layout_marginRight="6dp"
-                    android:layout_gravity="top|end"
-                    android:src="@drawable/ic_crono" />
-            </FrameLayout>
+                        <TextView
+                            android:id="@+id/txtTiempoRestante"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="2dp"
+                            android:fontFamily="@font/summer"
+                            android:text="--:--"
+                            android:textColor="#E91D2C"
+                            android:textSize="40sp" />
+
+                        <View
+                            android:layout_width="110dp"
+                            android:layout_height="1dp"
+                            android:layout_marginVertical="0dp"
+                            android:background="@color/colorBasta" />
+
+                        <TextView
+                            android:id="@+id/txtInstruccionLetra"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:gravity="center"
+                            android:fontFamily="@font/manrope_regular"
+                            android:text="Respuestas con la letra M"
+                            android:textColor="#064DDB"
+                            android:textSize="11sp"
+                            android:textStyle="bold" />
+
+                    </LinearLayout>
+
+                    <ImageView
+                        android:layout_width="55dp"
+                        android:layout_height="55dp"
+                        android:layout_marginTop="-5dp"
+                        android:layout_marginRight="6dp"
+                        android:layout_gravity="top|end"
+                        android:src="@drawable/ic_crono" />
+                </FrameLayout>
+
+            </LinearLayout>
+
+            <com.google.android.material.card.MaterialCardView
+                android:id="@+id/cardRespuestas"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                app:cardCornerRadius="22dp"
+                app:cardBackgroundColor="#FFFFFF"
+                app:strokeWidth="1dp"
+                app:strokeColor="#D6E0FF">
+
+                <androidx.recyclerview.widget.RecyclerView
+                    android:id="@+id/rvCategoriasJuego"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:minHeight="220dp"
+                    android:padding="8dp"
+                    android:clipToPadding="false"
+                    android:scrollbars="vertical"
+                    android:fadeScrollbars="false"
+                    android:scrollbarSize="4dp" />
+
+            </com.google.android.material.card.MaterialCardView>
+
+            <androidx.appcompat.widget.AppCompatButton
+                android:id="@+id/btnBasta"
+                android:layout_width="match_parent"
+                android:layout_height="62dp"
+                android:layout_marginTop="15dp"
+                android:background="@drawable/bg_boton_basta"
+                android:fontFamily="@font/lilitaone_regular"
+                android:text="¡BASTA!"
+                android:textAllCaps="false"
+                android:textColor="@color/blanco"
+                android:textSize="32sp"/>
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnSalida"
+                android:layout_width="match_parent"
+                android:layout_height="62dp"
+                android:layout_marginTop="15dp"
+                android:background="@drawable/bg_boton_exit"
+                app:backgroundTint="@null"
+                android:fontFamily="@font/lilitaone_regular"
+                android:text="Salir"
+                android:textAllCaps="false"
+                android:textColor="@color/blanco"
+                android:textSize="36sp"
+                app:icon="@drawable/salida"
+                app:iconSize="46dp"
+                app:iconGravity="textEnd"
+                app:iconTint="@color/blanco" />
 
         </LinearLayout>
+    </ScrollView>
 
-        <com.google.android.material.card.MaterialCardView
-            android:id="@+id/cardRespuestas"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
-            app:cardCornerRadius="22dp"
-            app:cardBackgroundColor="#FFFFFF"
-            app:strokeWidth="1dp"
-            app:strokeColor="#D6E0FF">
+    <include
+        android:id="@+id/notificationPartida"
+        layout="@layout/component_notification_card"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        app:layout_constraintWidth_percent="0.80"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent" />
 
-            <androidx.recyclerview.widget.RecyclerView
-                android:id="@+id/rvCategoriasJuego"
-                android:layout_width="match_parent"
-                android:layout_height="220dp"
-                android:padding="8dp"
-                android:clipToPadding="false"
-                android:scrollbars="vertical"
-                android:fadeScrollbars="false"
-                android:scrollbarSize="4dp" />
-
-        </com.google.android.material.card.MaterialCardView>
-
-        <androidx.appcompat.widget.AppCompatButton
-            android:id="@+id/btnBasta"
-            android:layout_width="match_parent"
-            android:layout_height="62dp"
-            android:layout_marginTop="15dp"
-            android:background="@drawable/bg_boton_basta"
-            android:fontFamily="@font/lilitaone_regular"
-            android:text="¡BASTA!"
-            android:textAllCaps="false"
-            android:textColor="@color/blanco"
-            android:textSize="32sp"/>
-
-        <com.google.android.material.button.MaterialButton
-            android:id="@+id/btnSalida"
-            android:layout_width="match_parent"
-            android:layout_height="62dp"
-            android:layout_marginTop="15dp"
-            android:background="@drawable/bg_boton_exit"
-            app:backgroundTint="@null"
-            android:fontFamily="@font/lilitaone_regular"
-            android:text="Salir"
-            android:textAllCaps="false"
-            android:textColor="@color/blanco"
-            android:textSize="36sp"
-            app:icon="@drawable/salida"
-            app:iconSize="46dp"
-            app:iconGravity="textEnd"
-            app:iconTint="@color/blanco" />
-
-
-    </LinearLayout>
-
-</ScrollView>
+</androidx.constraintlayout.widget.ConstraintLayout>
