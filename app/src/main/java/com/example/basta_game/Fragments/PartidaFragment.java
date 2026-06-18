@@ -12,6 +12,13 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.example.basta_game.models.ApiService;
+import com.example.basta_game.models.ItemRespuesta;
+import com.example.basta_game.models.ResultadoApi;
+import com.example.basta_game.models.RetrofitClient;
+import com.example.basta_game.models.ValidacionRequest;
+import com.example.basta_game.models.ValidacionResponse;
+
 import androidx.annotation.NonNull;
 import androidx.appcompat.widget.AppCompatButton;
 import androidx.fragment.app.Fragment;
@@ -69,7 +76,6 @@ public class PartidaFragment extends Fragment {
     private DatabaseReference salaRef;
 
     private boolean sonidoFinalReproducido = false;
-
 
     private CountDownTimer cronometroRonda;
 
@@ -145,9 +151,7 @@ public class PartidaFragment extends Fragment {
         txtInstruccionLetra = view.findViewById(R.id.txtInstruccionLetra);
         btnAbandonar = view.findViewById(R.id.btnSalida);
         imgLetraActual = view.findViewById(R.id.imgLetraActual);
-
         btnBasta = view.findViewById(R.id.btnBasta);
-
         rvJugadoresPartida = view.findViewById(R.id.rvJugadoresPartida);
         rvCategoriasJuego = view.findViewById(R.id.rvCategoriasJuego);
     }
@@ -185,7 +189,6 @@ public class PartidaFragment extends Fragment {
 
     private void configurarBotones() {
         btnBasta.setOnClickListener(v -> {
-
             if (bastaActivado) {
                 return;
             }
@@ -285,22 +288,14 @@ public class PartidaFragment extends Fragment {
 
     private int obtenerIconoParaCategoria(String nombre) {
         switch (nombre.toLowerCase(Locale.ROOT)) {
-            case "animal":
-                return R.drawable.ic_animal3;
-            case "color":
-                return R.drawable.ic_paleta2;
-            case "fruta":
-                return R.drawable.ic_frutas2;
-            case "país":
-                return R.drawable.ic_pais2;
-            case "cosa":
-                return R.drawable.ic_cosa;
-            case "nombre":
-                return R.drawable.ic_nombre;
-            case "apellido":
-                return R.drawable.ic_mujer;
-            default:
-                return R.drawable.perfil_menuu;
+            case "animal": return R.drawable.ic_animal3;
+            case "color": return R.drawable.ic_paleta2;
+            case "fruta": return R.drawable.ic_frutas2;
+            case "país": return R.drawable.ic_pais2;
+            case "cosa": return R.drawable.ic_cosa;
+            case "nombre": return R.drawable.ic_nombre;
+            case "apellido": return R.drawable.ic_mujer;
+            default: return R.drawable.perfil_menuu;
         }
     }
 
@@ -384,16 +379,12 @@ public class PartidaFragment extends Fragment {
                     }
 
                     @Override
-                    public void onCancelled(@NonNull DatabaseError error) {
-
-                    }
+                    public void onCancelled(@NonNull DatabaseError error) { }
                 });
             }
 
             @Override
-            public void onCancelled(@NonNull DatabaseError error) {
-
-            }
+            public void onCancelled(@NonNull DatabaseError error) { }
         });
     }
 
@@ -440,9 +431,7 @@ public class PartidaFragment extends Fragment {
                 }
 
                 @Override
-                public void onCancelled(@NonNull DatabaseError error) {
-
-                }
+                public void onCancelled(@NonNull DatabaseError error) { }
             });
         }
     }
@@ -483,54 +472,12 @@ public class PartidaFragment extends Fragment {
                 }
 
                 @Override
-                public void onCancelled(@NonNull DatabaseError error) {
-
-                }
+                public void onCancelled(@NonNull DatabaseError error) { }
             });
         }
     }
 
-    private void mostrarModalValidacionCarrusel(
-            List<String> categorias,
-            Map<String, List<RespuestaValidacion>> respuestasPorCategoria
-    ) {
-        Dialog dialog = new Dialog(requireContext());
-        dialog.setContentView(R.layout.dialogo_respuestas);
-
-        if (dialog.getWindow() != null) {
-            dialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
-            dialog.getWindow().setLayout(
-                    ViewGroup.LayoutParams.MATCH_PARENT,
-                    ViewGroup.LayoutParams.MATCH_PARENT
-            );
-        }
-
-        ViewPager2 vpCategorias = dialog.findViewById(R.id.vpCategoriasValidacion);
-        androidx.appcompat.widget.AppCompatButton btnSalir = dialog.findViewById(R.id.btnSalirRevision);
-
-        btnSalir.setOnClickListener(v -> dialog.dismiss());
-
-        Runnable accionMostrarBotonSalir = () -> {
-            btnSalir.setVisibility(View.VISIBLE);
-        };
-
-        TarjetasValidacionAdapter adapter = new TarjetasValidacionAdapter(
-                categorias,
-                respuestasPorCategoria,
-                vpCategorias,
-                accionMostrarBotonSalir
-        );
-
-        vpCategorias.setAdapter(adapter);
-        vpCategorias.setOffscreenPageLimit(1);
-
-        dialog.setCancelable(false);
-        dialog.show();
-    }
-
     private void cambiarEstadoUsuarios() {
-        Log.d("CAMBIAR", "Voy a poner estaListo=false en sala=" + idSala + " uid=" + auth.getCurrentUser().getUid());
-
         if (VerificacionesAuth.VerificarInicioSesion(auth)) {
             DatabaseReference nodoEstadoUsuario = FirebaseDatabase.getInstance()
                     .getReference("salas")
@@ -592,6 +539,91 @@ public class PartidaFragment extends Fragment {
         });
     }
 
+    // Le agregamos el parámetro del Mapa para poder comparar palabras
+    private void validarRespuestasConApi(Map<String, List<RespuestaValidacion>> respuestasPorCategoria) {
+        List<ItemRespuesta> respuestasApi = new ArrayList<>();
+
+        for (String categoria : listaNombresCategorias) {
+            String respuesta = respuestasJugador.get(categoria);
+            if(respuesta == null){
+                respuesta = "";
+            }
+            String categoriaApi = mapearCategoriaParaApi(categoria);
+            respuestasApi.add(new ItemRespuesta(categoriaApi, respuesta.trim()));
+        }
+
+        ValidacionRequest request = new ValidacionRequest(letraElegida, respuestasApi);
+        ApiService apiService = RetrofitClient.getClient().create(ApiService.class);
+
+        apiService.validarRonda(request).enqueue(new retrofit2.Callback<ValidacionResponse>() {
+            @Override
+            public void onResponse(retrofit2.Call<ValidacionResponse> call, retrofit2.Response<ValidacionResponse> response) {
+                if(response.isSuccessful() && response.body() != null){
+                    List<ResultadoApi> resultados = response.body().getResultados();
+
+                    HashMap<String, Object> validacionesJugador = new HashMap<>();
+
+                    for(ResultadoApi resultado : resultados){
+
+                        String categoriaOriginal = mapearCategoriaDesdeApi(resultado.getCategoria());
+                        for (String cat : listaNombresCategorias) {
+                            if (cat.equalsIgnoreCase(categoriaOriginal)) {
+                                categoriaOriginal = cat;
+                                break;
+                            }
+                        }
+
+                        // LÓGICA DE EMPATE (DUPLICADOS)
+                        String miRespuesta = respuestasJugador.get(categoriaOriginal);
+                        if (miRespuesta == null) miRespuesta = "";
+
+                        int repeticiones = 0;
+                        List<RespuestaValidacion> todasLasRespuestas = respuestasPorCategoria.get(categoriaOriginal);
+
+                        if (todasLasRespuestas != null) {
+                            for (RespuestaValidacion rv : todasLasRespuestas) {
+                                if (rv.getRespuesta() != null &&
+                                        rv.getRespuesta().trim().equalsIgnoreCase(miRespuesta.trim())) {
+                                    repeticiones++; // Contamos cuántos escribieron exactamente lo mismo
+                                }
+                            }
+                        }
+
+                        int puntosAsignados = 0;
+                        if (resultado.isCorrecta()) {
+                            // Si es correcta y hay más de 1 que puso lo mismo, son 5 puntos. Sino, 10.
+                            puntosAsignados = (repeticiones > 1) ? 5 : 10;
+                        }
+
+                        HashMap<String, Object> datosCat = new HashMap<>();
+                        datosCat.put("correcta", resultado.isCorrecta());
+                        datosCat.put("puntos", puntosAsignados);
+
+                        validacionesJugador.put(categoriaOriginal, datosCat);
+                    }
+
+                    DatabaseReference nodoMisValidaciones = FirebaseDatabase.getInstance()
+                            .getReference("salas")
+                            .child(idSala)
+                            .child("validaciones")
+                            .child("ronda_" + rondaActual)
+                            .child(auth.getCurrentUser().getUid());
+
+                    nodoMisValidaciones.setValue(validacionesJugador).addOnCompleteListener(task -> {
+                        if (task.isSuccessful()) {
+                            Log.d("VALIDACION", "Resultados de la API subidos a Firebase correctamente.");
+                        }
+                    });
+                }
+            }
+
+            @Override
+            public void onFailure(retrofit2.Call<ValidacionResponse> call, Throwable t) {
+                Log.e("VALIDACION_API", "Error API: " + t.getMessage());
+            }
+        });
+    }
+
     private void esperarRespuestasYMostrarModal() {
         nodoRespuestasRondaRef = FirebaseDatabase.getInstance()
                 .getReference("salas")
@@ -630,16 +662,12 @@ public class PartidaFragment extends Fragment {
                     }
 
                     @Override
-                    public void onCancelled(@NonNull DatabaseError error) {
-
-                    }
+                    public void onCancelled(@NonNull DatabaseError error) { }
                 });
             }
 
             @Override
-            public void onCancelled(@NonNull DatabaseError error) {
-
-            }
+            public void onCancelled(@NonNull DatabaseError error) { }
         });
     }
 
@@ -688,13 +716,7 @@ public class PartidaFragment extends Fragment {
                             List<RespuestaValidacion> lista = respuestasPorCategoria.get(categoria);
 
                             if (lista != null) {
-                                lista.add(
-                                        new RespuestaValidacion(
-                                                nombreJugador,
-                                                respuesta,
-                                                fotoJugador
-                                        )
-                                );
+                                lista.add(new RespuestaValidacion(uidJugador, nombreJugador, respuesta, fotoJugador));
                             }
                         }
                     }
@@ -704,6 +726,7 @@ public class PartidaFragment extends Fragment {
                     return;
                 }
 
+                validarRespuestasConApi(respuestasPorCategoria);
                 mostrarModalValidacionCarrusel(listaNombresCategorias, respuestasPorCategoria);
             }
 
@@ -819,16 +842,170 @@ public class PartidaFragment extends Fragment {
                     }
 
                     @Override
-                    public void onCancelled(@NonNull DatabaseError error) {
-
-                    }
+                    public void onCancelled(@NonNull DatabaseError error) { }
                 });
             }
 
             @Override
-            public void onCancelled(@NonNull DatabaseError error) {
+            public void onCancelled(@NonNull DatabaseError error) { }
+        });
+    }
 
+    private void mostrarModalValidacionCarrusel(
+            List<String> categorias,
+            Map<String, List<RespuestaValidacion>> respuestasPorCategoria
+    ) {
+        Dialog dialog = new Dialog(requireContext());
+        dialog.setContentView(R.layout.dialogo_respuestas);
+
+        if (dialog.getWindow() != null) {
+            dialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+            dialog.getWindow().setLayout(
+                    ViewGroup.LayoutParams.MATCH_PARENT,
+                    ViewGroup.LayoutParams.MATCH_PARENT
+            );
+        }
+
+        ViewPager2 vpCategorias = dialog.findViewById(R.id.vpCategoriasValidacion);
+        androidx.appcompat.widget.AppCompatButton btnSalir = dialog.findViewById(R.id.btnSalirRevision);
+
+        btnSalir.setOnClickListener(v -> dialog.dismiss());
+
+        Runnable accionMostrarBotonSalir = () -> {
+            btnSalir.setVisibility(View.VISIBLE);
+            determinarGanadorRondaYReproducirSonido(respuestasPorCategoria);
+        };
+
+        TarjetasValidacionAdapter adapter = new TarjetasValidacionAdapter(
+                categorias,
+                respuestasPorCategoria,
+                vpCategorias,
+                accionMostrarBotonSalir
+        );
+
+        vpCategorias.setAdapter(adapter);
+        vpCategorias.setOffscreenPageLimit(1);
+
+        dialog.setCancelable(false);
+        dialog.show();
+
+        escucharValidacionesGlobales(respuestasPorCategoria, adapter);
+    }
+
+    private void escucharValidacionesGlobales(
+            Map<String, List<RespuestaValidacion>> respuestasPorCategoria,
+            TarjetasValidacionAdapter adapter) {
+
+        DatabaseReference nodoValidaciones = FirebaseDatabase.getInstance()
+                .getReference("salas")
+                .child(idSala)
+                .child("validaciones")
+                .child("ronda_" + rondaActual);
+
+        nodoValidaciones.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                for (DataSnapshot jugadorValidacion : snapshot.getChildren()) {
+                    String uid = jugadorValidacion.getKey();
+
+                    for (DataSnapshot categoriaSnap : jugadorValidacion.getChildren()) {
+                        String categoria = categoriaSnap.getKey();
+                        Boolean correcta = categoriaSnap.child("correcta").getValue(Boolean.class);
+                        Integer puntos = categoriaSnap.child("puntos").getValue(Integer.class);
+
+                        if (correcta != null && puntos != null && uid != null && categoria != null) {
+
+                            // Búsqueda segura ignorando mayúsculas/minúsculas
+                            List<RespuestaValidacion> lista = null;
+                            for (String key : respuestasPorCategoria.keySet()) {
+                                if (key.equalsIgnoreCase(categoria)) {
+                                    lista = respuestasPorCategoria.get(key);
+                                    break;
+                                }
+                            }
+
+                            if (lista != null) {
+                                for (RespuestaValidacion rv : lista) {
+                                    if (rv.getUidJugador().equals(uid)) {
+                                        rv.setValidada(true);
+                                        rv.setCorrecta(correcta);
+                                        rv.setPuntos(puntos);
+                                        break;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+                if(adapter != null) {
+                    adapter.actualizarValidaciones();
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+                Log.e("VALIDACIONES", "Error escuchando validaciones", error.toException());
             }
         });
+    }
+
+    private void determinarGanadorRondaYReproducirSonido(Map<String, List<RespuestaValidacion>> respuestasPorCategoria) {
+        HashMap<String, Integer> puntajesTotales = new HashMap<>();
+
+        for (List<RespuestaValidacion> lista : respuestasPorCategoria.values()) {
+            for (RespuestaValidacion rv : lista) {
+                String uid = rv.getUidJugador();
+                int puntosActuales = puntajesTotales.containsKey(uid) ? puntajesTotales.get(uid) : 0;
+                puntajesTotales.put(uid, puntosActuales + rv.getPuntos());
+            }
+        }
+
+        int maxPuntos = -1;
+        for (int puntos : puntajesTotales.values()) {
+            if (puntos > maxPuntos) {
+                maxPuntos = puntos;
+            }
+        }
+
+        String miUid = auth.getCurrentUser().getUid();
+        int misPuntos = puntajesTotales.containsKey(miUid) ? puntajesTotales.get(miUid) : 0;
+
+        // Ganas si tienes el puntaje máximo Y lograste anotar al menos 10 puntos en la partida
+        if (maxPuntos > 0 && misPuntos == maxPuntos) {
+            Sounds.playCelebracion();
+        } else {
+            Sounds.playPerdedor();
+        }
+    }
+
+    // Traduce de la App a la API (Singular -> Plural)
+    private String mapearCategoriaParaApi(String categoriaApp) {
+        if (categoriaApp == null) return "";
+        switch (categoriaApp.toLowerCase(Locale.ROOT)) {
+            case "animal": return "animales";
+            case "color": return "colores";
+            case "fruta": return "frutas";
+            case "país":
+            case "pais": return "paises"; // Le quita la tilde y lo hace plural
+            case "cosa": return "cosas";
+            case "nombre": return "nombre";
+            case "apellido": return "apellido";
+            default: return categoriaApp.toLowerCase(Locale.ROOT);
+        }
+    }
+
+    // Traduce de la API a la App (Plural -> Singular)
+    private String mapearCategoriaDesdeApi(String categoriaApi) {
+        if (categoriaApi == null) return "";
+        switch (categoriaApi.toLowerCase(Locale.ROOT)) {
+            case "animales": return "Animal";
+            case "colores": return "Color";
+            case "frutas": return "Fruta";
+            case "paises": return "País"; // Le devuelve la tilde
+            case "cosas": return "Cosa";
+            case "nombre": return "Nombre";
+            case "apellido": return "Apellido";
+            default: return categoriaApi;
+        }
     }
 }

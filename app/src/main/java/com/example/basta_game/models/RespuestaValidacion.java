@@ -1,25 +1,44 @@
 package com.example.basta_game.models;
 
 public class RespuestaValidacion {
+
+    private String uidJugador;
     private String nombreJugador;
     private String respuesta;
     private String fotoPerfilUrl;
 
-    public RespuestaValidacion(String nombreJugador, String respuesta, String fotoPerfilUrl) {
+    private boolean validada = false;
+    private boolean correcta = false;
+    private int puntos = 0;
+
+    // Nuevas variables para el temporizador de votación
+    private boolean timerIniciado = false;
+    private boolean mostrarPuntaje = false;
+
+    public RespuestaValidacion(String uidJugador, String nombreJugador, String respuesta, String fotoPerfilUrl) {
+        this.uidJugador = uidJugador;
         this.nombreJugador = nombreJugador;
         this.respuesta = respuesta;
         this.fotoPerfilUrl = fotoPerfilUrl;
     }
 
-    public String getNombreJugador() {
-        return nombreJugador;
-    }
+    public String getUidJugador() { return uidJugador; }
+    public String getNombreJugador() { return nombreJugador; }
+    public String getRespuesta() { return respuesta; }
+    public String getFotoPerfilUrl() { return fotoPerfilUrl; }
 
-    public String getRespuesta() {
-        return respuesta;
-    }
+    public boolean isValidada() { return validada; }
+    public void setValidada(boolean validada) { this.validada = validada; }
 
-    public String getFotoPerfilUrl() {
-        return fotoPerfilUrl;
-    }
+    public boolean isCorrecta() { return correcta; }
+    public void setCorrecta(boolean correcta) { this.correcta = correcta; }
+
+    public int getPuntos() { return puntos; }
+    public void setPuntos(int puntos) { this.puntos = puntos; }
+
+    public boolean isTimerIniciado() { return timerIniciado; }
+    public void setTimerIniciado(boolean timerIniciado) { this.timerIniciado = timerIniciado; }
+
+    public boolean isMostrarPuntaje() { return mostrarPuntaje; }
+    public void setMostrarPuntaje(boolean mostrarPuntaje) { this.mostrarPuntaje = mostrarPuntaje; }
 }
