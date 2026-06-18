@@ -212,12 +212,19 @@ public class LobbyFragment extends Fragment {
                                     NotificationHelper.ERROR
                             );
                         }else{
+
+
+                                DatabaseReference nodoEstado = FirebaseDatabase.getInstance()
+                                        .getReference("salas")
+                                        .child(idSalaMetodo)
+                                        .child("estadoPartida");
                             //abrimos la partida e insertamos el tiempo de inicio de la ronda
                             DatabaseReference nodoEstado = FirebaseDatabase.getInstance()
                                     .getReference("salas")
                                     .child(idSalaMetodo)
                                     .child("estadoPartida");
 
+                                nodoEstado.setValue("En juego");
                             nodoEstado.setValue("En juego");
 
                             DatabaseReference nodoSala = FirebaseDatabase.getInstance().getReference("salas").child(idSalaMetodo).child("bastaPresionado");
