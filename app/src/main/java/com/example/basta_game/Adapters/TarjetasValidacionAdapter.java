@@ -106,16 +106,20 @@ public class TarjetasValidacionAdapter extends RecyclerView.Adapter<TarjetasVali
                 } else {
                     categoriasReveladas[position] = true;
 
-                    if (position == categorias.size() - 1) {
-                        viewPager2.setUserInputEnabled(true);
-                        notifyItemChanged(position);
+                    // NUEVO: Esperamos 5.5 segundos para que terminen de votar y vean los puntos
+                    // antes de deslizar a la siguiente página automáticamente.
+                    handler.postDelayed(() -> {
+                        if (position == categorias.size() - 1) {
+                            viewPager2.setUserInputEnabled(true);
+                            notifyItemChanged(position);
 
-                        if (onUltimaCategoriaRevelada != null) {
-                            onUltimaCategoriaRevelada.run();
+                            if (onUltimaCategoriaRevelada != null) {
+                                onUltimaCategoriaRevelada.run();
+                            }
+                        } else {
+                            viewPager2.setCurrentItem(position + 1, true);
                         }
-                    } else {
-                        viewPager2.setCurrentItem(position + 1, true);
-                    }
+                    }, 5500);
                 }
             }
         };
@@ -126,6 +130,14 @@ public class TarjetasValidacionAdapter extends RecyclerView.Adapter<TarjetasVali
     @Override
     public int getItemCount() {
         return categorias.size();
+    }
+
+    public void actualizarValidaciones() {
+        for (ValidacionAdapter adapter : subAdaptadores) {
+            if (adapter != null) {
+                adapter.notifyDataSetChanged();
+            }
+        }
     }
 
     public static class ViewHolder extends RecyclerView.ViewHolder {
