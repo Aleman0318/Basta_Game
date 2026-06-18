@@ -631,6 +631,16 @@ public class PartidaFragment extends Fragment {
                 .child("respuestas")
                 .child("ronda_" + rondaActual);
 
+        // NUEVO: SALVAVIDAS (FAIL-SAFE)
+        // Si pasan 5 segundos y no todos enviaron respuestas, abrimos el modal a la fuerza.
+        new android.os.Handler(android.os.Looper.getMainLooper()).postDelayed(() -> {
+            if (!modalValidacionMostrado && isAdded()) {
+                Log.d("VALIDACION", "Forzando apertura del modal por Timeout de jugadores lentos");
+                modalValidacionMostrado = true;
+                cargarRespuestasValidacionYMostrarModal();
+            }
+        }, 5000);
+
         listenerRespuestasValidacion = nodoRespuestasRondaRef.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshotRespuestas) {
