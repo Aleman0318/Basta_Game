@@ -13,6 +13,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.bumptech.glide.Glide;
 import com.example.basta_game.R;
 import com.example.basta_game.models.RespuestaValidacion;
+import com.example.basta_game.utils.Animations;
 
 import java.util.List;
 
@@ -64,6 +65,12 @@ public class ValidacionAdapter extends RecyclerView.Adapter<ValidacionAdapter.Vi
                 txtPuntos.setVisibility(View.GONE);
                 holder.txtRespuesta.setTextColor(ContextCompat.getColor(holder.itemView.getContext(), R.color.colorPrimary));
                 holder.txtRespuesta.setBackgroundResource(R.drawable.bg_input_juego);
+
+                Animations.animacionLanzada(holder.txtUsuario);
+                Animations.animacionLanzada(holder.txtRespuesta);
+                Animations.animacionLanzada(holder.imgAvatar);
+                Animations.animacionLanzada(btnValidar);
+
             } else {
                 // Ya se reveló completamente: evaluamos validación
                 if (respuesta.isValidada()) {
