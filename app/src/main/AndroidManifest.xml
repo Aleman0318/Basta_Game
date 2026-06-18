@@ -17,6 +17,7 @@
         android:theme="@style/Theme.Basta_Game">
         <activity
             android:name=".SalaActivity"
+            android:windowSoftInputMode="adjustResize"
             android:exported="false" />
         <activity
             android:name=".SplashActivity"
