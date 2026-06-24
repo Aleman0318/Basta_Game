@@ -9,14 +9,27 @@
     android:background="@drawable/bg_fondocuaderno3">
 
     <TextView
+        android:id="@+id/txtTituloResultados"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginBottom="20dp"
+        android:layout_marginBottom="8dp"
         android:fontFamily="@font/lilitaone_regular"
-        android:text="RESULTADOS FINALES"
+        android:text="PUNTUACIONES"
         android:textAlignment="center"
         android:textColor="@color/colorPrimary"
         android:textSize="26sp"/>
+
+    <TextView
+        android:id="@+id/txtGanadorResultados"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="18dp"
+        android:fontFamily="@font/manrope_regular"
+        android:text="Calculando resultados..."
+        android:textAlignment="center"
+        android:textColor="@color/colorTextoP"
+        android:textSize="16sp"
+        android:textStyle="bold"/>
 
     <com.google.android.material.card.MaterialCardView
         android:layout_width="match_parent"
@@ -25,50 +38,75 @@
         app:cardCornerRadius="20dp"
         app:cardBackgroundColor="@color/blanco"
         app:cardElevation="12dp"
-        app:strokeWidth="0dp"> <HorizontalScrollView
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:scrollbars="none"
-        android:overScrollMode="never"
-        android:fillViewport="true">
+        app:strokeWidth="0dp">
 
-        <LinearLayout
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:orientation="vertical">
+        <HorizontalScrollView
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:scrollbars="none"
+            android:overScrollMode="never"
+            android:fillViewport="true">
 
             <LinearLayout
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:background="@color/colorPrimary"
-                android:paddingVertical="14dp"
-                android:paddingHorizontal="8dp">
+                android:orientation="vertical">
 
-                <TextView android:layout_width="50dp" android:layout_height="wrap_content" android:fontFamily="@font/lilitaone_regular" android:text="N°" android:textAlignment="center" android:textColor="@color/amarillochillon" android:textSize="18sp" />
-                <TextView android:layout_width="130dp" android:layout_height="wrap_content" android:fontFamily="@font/lilitaone_regular" android:text="Jugador" android:paddingStart="8dp" android:textColor="@color/blanco" android:textSize="18sp" />
+                <LinearLayout
+                    android:id="@+id/contenedorEncabezadoTabla"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:background="@color/colorPrimary"
+                    android:paddingVertical="14dp"
+                    android:paddingHorizontal="8dp">
 
-                <TextView android:layout_width="60dp" android:layout_height="wrap_content" android:fontFamily="@font/lilitaone_regular" android:text="R1" android:textAlignment="center" android:textColor="@color/blanco" android:textSize="16sp" />
-                <TextView android:layout_width="60dp" android:layout_height="wrap_content" android:fontFamily="@font/lilitaone_regular" android:text="R2" android:textAlignment="center" android:textColor="@color/blanco" android:textSize="16sp" />
-                <TextView android:layout_width="60dp" android:layout_height="wrap_content" android:fontFamily="@font/lilitaone_regular" android:text="R3" android:textAlignment="center" android:textColor="@color/blanco" android:textSize="16sp" />
-                <TextView android:layout_width="60dp" android:layout_height="wrap_content" android:fontFamily="@font/lilitaone_regular" android:text="R4" android:textAlignment="center" android:textColor="@color/blanco" android:textSize="16sp" />
-                <TextView android:layout_width="60dp" android:layout_height="wrap_content" android:fontFamily="@font/lilitaone_regular" android:text="R5" android:textAlignment="center" android:textColor="@color/blanco" android:textSize="16sp" />
+                    <TextView
+                        android:layout_width="50dp"
+                        android:layout_height="wrap_content"
+                        android:fontFamily="@font/lilitaone_regular"
+                        android:text="N°"
+                        android:textAlignment="center"
+                        android:textColor="@color/amarillochillon"
+                        android:textSize="18sp" />
 
-                <TextView android:layout_width="80dp" android:layout_height="wrap_content" android:fontFamily="@font/lilitaone_regular" android:text="Total" android:textAlignment="center" android:textColor="@color/amarillochillon" android:textSize="20sp" />
+                    <TextView
+                        android:layout_width="130dp"
+                        android:layout_height="wrap_content"
+                        android:fontFamily="@font/lilitaone_regular"
+                        android:text="Jugador"
+                        android:paddingStart="8dp"
+                        android:textColor="@color/blanco"
+                        android:textSize="18sp" />
+
+                    <LinearLayout
+                        android:id="@+id/contenedorEncabezadosRondas"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal" />
+
+                    <TextView
+                        android:layout_width="80dp"
+                        android:layout_height="wrap_content"
+                        android:fontFamily="@font/lilitaone_regular"
+                        android:text="Total"
+                        android:textAlignment="center"
+                        android:textColor="@color/amarillochillon"
+                        android:textSize="20sp" />
+                </LinearLayout>
+
+                <androidx.recyclerview.widget.RecyclerView
+                    android:id="@+id/rvTablaPuntuaciones"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:paddingHorizontal="8dp"
+                    android:paddingTop="8dp"
+                    android:paddingBottom="16dp"
+                    android:clipToPadding="false"
+                    android:nestedScrollingEnabled="false" />
+
             </LinearLayout>
-
-            <androidx.recyclerview.widget.RecyclerView
-                android:id="@+id/rvTablaPuntuaciones"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:paddingHorizontal="8dp"
-                android:paddingTop="8dp"
-                android:paddingBottom="16dp"
-                android:clipToPadding="false"
-                android:nestedScrollingEnabled="false" />
-
-        </LinearLayout>
-    </HorizontalScrollView>
+        </HorizontalScrollView>
     </com.google.android.material.card.MaterialCardView>
 
     <com.google.android.material.button.MaterialButton
@@ -78,7 +116,7 @@
         android:layout_marginTop="20dp"
         android:backgroundTint="@color/colorPrimary"
         android:fontFamily="@font/lilitaone_regular"
-        android:text="VOLVER AL INICIO"
+        android:text="LISTO"
         android:textColor="@color/blanco"
         android:textSize="20sp"
         app:cornerRadius="16dp" />

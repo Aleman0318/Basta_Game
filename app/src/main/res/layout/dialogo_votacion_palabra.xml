@@ -43,6 +43,16 @@
             tools:text="Manzana" />
 
         <TextView
+            android:id="@+id/txtJugadorEvaluado"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:fontFamily="@font/manrope_regular"
+            android:textColor="@color/colorContenidoInputs"
+            android:textSize="14sp"
+            tools:text="Respuesta de Aleman" />
+
+        <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="16dp"
@@ -83,14 +93,35 @@
                 app:cornerRadius="12dp"
                 android:backgroundTint="@color/verde_puntos"
                 android:fontFamily="@font/lilitaone_regular"
-                android:text="Si"
+                android:text="Sí"
                 android:textColor="@color/blanco"
                 android:textSize="18sp"
                 app:strokeWidth="2dp"
-                app:strokeColor="@color/check"
-                />
+                app:strokeColor="@color/check" />
 
         </LinearLayout>
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnVotoAbstenerse"
+            android:layout_width="match_parent"
+            android:layout_height="50dp"
+            android:layout_marginTop="12dp"
+            app:cornerRadius="12dp"
+            android:backgroundTint="@color/colorContenidoInputs"
+            android:fontFamily="@font/lilitaone_regular"
+            android:text="Abstenerse"
+            android:textColor="@color/blanco"
+            android:textSize="17sp" />
+
+        <TextView
+            android:id="@+id/txtEstadoVotoUsuario"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
+            android:fontFamily="@font/manrope_regular"
+            android:text="Esperando votos..."
+            android:textColor="@color/colorTextoP"
+            android:textSize="14sp" />
 
         <View
             android:layout_width="match_parent"
@@ -123,11 +154,10 @@
                 android:textColor="@color/colorBasta"
                 android:textSize="18sp" />
 
-
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginHorizontal="16dp"
+                android:layout_marginHorizontal="12dp"
                 android:text="|"
                 android:textColor="@color/colorContenidoInputs"
                 android:textSize="18sp" />
@@ -137,11 +167,26 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:fontFamily="@font/lilitaone_regular"
-                android:text="Si: 0"
+                android:text="Sí: 0"
                 android:textColor="@color/verde_puntos"
                 android:textSize="18sp" />
 
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginHorizontal="12dp"
+                android:text="|"
+                android:textColor="@color/colorContenidoInputs"
+                android:textSize="18sp" />
 
+            <TextView
+                android:id="@+id/txtVotosAbstenerse"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:fontFamily="@font/lilitaone_regular"
+                android:text="Abs: 0"
+                android:textColor="@color/colorContenidoInputs"
+                android:textSize="18sp" />
 
         </LinearLayout>
     </LinearLayout>

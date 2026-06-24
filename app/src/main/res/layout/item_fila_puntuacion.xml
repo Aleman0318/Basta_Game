@@ -37,11 +37,11 @@
             android:ellipsize="end"
             tools:text="JugadorDaigo" />
 
-        <TextView android:id="@+id/txtR1" android:layout_width="60dp" android:layout_height="wrap_content" android:fontFamily="@font/manrope_regular" android:textAlignment="center" android:textColor="@color/colorContenidoInputs" android:textSize="16sp" tools:text="45" />
-        <TextView android:id="@+id/txtR2" android:layout_width="60dp" android:layout_height="wrap_content" android:fontFamily="@font/manrope_regular" android:textAlignment="center" android:textColor="@color/colorContenidoInputs" android:textSize="16sp" tools:text="50" />
-        <TextView android:id="@+id/txtR3" android:layout_width="60dp" android:layout_height="wrap_content" android:fontFamily="@font/manrope_regular" android:textAlignment="center" android:textColor="@color/colorContenidoInputs" android:textSize="16sp" tools:text="30" />
-        <TextView android:id="@+id/txtR4" android:layout_width="60dp" android:layout_height="wrap_content" android:fontFamily="@font/manrope_regular" android:textAlignment="center" android:textColor="@color/colorContenidoInputs" android:textSize="16sp" tools:text="60" />
-        <TextView android:id="@+id/txtR5" android:layout_width="60dp" android:layout_height="wrap_content" android:fontFamily="@font/manrope_regular" android:textAlignment="center" android:textColor="@color/colorContenidoInputs" android:textSize="16sp" tools:text="10" />
+        <LinearLayout
+            android:id="@+id/contenedorPuntosRondas"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal" />
 
         <TextView
             android:id="@+id/txtTotalPuntos"

@@ -6,6 +6,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
+
 import androidx.annotation.NonNull;
 import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.RecyclerView;
@@ -19,11 +20,20 @@ import java.util.List;
 
 public class ValidacionAdapter extends RecyclerView.Adapter<ValidacionAdapter.ViewHolder> {
 
+    public interface OnSolicitarVotacionListener {
+        void onSolicitarVotacion(RespuestaValidacion respuesta);
+    }
+
     private final List<RespuestaValidacion> respuestas;
     private int elementosRevelados = 0;
+    private OnSolicitarVotacionListener listener;
 
-    public ValidacionAdapter(List<RespuestaValidacion> respuestas) {
+    public ValidacionAdapter(
+            List<RespuestaValidacion> respuestas,
+            OnSolicitarVotacionListener listener
+    ) {
         this.respuestas = respuestas;
+        this.listener = listener;
     }
 
     @NonNull
@@ -38,6 +48,8 @@ public class ValidacionAdapter extends RecyclerView.Adapter<ValidacionAdapter.Vi
     public void onBindViewHolder(@NonNull ValidacionAdapter.ViewHolder holder, int position) {
         View btnValidar = holder.itemView.findViewById(R.id.btnValidarAccion);
         TextView txtPuntos = holder.itemView.findViewById(R.id.txtPuntuacionValidacion);
+
+        btnValidar.setOnClickListener(null);
 
         if (position < elementosRevelados) {
             holder.itemView.setVisibility(View.VISIBLE);
@@ -58,9 +70,21 @@ public class ValidacionAdapter extends RecyclerView.Adapter<ValidacionAdapter.Vi
                     .error(R.drawable.ic_siluetas)
                     .into(holder.imgAvatar);
 
-            // LOGICA DE COLORES Y TEMPORIZADOR
+            boolean respuestaVacia =
+                    respuesta.getRespuesta() == null ||
+                            respuesta.getRespuesta().trim().isEmpty() ||
+                            respuesta.getRespuesta().equalsIgnoreCase("Sin respuesta");
+
+            btnValidar.setEnabled(!respuestaVacia);
+            btnValidar.setAlpha(respuestaVacia ? 0.4f : 1f);
+
+            btnValidar.setOnClickListener(v -> {
+                if (!respuestaVacia && listener != null) {
+                    listener.onSolicitarVotacion(respuesta);
+                }
+            });
+
             if (position == elementosRevelados - 1 && elementosRevelados <= respuestas.size()) {
-                // Apenas se está revelando, estado neutro
                 btnValidar.setVisibility(View.VISIBLE);
                 txtPuntos.setVisibility(View.GONE);
                 holder.txtRespuesta.setTextColor(ContextCompat.getColor(holder.itemView.getContext(), R.color.colorPrimary));
@@ -72,41 +96,39 @@ public class ValidacionAdapter extends RecyclerView.Adapter<ValidacionAdapter.Vi
                 Animations.animacionLanzada(btnValidar);
 
             } else {
-                // Ya se reveló completamente: evaluamos validación
                 if (respuesta.isValidada()) {
 
                     int colorOutline;
+
                     if (respuesta.getPuntos() == 10) {
-                        colorOutline = Color.parseColor("#4CAF50"); // Verde (Correcto)
+                        colorOutline = Color.parseColor("#4CAF50");
                     } else if (respuesta.getPuntos() == 5) {
-                        colorOutline = Color.parseColor("#FFB300"); // Amarillo (Empate)
+                        colorOutline = Color.parseColor("#FFB300");
                     } else {
-                        colorOutline = Color.parseColor("#F44336"); // Rojo (Incorrecto)
+                        colorOutline = Color.parseColor("#F44336");
                     }
 
-                    // 1. Cambiamos color del texto
                     holder.txtRespuesta.setTextColor(colorOutline);
 
-                    // 2. Cambiamos color del borde del input dinámicamente
                     android.graphics.drawable.GradientDrawable gd = new android.graphics.drawable.GradientDrawable();
                     gd.setColor(Color.WHITE);
-                    gd.setCornerRadius(40f); // Redondeo del input
-                    gd.setStroke(4, colorOutline); // Ancho y color del borde
+                    gd.setCornerRadius(40f);
+                    gd.setStroke(4, colorOutline);
                     holder.txtRespuesta.setBackground(gd);
 
-                    // 3. Controlamos los 5 segundos del botón de Votar vs Puntaje
                     if (!respuesta.isMostrarPuntaje()) {
                         btnValidar.setVisibility(View.VISIBLE);
                         txtPuntos.setVisibility(View.GONE);
 
-                        // Iniciamos cuenta regresiva de 5 segundos
                         if (!respuesta.isTimerIniciado()) {
                             respuesta.setTimerIniciado(true);
+
                             holder.itemView.postDelayed(() -> {
                                 respuesta.setMostrarPuntaje(true);
-                                notifyItemChanged(position); // Actualiza la tarjeta para mostrar el puntaje
+                                notifyItemChanged(position);
                             }, 5000);
                         }
+
                     } else {
                         btnValidar.setVisibility(View.GONE);
                         txtPuntos.setVisibility(View.VISIBLE);
@@ -115,7 +137,6 @@ public class ValidacionAdapter extends RecyclerView.Adapter<ValidacionAdapter.Vi
                     }
 
                 } else {
-                    // Si Firebase aún no responde (estado neutro)
                     holder.txtRespuesta.setTextColor(ContextCompat.getColor(holder.itemView.getContext(), R.color.colorPrimary));
                     holder.txtRespuesta.setBackgroundResource(R.drawable.bg_input_juego);
                     btnValidar.setVisibility(View.VISIBLE);
@@ -134,7 +155,6 @@ public class ValidacionAdapter extends RecyclerView.Adapter<ValidacionAdapter.Vi
     }
 
     public void revelarSiguiente() {
-        // ELIMINAMOS LOS SONIDOS DE AQUÍ. La revelación ahora es silenciosa y limpia.
         if (elementosRevelados <= respuestas.size()) {
             elementosRevelados++;
             notifyDataSetChanged();
