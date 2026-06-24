@@ -57,6 +57,7 @@ public class HomeActivity extends AppCompatActivity {
                         "Has abandonado la partida",
                         NotificationHelper.WARNING
                 );
+                Sounds.playNotificaciones();
             }else if(seDesconectoSiendoHost && !seDesconecto){
                 NotificationHelper.show(
                         notificationHome,

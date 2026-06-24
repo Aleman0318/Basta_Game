@@ -48,6 +48,7 @@ import com.example.basta_game.models.RespuestaValidacion;
 import com.example.basta_game.models.Sala;
 import com.example.basta_game.utils.CustomDialogHelper;
 import com.example.basta_game.utils.LetraSala;
+import com.example.basta_game.utils.NotificationHelper;
 import com.example.basta_game.utils.Sounds;
 import com.example.basta_game.utils.VerificacionesAuth;
 
@@ -1161,12 +1162,11 @@ public class PartidaFragment extends Fragment {
                     nombreJugadorBasta = "Un jugador";
                 }
 
-                com.example.basta_game.utils.NotificationHelper.show(
+                NotificationHelper.show(
                         notificationPartida,
                         "¡" + nombreJugadorBasta + " presionó BASTA!",
-                        com.example.basta_game.utils.NotificationHelper.SUCCESS
+                        NotificationHelper.SUCCESS
                 );
-
                 recalcularCronometroConBasta(bastaTimeStamp);
             }
 
@@ -1507,19 +1507,19 @@ public class PartidaFragment extends Fragment {
                 respuesta.getRespuesta().trim().isEmpty() ||
                 respuesta.getRespuesta().equalsIgnoreCase("Sin respuesta")) {
 
-            com.example.basta_game.utils.NotificationHelper.show(
+            NotificationHelper.show(
                     notificationPartida,
                     "No se puede votar una respuesta vacía",
-                    com.example.basta_game.utils.NotificationHelper.SUCCESS
+                    NotificationHelper.SUCCESS
             );
             return;
         }
 
         if (!respuesta.isValidada()) {
-            com.example.basta_game.utils.NotificationHelper.show(
+            NotificationHelper.show(
                     notificationPartida,
                     "Espera a que el sistema valide esa respuesta",
-                    com.example.basta_game.utils.NotificationHelper.SUCCESS
+                    NotificationHelper.SUCCESS
             );
             return;
         }
@@ -1537,10 +1537,10 @@ public class PartidaFragment extends Fragment {
                         .getValue(Boolean.class);
 
                 if (resumenListo != null && resumenListo) {
-                    com.example.basta_game.utils.NotificationHelper.show(
+                    NotificationHelper.show(
                             notificationPartida,
                             "La revisión de esta ronda ya terminó",
-                            com.example.basta_game.utils.NotificationHelper.SUCCESS
+                            NotificationHelper.SUCCESS
                     );
                     return;
                 }
@@ -1551,10 +1551,10 @@ public class PartidaFragment extends Fragment {
                 );
 
                 if (usadas >= MAX_VOTACIONES_DECISIVAS_POR_RONDA) {
-                    com.example.basta_game.utils.NotificationHelper.show(
+                    NotificationHelper.show(
                             notificationPartida,
                             "Ya se usaron las 2 votaciones de esta ronda",
-                            com.example.basta_game.utils.NotificationHelper.SUCCESS
+                            NotificationHelper.SUCCESS
                     );
                     return;
                 }
@@ -1566,10 +1566,10 @@ public class PartidaFragment extends Fragment {
                         .getValue(Boolean.class);
 
                 if (activa != null && activa) {
-                    com.example.basta_game.utils.NotificationHelper.show(
+                    NotificationHelper.show(
                             notificationPartida,
                             "Ya hay una votación activa",
-                            com.example.basta_game.utils.NotificationHelper.SUCCESS
+                            NotificationHelper.SUCCESS
                     );
                     return;
                 }
@@ -1627,10 +1627,10 @@ public class PartidaFragment extends Fragment {
                 }
 
                 if (!committed) {
-                    com.example.basta_game.utils.NotificationHelper.show(
+                    NotificationHelper.show(
                             notificationPartida,
                             "Otro jugador inició una votación primero",
-                            com.example.basta_game.utils.NotificationHelper.SUCCESS
+                            NotificationHelper.SUCCESS
                     );
                 }
             }
