@@ -17,7 +17,6 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
-
 import com.example.basta_game.HomeActivity;
 import com.example.basta_game.models.ApiService;
 import com.example.basta_game.models.ItemRespuesta;
@@ -25,7 +24,6 @@ import com.example.basta_game.models.ResultadoApi;
 import com.example.basta_game.models.RetrofitClient;
 import com.example.basta_game.models.ValidacionRequest;
 import com.example.basta_game.models.ValidacionResponse;
-
 import androidx.annotation.NonNull;
 import androidx.appcompat.widget.AppCompatButton;
 import androidx.core.content.ContextCompat;
@@ -33,7 +31,6 @@ import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.viewpager2.widget.ViewPager2;
-
 import com.example.basta_game.Adapters.CategoriaPartidaAdapter;
 import com.example.basta_game.Adapters.JugadorPartidaAdapter;
 import com.example.basta_game.Adapters.PuntuacionAdapter;
@@ -51,7 +48,6 @@ import com.example.basta_game.utils.LetraSala;
 import com.example.basta_game.utils.NotificationHelper;
 import com.example.basta_game.utils.Sounds;
 import com.example.basta_game.utils.VerificacionesAuth;
-
 import com.google.android.material.button.MaterialButton;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DataSnapshot;
@@ -62,7 +58,6 @@ import com.google.firebase.database.MutableData;
 import com.google.firebase.database.ServerValue;
 import com.google.firebase.database.Transaction;
 import com.google.firebase.database.ValueEventListener;
-
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;

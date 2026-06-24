@@ -12,7 +12,6 @@ import androidx.recyclerview.widget.RecyclerView;
 import androidx.viewpager2.widget.ViewPager2;
 import com.example.basta_game.R;
 import com.example.basta_game.models.RespuestaValidacion;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;

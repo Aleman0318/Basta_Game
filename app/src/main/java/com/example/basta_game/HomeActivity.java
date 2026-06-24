@@ -9,10 +9,8 @@ import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
-
 import com.example.basta_game.Fragments.JugarFragment;
 import com.example.basta_game.Fragments.PerfilFragment;
-import com.example.basta_game.Fragments.RankingFragment;
 import com.example.basta_game.utils.NotificationHelper;
 import com.example.basta_game.utils.Sounds;
 import com.example.basta_game.utils.VerificacionesAuth;
@@ -26,7 +24,6 @@ public class HomeActivity extends AppCompatActivity {
     private FirebaseAuth auth;
 
     private final Fragment fragmentJugar = new JugarFragment();
-    private final Fragment fragmentRanking = new RankingFragment();
     private final Fragment fragmentPerfil = new PerfilFragment();
     private final FragmentManager fm = getSupportFragmentManager();
 
@@ -77,7 +74,6 @@ public class HomeActivity extends AppCompatActivity {
 
         if (savedInstanceState == null) {
             fm.beginTransaction().add(R.id.fragment_container, fragmentPerfil, "perfil").hide(fragmentPerfil).commit();
-            fm.beginTransaction().add(R.id.fragment_container, fragmentRanking, "ranking").hide(fragmentRanking).commit();
             fm.beginTransaction().add(R.id.fragment_container, fragmentJugar, "jugar").commit();
 
             bottomNavigationView.setSelectedItemId(R.id.nav_jugar);
@@ -89,10 +85,6 @@ public class HomeActivity extends AppCompatActivity {
             if (id == R.id.nav_jugar) {
                 fm.beginTransaction().hide(fragmentActivo).show(fragmentJugar).commit();
                 fragmentActivo = fragmentJugar;
-                return true;
-            } else if (id == R.id.nav_ranking) {
-                fm.beginTransaction().hide(fragmentActivo).show(fragmentRanking).commit();
-                fragmentActivo = fragmentRanking;
                 return true;
             } else if (id == R.id.nav_perfil) {
                 fm.beginTransaction().hide(fragmentActivo).show(fragmentPerfil).commit();

@@ -1,14 +1,11 @@
 package com.example.basta_game.Fragments;
 
 import android.os.Bundle;
-
 import androidx.fragment.app.Fragment;
-
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import com.airbnb.lottie.LottieAnimationView;
-
 import com.example.basta_game.R;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;

@@ -1,15 +1,12 @@
 package com.example.basta_game.Fragments;
 
-import android.content.Intent;
 import android.content.res.ColorStateList;
 import android.graphics.Color;
 import android.os.Bundle;
-
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
-
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -18,31 +15,22 @@ import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
 import androidx.appcompat.widget.AppCompatButton;
-
-import com.example.basta_game.HomeActivity;
 import com.example.basta_game.SalaActivity;
-import com.example.basta_game.models.Jugador;
 import com.example.basta_game.R;
 import com.example.basta_game.Adapters.JugadorSalaAdapter;
 import com.example.basta_game.models.JugadorSala;
-import com.example.basta_game.models.Sala;
 import com.example.basta_game.utils.Animations;
 import com.example.basta_game.utils.CustomDialogHelper;
 import com.example.basta_game.utils.NotificationHelper;
 import com.example.basta_game.utils.Sounds;
 import com.example.basta_game.utils.VerificacionesAuth;
-import com.google.android.material.card.MaterialCardView;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
-import com.google.firebase.database.ServerValue;
 import com.google.firebase.database.ValueEventListener;
-
-import java.lang.reflect.Array;
 import java.util.ArrayList;
-import java.util.List;
 
 public class LobbyFragment extends Fragment {
 

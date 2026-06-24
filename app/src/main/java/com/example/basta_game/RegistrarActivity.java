@@ -5,23 +5,17 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.TextView;
-
 import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.AppCompatButton;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
-
-//import de firebase
 import com.example.basta_game.models.Usuario;
 import com.example.basta_game.utils.Sounds;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DatabaseReference;
-
-//imports notificacion personalizada
 import com.example.basta_game.utils.NotificationHelper;
-
 import com.google.android.material.textfield.TextInputEditText;
 import com.google.firebase.database.FirebaseDatabase;
 
@@ -31,13 +25,10 @@ public class RegistrarActivity extends AppCompatActivity {
     private TextInputEditText etCorreoReg;
     private TextInputEditText etPasswordReg;
     private AppCompatButton btnRegistrar;
-    
-    //instancias de firebase
+
     private FirebaseAuth auth;
     private DatabaseReference db;
-    
 
-    //notificacion personalziada
     private View notificationRegister;
 
     private TextView tvIrLogin;

@@ -2,7 +2,6 @@ package com.example.basta_game.Fragments;
 
 import android.content.Intent;
 import android.os.Bundle;
-import android.text.TextUtils;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -10,22 +9,17 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.SeekBar;
 import android.widget.TextView;
-
 import androidx.annotation.NonNull;
 import androidx.appcompat.widget.AppCompatButton;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
-
 import com.example.basta_game.Adapters.CategoriaAdapter;
 import com.example.basta_game.R;
 import com.example.basta_game.SalaActivity;
 import com.example.basta_game.models.Categoria;
-
 import java.util.ArrayList;
 import java.util.List;
-
-//imports firebase
 import com.example.basta_game.models.CodigoSalaSearch;
 import com.example.basta_game.models.JugadorSala;
 import com.example.basta_game.models.Sala;

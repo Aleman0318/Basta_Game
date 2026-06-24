@@ -2,35 +2,22 @@ package com.example.basta_game;
 
 import android.content.Intent;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.View;
 import android.widget.TextView;
-import android.widget.Toast;
 import androidx.activity.EdgeToEdge;
-import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.AppCompatButton;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
-
-import com.example.basta_game.models.Usuario;
 import com.example.basta_game.utils.NotificationHelper;
 import com.example.basta_game.utils.Sounds;
 import com.example.basta_game.utils.VerificacionesAuth;
 import com.google.android.material.textfield.TextInputEditText;
-
-//imports firebase
 import com.google.firebase.FirebaseNetworkException;
 import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.auth.FirebaseAuthException;
 import com.google.firebase.auth.FirebaseAuthInvalidCredentialsException;
-import com.google.firebase.database.DataSnapshot;
-import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
-import com.google.firebase.database.FirebaseDatabase;
-import com.google.firebase.database.ValueEventListener;
-
 
 public class LoginActivity extends AppCompatActivity {
 
@@ -39,7 +26,6 @@ public class LoginActivity extends AppCompatActivity {
     private AppCompatButton btnEntrar;
     private TextView tvIrRegistro;
 
-    //instancias de firebase
     private FirebaseAuth auth;
     private DatabaseReference db;
 

@@ -1,7 +1,5 @@
 package com.example.basta_game.Adapters;
 
-import static androidx.core.content.ContentProviderCompat.requireContext;
-
 import android.content.res.ColorStateList;
 import android.graphics.Color;
 import android.view.LayoutInflater;
@@ -11,7 +9,6 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
-
 import com.bumptech.glide.Glide;
 import com.example.basta_game.R;
 import com.example.basta_game.models.JugadorSala;
@@ -54,7 +51,6 @@ public class JugadorSalaAdapter extends RecyclerView.Adapter<JugadorSalaAdapter.
                    ColorStateList.valueOf(Color.parseColor("#404040"))
            );
 
-           //cambiandole color a las pastillas de estado de jugadores Listo y no Listo
            holder.cardEstadoPill.setCardBackgroundColor(
                    ColorStateList.valueOf(Color.parseColor("#A4A4A4"))
            );
@@ -66,13 +62,11 @@ public class JugadorSalaAdapter extends RecyclerView.Adapter<JugadorSalaAdapter.
            holder.tvEstadoJugador.setText("Desconectado");
 
        }else {
-           // Verde si está listo, rojo si no está listo
            if (jugador.isEstaListo()) {
                holder.cardEstado.setCardBackgroundColor(
                        ColorStateList.valueOf(Color.parseColor("#4CAF50"))
                );
 
-               //cambiandole color a las pastillas de estado de jugadores Listo y no Listo
                holder.cardEstadoPill.setCardBackgroundColor(
                        ColorStateList.valueOf(Color.parseColor("#F1FFF0"))
                );
@@ -91,7 +85,6 @@ public class JugadorSalaAdapter extends RecyclerView.Adapter<JugadorSalaAdapter.
                holder.tvEstadoJugador.setTextColor(Color.parseColor("#CE0000"));
                holder.tvEstadoJugador.setText("En Espera");
 
-               //cambiandole color a las pastillas de estado de jugadores Listo y no Listo
                holder.cardEstadoPill.setCardBackgroundColor(
                        ColorStateList.valueOf(Color.parseColor("#FFF4CC"))
                );

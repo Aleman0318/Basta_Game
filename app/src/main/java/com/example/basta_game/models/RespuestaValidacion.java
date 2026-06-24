@@ -12,7 +12,6 @@ public class RespuestaValidacion {
     private int puntos = 0;
     private String categoria;
 
-    // Nuevas variables para el temporizador de votación
     private boolean timerIniciado = false;
     private boolean mostrarPuntaje = false;
 

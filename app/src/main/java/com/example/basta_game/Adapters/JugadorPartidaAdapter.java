@@ -7,7 +7,6 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
-
 import com.bumptech.glide.Glide;
 import com.example.basta_game.models.Jugador;
 import com.example.basta_game.R;
@@ -44,7 +43,6 @@ public class JugadorPartidaAdapter extends RecyclerView.Adapter<JugadorPartidaAd
             holder.imgCoronaHost.setVisibility(View.INVISIBLE);
         }
 
-        // ¡AQUÍ ESTÁ LA SOLUCIÓN DEL TEXTO!
         if (jugador.isEstaListo()) {
             holder.txtEstado.setText("Listo");
         } else {
@@ -61,7 +59,6 @@ public class JugadorPartidaAdapter extends RecyclerView.Adapter<JugadorPartidaAd
         public ViewHolder(@NonNull View itemView) {
             super(itemView);
             txtNombre = itemView.findViewById(R.id.txtNombreJugador);
-            // Aseguramos que el adaptador encuentre el TextView del estado
             txtEstado = itemView.findViewById(R.id.txtEstadoJugador);
             imgAvatar = itemView.findViewById(R.id.imgAvatarJugadorPartida);
             imgCoronaHost = itemView.findViewById(R.id.imgCoronaHost);

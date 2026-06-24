@@ -10,13 +10,10 @@ import android.view.ViewGroup;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
-
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
-
 import com.example.basta_game.models.Categoria;
 import com.example.basta_game.R;
-
 import java.util.List;
 import java.util.Map;
 

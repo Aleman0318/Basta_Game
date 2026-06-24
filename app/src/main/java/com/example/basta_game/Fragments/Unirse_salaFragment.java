@@ -3,7 +3,6 @@ package com.example.basta_game.Fragments;
 import android.content.Intent;
 import android.os.Bundle;
 import android.text.InputFilter;
-
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 import android.view.LayoutInflater;
@@ -28,7 +27,6 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
-
 import java.util.ArrayList;
 
 public class Unirse_salaFragment extends Fragment {
