@@ -211,6 +211,7 @@ public class LobbyFragment extends Fragment {
                                     "Todos los jugadores deben estar listos",
                                     NotificationHelper.ERROR
                             );
+                            Sounds.playNotificaciones();
 
 
 

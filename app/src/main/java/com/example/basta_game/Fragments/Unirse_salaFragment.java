@@ -20,6 +20,7 @@ import com.example.basta_game.models.Sala;
 import com.example.basta_game.models.Usuario;
 import com.example.basta_game.utils.Animations;
 import com.example.basta_game.utils.NotificationHelper;
+import com.example.basta_game.utils.Sounds;
 import com.example.basta_game.utils.VerificacionesAuth;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DataSnapshot;
@@ -94,6 +95,7 @@ public class Unirse_salaFragment extends Fragment {
                                         "No se encontro la sala requerida",
                                         NotificationHelper.ERROR
                                 );
+                                Sounds.playNotificaciones();
                             }else{
                                 DatabaseReference nodoSala = FirebaseDatabase.getInstance().getReference("salas").child(codigoElegidoFiltrado.getIdSala());
                                 nodoSala.addListenerForSingleValueEvent(new ValueEventListener() {
@@ -171,6 +173,7 @@ public class Unirse_salaFragment extends Fragment {
                                                             "La sala está llena",
                                                             NotificationHelper.ERROR
                                                     );
+                                                    Sounds.playNotificaciones();
                                                 }
                                             }
 
