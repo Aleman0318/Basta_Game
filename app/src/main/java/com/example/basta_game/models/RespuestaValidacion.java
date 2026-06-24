@@ -10,6 +10,7 @@ public class RespuestaValidacion {
     private boolean validada = false;
     private boolean correcta = false;
     private int puntos = 0;
+    private String categoria;
 
     // Nuevas variables para el temporizador de votación
     private boolean timerIniciado = false;
@@ -20,6 +21,14 @@ public class RespuestaValidacion {
         this.nombreJugador = nombreJugador;
         this.respuesta = respuesta;
         this.fotoPerfilUrl = fotoPerfilUrl;
+    }
+
+    public String getCategoria() {
+        return categoria;
+    }
+
+    public void setCategoria(String categoria) {
+        this.categoria = categoria;
     }
 
     public String getUidJugador() { return uidJugador; }

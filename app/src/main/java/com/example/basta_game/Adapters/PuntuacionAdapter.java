@@ -1,42 +1,86 @@
 package com.example.basta_game.Adapters;
 
+import android.content.Context;
+import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.LinearLayout;
 import android.widget.TextView;
+
 import androidx.annotation.NonNull;
+import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.RecyclerView;
+
 import com.example.basta_game.R;
-import com.example.basta_game.models.PuntuacionDummy;
+import com.example.basta_game.models.PuntuacionJugador;
+
 import java.util.List;
 
 public class PuntuacionAdapter extends RecyclerView.Adapter<PuntuacionAdapter.ViewHolder> {
 
-    private List<PuntuacionDummy> listaPuntuaciones;
+    private List<PuntuacionJugador> listaPuntuaciones;
+    private int cantidadRondas;
 
-    public PuntuacionAdapter(List<PuntuacionDummy> listaPuntuaciones) {
+    public PuntuacionAdapter(List<PuntuacionJugador> listaPuntuaciones, int cantidadRondas) {
         this.listaPuntuaciones = listaPuntuaciones;
+        this.cantidadRondas = cantidadRondas;
     }
 
     @NonNull
     @Override
-    public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_fila_puntuacion, parent, false);
+    public PuntuacionAdapter.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+        View view = LayoutInflater.from(parent.getContext())
+                .inflate(R.layout.item_fila_puntuacion, parent, false);
+
         return new ViewHolder(view);
     }
 
     @Override
-    public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
-        PuntuacionDummy jugador = listaPuntuaciones.get(position);
+    public void onBindViewHolder(@NonNull PuntuacionAdapter.ViewHolder holder, int position) {
+        PuntuacionJugador jugador = listaPuntuaciones.get(position);
 
-        holder.txtPosicion.setText(String.valueOf(jugador.posicion));
-        holder.txtNombre.setText(jugador.nombre);
-        holder.txtR1.setText(String.valueOf(jugador.r1));
-        holder.txtR2.setText(String.valueOf(jugador.r2));
-        holder.txtR3.setText(String.valueOf(jugador.r3));
-        holder.txtR4.setText(String.valueOf(jugador.r4));
-        holder.txtR5.setText(String.valueOf(jugador.r5));
-        holder.txtTotal.setText(String.valueOf(jugador.total));
+        holder.txtPosicion.setText(String.valueOf(jugador.getPosicion()));
+        holder.txtNombre.setText(jugador.getNombre());
+        holder.txtTotal.setText(String.valueOf(jugador.getTotal()));
+
+        holder.contenedorPuntosRondas.removeAllViews();
+
+        List<Integer> puntajes = jugador.getPuntajesRondas();
+
+        for (int i = 0; i < cantidadRondas; i++) {
+            String textoPuntos = "-";
+
+            if (puntajes != null && i < puntajes.size() && puntajes.get(i) != null) {
+                textoPuntos = String.valueOf(puntajes.get(i));
+            }
+
+            TextView txtPuntos = crearCeldaPuntos(holder.itemView.getContext(), textoPuntos);
+            holder.contenedorPuntosRondas.addView(txtPuntos);
+        }
+    }
+
+    private TextView crearCeldaPuntos(Context context, String texto) {
+        TextView textView = new TextView(context);
+
+        LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(
+                dp(context, 60),
+                LinearLayout.LayoutParams.WRAP_CONTENT
+        );
+
+        textView.setLayoutParams(params);
+        textView.setText(texto);
+        textView.setGravity(Gravity.CENTER);
+        textView.setTextSize(16);
+        textView.setTextColor(ContextCompat.getColor(context, R.color.colorContenidoInputs));
+        textView.setSingleLine(true);
+
+        return textView;
+    }
+
+    private int dp(Context context, int valor) {
+        float density = context.getResources().getDisplayMetrics().density;
+        return Math.round(valor * density);
     }
 
     @Override
@@ -45,18 +89,19 @@ public class PuntuacionAdapter extends RecyclerView.Adapter<PuntuacionAdapter.Vi
     }
 
     public static class ViewHolder extends RecyclerView.ViewHolder {
-        TextView txtPosicion, txtNombre, txtR1, txtR2, txtR3, txtR4, txtR5, txtTotal;
+
+        TextView txtPosicion;
+        TextView txtNombre;
+        TextView txtTotal;
+        LinearLayout contenedorPuntosRondas;
 
         public ViewHolder(@NonNull View itemView) {
             super(itemView);
+
             txtPosicion = itemView.findViewById(R.id.txtPosicion);
             txtNombre = itemView.findViewById(R.id.txtNombreJugadorTabla);
-            txtR1 = itemView.findViewById(R.id.txtR1);
-            txtR2 = itemView.findViewById(R.id.txtR2);
-            txtR3 = itemView.findViewById(R.id.txtR3);
-            txtR4 = itemView.findViewById(R.id.txtR4);
-            txtR5 = itemView.findViewById(R.id.txtR5);
             txtTotal = itemView.findViewById(R.id.txtTotalPuntos);
+            contenedorPuntosRondas = itemView.findViewById(R.id.contenedorPuntosRondas);
         }
     }
 }

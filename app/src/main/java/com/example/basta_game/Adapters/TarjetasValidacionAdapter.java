@@ -19,6 +19,10 @@ import java.util.Map;
 
 public class TarjetasValidacionAdapter extends RecyclerView.Adapter<TarjetasValidacionAdapter.ViewHolder> {
 
+    public interface ControlAnimacionCallback {
+        boolean puedeContinuar();
+    }
+
     private List<String> categorias;
     private Map<String, List<RespuestaValidacion>> respuestasPorCategoria;
     private ViewPager2 viewPager2;
@@ -26,21 +30,27 @@ public class TarjetasValidacionAdapter extends RecyclerView.Adapter<TarjetasVali
     private boolean[] categoriasReveladas;
 
     private ValidacionAdapter[] subAdaptadores;
+    private ValidacionAdapter.OnSolicitarVotacionListener listenerVotacion;
+    private ControlAnimacionCallback controlAnimacionCallback;
 
     public TarjetasValidacionAdapter(
             List<String> categorias,
             Map<String, List<RespuestaValidacion>> respuestasPorCategoria,
             ViewPager2 viewPager2,
-            Runnable onUltimaCategoriaRevelada
+            Runnable onUltimaCategoriaRevelada,
+            ValidacionAdapter.OnSolicitarVotacionListener listenerVotacion,
+            ControlAnimacionCallback controlAnimacionCallback
     ) {
         this.categorias = categorias;
         this.respuestasPorCategoria = respuestasPorCategoria;
         this.viewPager2 = viewPager2;
         this.onUltimaCategoriaRevelada = onUltimaCategoriaRevelada;
+        this.listenerVotacion = listenerVotacion;
+        this.controlAnimacionCallback = controlAnimacionCallback;
         this.categoriasReveladas = new boolean[categorias.size()];
         this.subAdaptadores = new ValidacionAdapter[categorias.size()];
 
-        for(int i = 0; i < categorias.size(); i++) {
+        for (int i = 0; i < categorias.size(); i++) {
             String categoria = categorias.get(i);
             List<RespuestaValidacion> respuestas = respuestasPorCategoria.get(categoria);
 
@@ -48,7 +58,7 @@ public class TarjetasValidacionAdapter extends RecyclerView.Adapter<TarjetasVali
                 respuestas = new ArrayList<>();
             }
 
-            subAdaptadores[i] = new ValidacionAdapter(respuestas);
+            subAdaptadores[i] = new ValidacionAdapter(respuestas, listenerVotacion);
         }
 
         viewPager2.registerOnPageChangeCallback(new ViewPager2.OnPageChangeCallback() {
@@ -88,6 +98,25 @@ public class TarjetasValidacionAdapter extends RecyclerView.Adapter<TarjetasVali
         }
     }
 
+    private boolean puedeContinuarAnimacion() {
+        return controlAnimacionCallback == null || controlAnimacionCallback.puedeContinuar();
+    }
+
+    private void ejecutarCuandoSePueda(Handler handler, Runnable accion) {
+        Runnable espera = new Runnable() {
+            @Override
+            public void run() {
+                if (puedeContinuarAnimacion()) {
+                    accion.run();
+                } else {
+                    handler.postDelayed(this, 500);
+                }
+            }
+        };
+
+        handler.post(espera);
+    }
+
     private void iniciarAnimacionEnPagina(int position) {
         if (categoriasReveladas[position]) return;
 
@@ -95,10 +124,16 @@ public class TarjetasValidacionAdapter extends RecyclerView.Adapter<TarjetasVali
         viewPager2.setUserInputEnabled(false);
 
         Handler handler = new Handler(Looper.getMainLooper());
+
         Runnable revelarRunnable = new Runnable() {
             @Override
             public void run() {
                 if (viewPager2.getCurrentItem() != position) return;
+
+                if (!puedeContinuarAnimacion()) {
+                    handler.postDelayed(this, 500);
+                    return;
+                }
 
                 if (!adaptadorJugadores.estanTodosRevelados()) {
                     adaptadorJugadores.revelarSiguiente();
@@ -106,19 +141,21 @@ public class TarjetasValidacionAdapter extends RecyclerView.Adapter<TarjetasVali
                 } else {
                     categoriasReveladas[position] = true;
 
-                    // NUEVO: Esperamos 5.5 segundos para que terminen de votar y vean los puntos
-                    // antes de deslizar a la siguiente página automáticamente.
                     handler.postDelayed(() -> {
-                        if (position == categorias.size() - 1) {
-                            viewPager2.setUserInputEnabled(true);
-                            notifyItemChanged(position);
+                        ejecutarCuandoSePueda(handler, () -> {
+                            if (viewPager2.getCurrentItem() != position) return;
 
-                            if (onUltimaCategoriaRevelada != null) {
-                                onUltimaCategoriaRevelada.run();
+                            if (position == categorias.size() - 1) {
+                                viewPager2.setUserInputEnabled(true);
+                                notifyItemChanged(position);
+
+                                if (onUltimaCategoriaRevelada != null) {
+                                    onUltimaCategoriaRevelada.run();
+                                }
+                            } else {
+                                viewPager2.setCurrentItem(position + 1, true);
                             }
-                        } else {
-                            viewPager2.setCurrentItem(position + 1, true);
-                        }
+                        });
                     }, 5500);
                 }
             }
