@@ -4,70 +4,103 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:layout_marginHorizontal="4dp"
-    android:layout_marginVertical="6dp"
-    app:cardCornerRadius="18dp"
-    app:cardElevation="2dp"
-    app:cardBackgroundColor="#FFFFFF"
-    app:strokeWidth="1dp"
-    app:strokeColor="#D6E0FF">
+    android:layout_marginHorizontal="2dp"
+    android:layout_marginVertical="7dp"
+    app:cardBackgroundColor="#FCFDFF"
+    app:cardCornerRadius="20dp"
+    app:cardElevation="3dp"
+    app:strokeColor="#BFD0FF"
+    app:strokeWidth="1.5dp">
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:gravity="center_vertical"
-        android:paddingHorizontal="10dp"
-        android:paddingVertical="9dp">
+        android:orientation="vertical"
+        android:padding="12dp">
 
-        <com.google.android.material.card.MaterialCardView
-            android:layout_width="46dp"
-            android:layout_height="46dp"
-            app:cardCornerRadius="14dp"
-            app:cardElevation="0dp"
-            app:cardBackgroundColor="#EEF4FF"
-            app:strokeWidth="1dp"
-            app:strokeColor="#BFD0FF">
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center_vertical"
+            android:orientation="horizontal">
 
-            <ImageView
-                android:id="@+id/imgIconoCategoriaPartida"
-                android:layout_width="30dp"
-                android:layout_height="30dp"
-                android:layout_gravity="center"
-                android:scaleType="fitCenter"
-                android:src="@drawable/outline_person_24" />
+            <com.google.android.material.card.MaterialCardView
+                android:layout_width="48dp"
+                android:layout_height="48dp"
+                app:cardBackgroundColor="#EEF4FF"
+                app:cardCornerRadius="16dp"
+                app:cardElevation="0dp"
+                app:strokeColor="@color/colorPrimary"
+                app:strokeWidth="1dp">
 
-        </com.google.android.material.card.MaterialCardView>
+                <ImageView
+                    android:id="@+id/imgIconoCategoriaPartida"
+                    android:layout_width="30dp"
+                    android:layout_height="30dp"
+                    android:layout_gravity="center"
+                    android:scaleType="fitCenter"
+                    android:src="@drawable/outline_person_24" />
+
+            </com.google.android.material.card.MaterialCardView>
+
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="12dp"
+                android:layout_weight="1"
+                android:orientation="vertical">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:fontFamily="@font/manrope_regular"
+                    android:text="Categoría"
+                    android:textColor="@color/colorContenidoInputs"
+                    android:textSize="11sp"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:id="@+id/txtNombreCategoriaPartida"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:ellipsize="end"
+                    android:fontFamily="@font/lilitaone_regular"
+                    android:maxLines="1"
+                    android:text="Animal"
+                    android:textColor="@color/colorTextoP"
+                    android:textSize="22sp" />
+
+            </LinearLayout>
+
+        </LinearLayout>
 
         <TextView
-            android:id="@+id/txtNombreCategoriaPartida"
-            android:layout_width="78dp"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginStart="10dp"
-            android:fontFamily="@font/comic"
-            android:text="Animal"
-            android:textColor="@color/colorPrimary"
-            android:textSize="15sp"
-            android:textStyle="bold"
-            android:maxLines="1"
-            android:ellipsize="end" />
+            android:layout_marginTop="10dp"
+            android:fontFamily="@font/manrope_regular"
+            android:text="Tu respuesta"
+            android:textColor="@color/colorContenidoInputs"
+            android:textSize="12sp"
+            android:textStyle="bold" />
 
         <EditText
             android:id="@+id/etRespuestaCategoriaPartida"
-            android:layout_width="0dp"
-            android:layout_height="44dp"
-            android:layout_weight="1"
-            android:layout_marginStart="6dp"
+            android:layout_width="match_parent"
+            android:layout_height="50dp"
+            android:layout_marginTop="5dp"
             android:background="@drawable/bg_input_juego"
-            android:paddingHorizontal="12dp"
-            android:fontFamily="@font/manrope_regular"
-            android:textSize="15sp"
-            android:gravity="center"
-            android:hint="Respuesta..."
-            android:textColorHint="@color/colorContenidoInputs"
-            android:textColor="@color/colorPrimary"
+            android:fontFamily="@font/playkidz"
+            android:gravity="center_vertical"
+            android:hint="Escribe aquí..."
+            android:imeOptions="actionNext"
+            android:inputType="textCapWords|textNoSuggestions"
             android:maxLines="1"
-            android:singleLine="true" />
+            android:paddingHorizontal="14dp"
+            android:singleLine="true"
+            android:textColor="@color/colorPrimary"
+            android:textColorHint="@color/colorContenidoInputs"
+            android:textSize="20sp" />
 
     </LinearLayout>
 

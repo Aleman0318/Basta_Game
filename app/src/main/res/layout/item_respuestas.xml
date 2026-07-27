@@ -5,11 +5,11 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:layout_marginVertical="5dp"
-    app:cardCornerRadius="16dp"
-    app:cardElevation="2dp"
-    app:cardBackgroundColor="#FFFFFF"
-    app:strokeWidth="1dp"
+    android:layout_marginVertical="6dp"
+    app:cardCornerRadius="18dp"
+    app:cardElevation="3dp"
+    app:cardBackgroundColor="#FCFDFF"
+    app:strokeWidth="1.5dp"
     app:strokeColor="#D6E0FF">
 
     <LinearLayout
@@ -17,28 +17,35 @@
         android:layout_height="wrap_content"
         android:orientation="horizontal"
         android:gravity="center_vertical"
-        android:paddingVertical="8dp"
-        android:paddingHorizontal="8dp">
+        android:paddingVertical="10dp"
+        android:paddingHorizontal="10dp">
 
-        <com.google.android.material.card.MaterialCardView
-            android:layout_width="42dp"
-            android:layout_height="42dp"
-            app:cardCornerRadius="21dp"
-            app:cardElevation="0dp"
-            app:strokeWidth="1dp"
-            app:strokeColor="#FFFFFF">
+        <FrameLayout
+            android:layout_width="48dp"
+            android:layout_height="48dp">
 
-            <ImageView
-                android:id="@+id/imgAvatarValidacion"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:scaleType="centerCrop"
-                android:src="@drawable/ic_siluetas" />
+            <com.google.android.material.card.MaterialCardView
+                android:layout_width="46dp"
+                android:layout_height="46dp"
+                android:layout_gravity="center"
+                app:cardCornerRadius="23dp"
+                app:cardElevation="0dp"
+                app:strokeWidth="1.5dp"
+                app:strokeColor="@color/colorPrimary">
 
-        </com.google.android.material.card.MaterialCardView>
+                <ImageView
+                    android:id="@+id/imgAvatarValidacion"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:scaleType="centerCrop"
+                    android:src="@drawable/ic_siluetas" />
+
+            </com.google.android.material.card.MaterialCardView>
+
+        </FrameLayout>
 
         <LinearLayout
-            android:layout_width="78dp"
+            android:layout_width="74dp"
             android:layout_height="wrap_content"
             android:layout_marginStart="8dp"
             android:orientation="vertical">
@@ -47,10 +54,9 @@
                 android:id="@+id/txtUsuarioValidacion"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:fontFamily="@font/manrope_regular"
+                android:fontFamily="@font/lilitaone_regular"
                 android:textColor="@color/colorTextoP"
-                android:textSize="13sp"
-                android:textStyle="bold"
+                android:textSize="15sp"
                 android:maxLines="1"
                 android:ellipsize="end"
                 tools:text="Marlon" />
@@ -60,50 +66,66 @@
                 android:layout_height="wrap_content"
                 android:fontFamily="@font/manrope_regular"
                 android:text="Jugador"
-                android:textColor="@color/colorGrisAzulado"
-                android:textSize="10sp" />
+                android:textColor="@color/colorContenidoInputs"
+                android:textSize="10sp"
+                android:textStyle="bold" />
 
         </LinearLayout>
 
         <TextView
             android:id="@+id/txtRespuestaValidacion"
             android:layout_width="0dp"
-            android:layout_height="42dp"
+            android:layout_height="46dp"
             android:layout_weight="1"
             android:layout_marginStart="5dp"
-            android:layout_marginEnd="5dp"
+            android:layout_marginEnd="7dp"
             android:background="@drawable/bg_input_juego"
             android:gravity="center_vertical"
             android:paddingHorizontal="12dp"
             android:fontFamily="@font/playkidz"
             android:textColor="@color/colorPrimary"
-            android:textSize="16sp"
+            android:textSize="18sp"
             android:maxLines="1"
             android:ellipsize="end"
             tools:text="Manzana" />
 
         <FrameLayout
-            android:layout_width="42dp"
-            android:layout_height="42dp"
+            android:layout_width="64dp"
+            android:layout_height="44dp"
             android:layout_gravity="center">
 
             <com.google.android.material.card.MaterialCardView
                 android:id="@+id/btnValidarAccion"
-                android:layout_width="42dp"
-                android:layout_height="42dp"
+                android:layout_width="64dp"
+                android:layout_height="44dp"
                 android:layout_gravity="center"
-                app:cardCornerRadius="12dp"
-                app:cardBackgroundColor="@color/colorGrisAzulado"
-                app:strokeWidth="1dp"
-                app:strokeColor="@color/colorCelesteOscuro"
                 android:clickable="true"
-                android:focusable="true">
+                android:focusable="true"
+                android:foreground="?attr/selectableItemBackground"
+                android:contentDescription="Votar respuesta"
+                app:cardCornerRadius="15dp"
+                app:cardBackgroundColor="#FFF7D6"
+                app:cardElevation="0dp"
+                app:strokeWidth="1.5dp"
+                app:strokeColor="@color/colorSecondary">
 
-                <ImageView
-                    android:layout_width="18dp"
-                    android:layout_height="18dp"
-                    android:layout_gravity="center"
-                    android:src="@drawable/ic_rueda" />
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:orientation="vertical"
+                    android:gravity="center">
+
+                    <TextView
+                        android:id="@+id/txtBotonVotarValidacion"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:fontFamily="@font/lilitaone_regular"
+                        android:text="VOTAR"
+                        android:textColor="@color/colorSecondary"
+                        android:textSize="11sp"
+                        android:includeFontPadding="false" />
+
+                </LinearLayout>
 
             </com.google.android.material.card.MaterialCardView>
 

@@ -7,11 +7,14 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
+
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
-import com.example.basta_game.models.Categoria;
+
 import com.example.basta_game.R;
+import com.example.basta_game.models.Categoria;
 import com.google.android.material.card.MaterialCardView;
+
 import java.util.List;
 
 public class CategoriaAdapter extends RecyclerView.Adapter<CategoriaAdapter.ViewHolder> {
@@ -30,34 +33,79 @@ public class CategoriaAdapter extends RecyclerView.Adapter<CategoriaAdapter.View
 
     @NonNull
     @Override
-    public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_categoria, parent, false);
+    public CategoriaAdapter.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+        View view = LayoutInflater.from(parent.getContext())
+                .inflate(R.layout.item_categoria, parent, false);
+
         return new ViewHolder(view);
     }
 
     @Override
-    public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
+    public void onBindViewHolder(@NonNull CategoriaAdapter.ViewHolder holder, int position) {
         Categoria categoria = listaCategorias.get(position);
-        holder.tvNombre.setText(categoria.getNombre());
 
-        // esto asigna la imagen correspondiente proveniente de el list de categoria
+        holder.tvNombre.setText(categoria.getNombre());
         holder.ivIcono.setImageResource(categoria.getIconoId());
-        if (categoria.isHabilitada()) {
-            holder.cardView.setCardBackgroundColor(ColorStateList.valueOf(Color.parseColor("#3B4B7D")));
-        } else {
-            holder.cardView.setCardBackgroundColor(ColorStateList.valueOf(Color.parseColor("#C2C0C0")));
-        }
+
+        aplicarEstadoVisual(holder, categoria.isHabilitada());
 
         holder.itemView.setOnClickListener(v -> {
             boolean nuevoEstado = !categoria.isHabilitada();
             categoria.setHabilitada(nuevoEstado);
 
-            notifyItemChanged(holder.getAdapterPosition());
+            aplicarEstadoVisual(holder, nuevoEstado);
 
             if (listener != null) {
                 listener.onCategoriaToggle(categoria, nuevoEstado);
             }
         });
+    }
+
+    private void aplicarEstadoVisual(ViewHolder holder, boolean habilitada) {
+        if (habilitada) {
+            holder.cardView.setCardBackgroundColor(
+                    ColorStateList.valueOf(Color.parseColor("#EEF4FF"))
+            );
+            holder.cardView.setStrokeColor(
+                    ColorStateList.valueOf(Color.parseColor("#0017ED"))
+            );
+            holder.cardView.setStrokeWidth(3);
+
+            holder.cardIcono.setCardBackgroundColor(
+                    ColorStateList.valueOf(Color.parseColor("#FFFFFF"))
+            );
+            holder.cardIcono.setStrokeColor(
+                    ColorStateList.valueOf(Color.parseColor("#0017ED"))
+            );
+
+            holder.tvNombre.setTextColor(Color.parseColor("#0017ED"));
+            holder.tvEstado.setText("Seleccionada");
+            holder.tvEstado.setTextColor(Color.parseColor("#0017ED"));
+
+            holder.itemView.setAlpha(1f);
+
+        } else {
+            holder.cardView.setCardBackgroundColor(
+                    ColorStateList.valueOf(Color.parseColor("#FCFDFF"))
+            );
+            holder.cardView.setStrokeColor(
+                    ColorStateList.valueOf(Color.parseColor("#D6E0FF"))
+            );
+            holder.cardView.setStrokeWidth(2);
+
+            holder.cardIcono.setCardBackgroundColor(
+                    ColorStateList.valueOf(Color.parseColor("#FFFFFF"))
+            );
+            holder.cardIcono.setStrokeColor(
+                    ColorStateList.valueOf(Color.parseColor("#CBD5E1"))
+            );
+
+            holder.tvNombre.setTextColor(Color.parseColor("#1E293B"));
+            holder.tvEstado.setText("Deseleccionada");
+            holder.tvEstado.setTextColor(Color.parseColor("#9E9E9E"));
+
+            holder.itemView.setAlpha(0.88f);
+        }
     }
 
     @Override
@@ -67,14 +115,19 @@ public class CategoriaAdapter extends RecyclerView.Adapter<CategoriaAdapter.View
 
     public static class ViewHolder extends RecyclerView.ViewHolder {
         TextView tvNombre;
+        TextView tvEstado;
         ImageView ivIcono;
         MaterialCardView cardView;
+        MaterialCardView cardIcono;
 
         public ViewHolder(@NonNull View itemView) {
             super(itemView);
+
+            cardView = itemView.findViewById(R.id.cardCategoria);
+            cardIcono = itemView.findViewById(R.id.cardIconoCategoria);
             tvNombre = itemView.findViewById(R.id.tvNombreCategoria);
+            tvEstado = itemView.findViewById(R.id.tvEstadoCategoria);
             ivIcono = itemView.findViewById(R.id.ivIconoCategoria);
-            cardView = (MaterialCardView) itemView;
         }
     }
 }

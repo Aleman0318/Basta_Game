@@ -15,6 +15,10 @@ public class RespuestaValidacion {
     private boolean timerIniciado = false;
     private boolean mostrarPuntaje = false;
 
+    private String claveVotacion;
+    private boolean votacionResuelta = false;
+    private String resultadoVotacion;
+
     public RespuestaValidacion(String uidJugador, String nombreJugador, String respuesta, String fotoPerfilUrl) {
         this.uidJugador = uidJugador;
         this.nombreJugador = nombreJugador;
@@ -49,4 +53,13 @@ public class RespuestaValidacion {
 
     public boolean isMostrarPuntaje() { return mostrarPuntaje; }
     public void setMostrarPuntaje(boolean mostrarPuntaje) { this.mostrarPuntaje = mostrarPuntaje; }
+
+    public String getClaveVotacion() { return claveVotacion; }
+    public void setClaveVotacion(String claveVotacion) { this.claveVotacion = claveVotacion; }
+
+    public boolean isVotacionResuelta() { return votacionResuelta; }
+    public void setVotacionResuelta(boolean votacionResuelta) { this.votacionResuelta = votacionResuelta; }
+
+    public String getResultadoVotacion() { return resultadoVotacion; }
+    public void setResultadoVotacion(String resultadoVotacion) { this.resultadoVotacion = resultadoVotacion; }
 }

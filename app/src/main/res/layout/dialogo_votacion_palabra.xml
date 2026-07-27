@@ -5,189 +5,293 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:layout_marginHorizontal="24dp"
-    app:cardCornerRadius="14dp"
-    app:strokeColor="@color/colorBasta"
-    app:strokeWidth="1dp"
+    android:layout_marginHorizontal="22dp"
+    app:cardCornerRadius="28dp"
     app:cardBackgroundColor="@color/blanco"
-    app:cardElevation="16dp">
+    app:cardElevation="18dp"
+    app:strokeWidth="2dp"
+    app:strokeColor="#D6E0FF">
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
-        android:paddingTop="24dp"
-        android:paddingBottom="24dp"
+        android:gravity="center_horizontal"
         android:paddingHorizontal="20dp"
-        android:gravity="center_horizontal">
+        android:paddingTop="24dp"
+        android:paddingBottom="22dp">
+
+        <com.google.android.material.card.MaterialCardView
+            android:layout_width="58dp"
+            android:layout_height="58dp"
+            app:cardCornerRadius="20dp"
+            app:cardElevation="0dp"
+            app:cardBackgroundColor="#EEF4FF"
+            app:strokeWidth="1.5dp"
+            app:strokeColor="@color/colorPrimary">
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:gravity="center"
+                android:fontFamily="@font/lilitaone_regular"
+                android:text="?"
+                android:textColor="@color/colorPrimary"
+                android:textSize="30sp" />
+
+        </com.google.android.material.card.MaterialCardView>
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_marginTop="10dp"
             android:fontFamily="@font/lilitaone_regular"
-            android:text="EVALUEMOS LA PALABRA"
-            android:textColor="@color/colorBasta"
-            android:textSize="22sp" />
+            android:text="Jurado de palabra"
+            android:textColor="@color/colorTextoP"
+            android:textSize="29sp" />
 
         <TextView
-            android:id="@+id/txtPalabraAEvaluar"
             android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:fontFamily="@font/manrope_regular"
+            android:text="Revisen si esta respuesta debe contar"
+            android:textColor="@color/colorContenidoInputs"
+            android:textSize="13sp"
+            android:textStyle="bold" />
+
+        <com.google.android.material.card.MaterialCardView
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="12dp"
-            android:background="@drawable/bg_chip_blanco_azul"
-            android:paddingHorizontal="24dp"
-            android:paddingVertical="8dp"
-            android:fontFamily="@font/playkidz"
-            android:textColor="@color/colorTextoP"
-            android:textSize="24sp"
-            tools:text="Manzana" />
+            app:cardCornerRadius="18dp"
+            app:cardBackgroundColor="#FFF7ED"
+            app:cardElevation="0dp"
+            app:strokeWidth="1.5dp"
+            app:strokeColor="@color/colorSecondary">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:paddingHorizontal="12dp"
+                android:paddingVertical="10dp">
+
+                <TextView
+                    android:layout_width="34dp"
+                    android:layout_height="34dp"
+                    android:gravity="center"
+                    android:fontFamily="@font/lilitaone_regular"
+                    android:text="2"
+                    android:textColor="@color/colorSecondary"
+                    android:textSize="22sp" />
+
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="8dp"
+                    android:layout_weight="1"
+                    android:fontFamily="@font/manrope_regular"
+                    android:text="Solo hay 2 votaciones colectivas por ronda. Úsenlas bien."
+                    android:textColor="@color/colorTextoP"
+                    android:textSize="12sp"
+                    android:textStyle="bold" />
+
+            </LinearLayout>
+
+        </com.google.android.material.card.MaterialCardView>
+
+        <com.google.android.material.card.MaterialCardView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="14dp"
+            app:cardCornerRadius="22dp"
+            app:cardBackgroundColor="#FCFDFF"
+            app:cardElevation="2dp"
+            app:strokeWidth="1.5dp"
+            app:strokeColor="#D6E0FF">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:gravity="center_horizontal"
+                android:padding="16dp">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:fontFamily="@font/manrope_regular"
+                    android:text="Respuesta enviada"
+                    android:textColor="@color/colorContenidoInputs"
+                    android:textSize="12sp"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:id="@+id/txtPalabraAEvaluar"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="7dp"
+                    android:background="@drawable/bg_chip_blanco_azul"
+                    android:fontFamily="@font/playkidz"
+                    android:paddingHorizontal="28dp"
+                    android:paddingVertical="9dp"
+                    android:textColor="@color/colorPrimary"
+                    android:textSize="28sp"
+                    tools:text="Manzana" />
+
+                <TextView
+                    android:id="@+id/txtJugadorEvaluado"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="9dp"
+                    android:fontFamily="@font/manrope_regular"
+                    android:textColor="@color/colorTextoP"
+                    android:textSize="14sp"
+                    android:textStyle="bold"
+                    tools:text="Respuesta de Aleman" />
+
+            </LinearLayout>
+
+        </com.google.android.material.card.MaterialCardView>
 
         <TextView
-            android:id="@+id/txtJugadorEvaluado"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
-            android:fontFamily="@font/manrope_regular"
-            android:textColor="@color/colorContenidoInputs"
-            android:textSize="14sp"
-            tools:text="Respuesta de Aleman" />
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="16dp"
-            android:layout_marginBottom="16dp"
+            android:layout_marginTop="18dp"
             android:fontFamily="@font/lilitaone_regular"
-            android:text="¿Es válida?"
+            android:text="¿La aceptamos?"
             android:textColor="@color/colorTextoP"
-            android:textSize="24sp"
-            android:textStyle="bold" />
+            android:textSize="25sp" />
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
             android:orientation="horizontal"
             android:weightSum="2">
 
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/btnVotoNo"
                 android:layout_width="0dp"
-                android:layout_height="55dp"
+                android:layout_height="56dp"
                 android:layout_weight="1"
-                android:layout_marginEnd="8dp"
-                app:cornerRadius="12dp"
-                android:backgroundTint="@color/colorBasta"
+                android:layout_marginEnd="7dp"
+                android:backgroundTint="@color/colorSecondaryTenue"
                 android:fontFamily="@font/lilitaone_regular"
-                android:text="No"
+                android:text="No vale"
+                android:textColor="@color/colorBasta"
+                android:textSize="17sp"
+                app:cornerRadius="17dp"
                 app:strokeWidth="2dp"
-                app:strokeColor="@color/colorRojoFuerte"
-                android:textColor="@color/blanco"
-                android:textSize="18sp" />
+                app:strokeColor="@color/colorBasta" />
 
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/btnVotoSi"
                 android:layout_width="0dp"
-                android:layout_height="55dp"
+                android:layout_height="56dp"
                 android:layout_weight="1"
-                android:layout_marginStart="8dp"
-                app:cornerRadius="12dp"
-                android:backgroundTint="@color/verde_puntos"
+                android:layout_marginStart="7dp"
+                android:backgroundTint="@color/verde_bg"
                 android:fontFamily="@font/lilitaone_regular"
-                android:text="Sí"
-                android:textColor="@color/blanco"
-                android:textSize="18sp"
+                android:text="Sí vale"
+                android:textColor="@color/verde_puntos"
+                android:textSize="17sp"
+                app:cornerRadius="17dp"
                 app:strokeWidth="2dp"
-                app:strokeColor="@color/check" />
+                app:strokeColor="@color/verde_puntos" />
 
         </LinearLayout>
 
         <com.google.android.material.button.MaterialButton
             android:id="@+id/btnVotoAbstenerse"
             android:layout_width="match_parent"
-            android:layout_height="50dp"
-            android:layout_marginTop="12dp"
-            app:cornerRadius="12dp"
-            android:backgroundTint="@color/colorContenidoInputs"
+            android:layout_height="52dp"
+            android:layout_marginTop="10dp"
+            android:backgroundTint="#F1F5F9"
             android:fontFamily="@font/lilitaone_regular"
-            android:text="Abstenerse"
-            android:textColor="@color/blanco"
-            android:textSize="17sp" />
+            android:text="Me abstengo"
+            android:textColor="@color/colorTextoP"
+            android:textSize="17sp"
+            app:cornerRadius="17dp"
+            app:strokeWidth="1.5dp"
+            app:strokeColor="@color/colorContenidoInputs" />
 
         <TextView
             android:id="@+id/txtEstadoVotoUsuario"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="12dp"
+            android:layout_marginTop="13dp"
+            android:background="@drawable/bg_chip_blanco_gris"
             android:fontFamily="@font/manrope_regular"
+            android:paddingHorizontal="14dp"
+            android:paddingVertical="6dp"
             android:text="Esperando votos..."
             android:textColor="@color/colorTextoP"
-            android:textSize="14sp" />
+            android:textSize="13sp"
+            android:textStyle="bold" />
 
         <View
             android:layout_width="match_parent"
             android:layout_height="1dp"
             android:layout_marginTop="20dp"
             android:layout_marginBottom="12dp"
-            android:background="@color/colorContenidoInputs" />
+            android:background="#D6E0FF" />
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:fontFamily="@font/manrope_regular"
+            android:fontFamily="@font/lilitaone_regular"
             android:text="Recuento de votos"
-            android:textColor="@color/colorContenidoInputs"
-            android:textSize="16sp" />
+            android:textColor="@color/colorTextoP"
+            android:textSize="19sp" />
 
         <LinearLayout
-            android:layout_width="wrap_content"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
+            android:layout_marginTop="10dp"
             android:orientation="horizontal"
-            android:gravity="center">
+            android:weightSum="3">
 
             <TextView
                 android:id="@+id/txtVotosNo"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
+                android:layout_width="0dp"
+                android:layout_height="38dp"
+                android:layout_weight="1"
+                android:gravity="center"
+                android:background="@drawable/bg_chip_blanco_gris"
                 android:fontFamily="@font/lilitaone_regular"
                 android:text="No: 0"
                 android:textColor="@color/colorBasta"
-                android:textSize="18sp" />
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginHorizontal="12dp"
-                android:text="|"
-                android:textColor="@color/colorContenidoInputs"
-                android:textSize="18sp" />
+                android:textSize="16sp" />
 
             <TextView
                 android:id="@+id/txtVotosSi"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
+                android:layout_width="0dp"
+                android:layout_height="38dp"
+                android:layout_marginHorizontal="8dp"
+                android:layout_weight="1"
+                android:gravity="center"
+                android:background="@drawable/bg_chip_blanco_gris"
                 android:fontFamily="@font/lilitaone_regular"
                 android:text="Sí: 0"
                 android:textColor="@color/verde_puntos"
-                android:textSize="18sp" />
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginHorizontal="12dp"
-                android:text="|"
-                android:textColor="@color/colorContenidoInputs"
-                android:textSize="18sp" />
+                android:textSize="16sp" />
 
             <TextView
                 android:id="@+id/txtVotosAbstenerse"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
+                android:layout_width="0dp"
+                android:layout_height="38dp"
+                android:layout_weight="1"
+                android:gravity="center"
+                android:background="@drawable/bg_chip_blanco_gris"
                 android:fontFamily="@font/lilitaone_regular"
                 android:text="Abs: 0"
                 android:textColor="@color/colorContenidoInputs"
-                android:textSize="18sp" />
+                android:textSize="16sp" />
 
         </LinearLayout>
+
     </LinearLayout>
+
 </com.google.android.material.card.MaterialCardView>

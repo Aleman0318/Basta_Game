@@ -1,0 +1,319 @@
+<?xml version="1.0" encoding="utf-8"?>
+<com.google.android.material.card.MaterialCardView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/cardComodinTiendaItem"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_marginHorizontal="10dp"
+    android:layout_marginVertical="12dp"
+    app:cardBackgroundColor="@color/blanco"
+    app:cardCornerRadius="28dp"
+    app:cardElevation="8dp"
+    app:strokeColor="#D6E0FF"
+    app:strokeWidth="2dp">
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:padding="18dp">
+
+        <ImageView
+            android:id="@+id/imgHeaderRareza"
+            android:layout_width="150dp"
+            android:layout_height="50dp"
+            android:scaleType="fitStart"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            tools:src="@drawable/bg_rareza_caotico" />
+
+        <com.google.android.material.card.MaterialCardView
+            android:id="@+id/cardIconoComodinItem"
+            android:layout_width="64dp"
+            android:layout_height="64dp"
+            android:layout_marginTop="14dp"
+            app:cardBackgroundColor="#EEF4FF"
+            app:cardCornerRadius="20dp"
+            app:cardElevation="0dp"
+            app:strokeWidth="1.5dp"
+            app:strokeColor="@color/colorPrimary"
+            app:layout_constraintTop_toBottomOf="@id/imgHeaderRareza"
+            app:layout_constraintStart_toStartOf="parent">
+
+            <ImageView
+                android:id="@+id/imgIconoComodinItem"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:padding="1dp"
+                android:scaleType="fitCenter"
+                tools:src="@drawable/ic_comodin_cambiodeflujo" />
+        </com.google.android.material.card.MaterialCardView>
+
+        <TextView
+            android:id="@+id/txtNombreComodinItem"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="14dp"
+            android:fontFamily="@font/lilitaone_regular"
+            android:textColor="@color/colorTextoP"
+            android:textSize="26sp"
+            app:layout_constraintTop_toTopOf="@id/cardIconoComodinItem"
+            app:layout_constraintStart_toEndOf="@id/cardIconoComodinItem"
+            app:layout_constraintEnd_toEndOf="parent"
+            tools:text="Cambio de Flujo" />
+
+        <TextView
+            android:id="@+id/txtDescripcionComodinItem"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="2dp"
+            android:fontFamily="@font/manrope_regular"
+            android:textColor="#5E6C84"
+            android:textSize="12sp"
+            android:textStyle="bold"
+            app:layout_constraintTop_toBottomOf="@id/txtNombreComodinItem"
+            app:layout_constraintStart_toStartOf="@id/txtNombreComodinItem"
+            app:layout_constraintEnd_toEndOf="parent"
+            tools:text="Intercambia tu puntaje con un jugador elegido aleatoriamente." />
+
+        <LinearLayout
+            android:id="@+id/btnDesplegarReglas"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="10dp"
+            android:background="#EEF4FF"
+            android:paddingHorizontal="12dp"
+            android:paddingVertical="6dp"
+            android:gravity="center_vertical"
+            android:orientation="horizontal"
+            app:layout_constraintTop_toBottomOf="@id/txtDescripcionComodinItem"
+            app:layout_constraintStart_toStartOf="@id/txtDescripcionComodinItem">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:fontFamily="@font/manrope_regular"
+                android:text="Estadísticas y Reglas"
+                android:textColor="@color/colorPrimary"
+                android:textSize="11sp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:id="@+id/txtFlechaDesplegable"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="6dp"
+                android:text="▼"
+                android:textColor="@color/colorPrimary"
+                android:textSize="10sp"/>
+        </LinearLayout>
+
+        <androidx.constraintlayout.widget.Barrier
+            android:id="@+id/barrierContenido"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:barrierDirection="bottom"
+            app:constraint_referenced_ids="cardIconoComodinItem,btnDesplegarReglas" />
+
+        <!-- CAJA DE ESTADÍSTICAS ESTILO BOCETO -->
+        <com.google.android.material.card.MaterialCardView
+            android:id="@+id/layoutEstadisticasOcultas"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
+            app:cardCornerRadius="16dp"
+            app:cardBackgroundColor="#F8FAFF"
+            app:cardElevation="0dp"
+            app:strokeColor="#D6E0FF"
+            app:strokeWidth="1.5dp"
+            android:visibility="gone"
+            app:layout_constraintTop_toBottomOf="@id/barrierContenido"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            tools:visibility="visible">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:paddingVertical="4dp">
+
+                <!-- FILA 1 -->
+                <LinearLayout
+                    android:id="@+id/rowRegla1"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical"
+                    android:paddingHorizontal="14dp"
+                    android:paddingVertical="10dp">
+
+                    <ImageView
+                        android:id="@+id/imgRegla1"
+                        android:layout_width="32dp"
+                        android:layout_height="32dp"
+                        android:src="@drawable/ic_rueda" />
+
+                    <TextView
+                        android:id="@+id/txtRegla1"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:layout_marginStart="14dp"
+                        android:fontFamily="@font/manrope_regular"
+                        android:textColor="#5E6C84"
+                        android:textSize="12sp"
+                        tools:text="1 vs 1: Tienes 65% de riesgo..." />
+                </LinearLayout>
+
+                <View
+                    android:id="@+id/divRegla1"
+                    android:layout_width="match_parent"
+                    android:layout_height="1dp"
+                    android:layout_marginHorizontal="14dp"
+                    android:background="#D6E0FF"/>
+
+                <!-- FILA 2 -->
+                <LinearLayout
+                    android:id="@+id/rowRegla2"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical"
+                    android:paddingHorizontal="14dp"
+                    android:paddingVertical="10dp">
+
+                    <ImageView
+                        android:id="@+id/imgRegla2"
+                        android:layout_width="32dp"
+                        android:layout_height="32dp"
+                        android:src="@drawable/ic_siluetas" />
+
+                    <TextView
+                        android:id="@+id/txtRegla2"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:layout_marginStart="14dp"
+                        android:fontFamily="@font/manrope_regular"
+                        android:textColor="#5E6C84"
+                        android:textSize="12sp"
+                        tools:text="Si vas primero (3+ jug)..." />
+                </LinearLayout>
+
+                <View
+                    android:id="@+id/divRegla2"
+                    android:layout_width="match_parent"
+                    android:layout_height="1dp"
+                    android:layout_marginHorizontal="14dp"
+                    android:background="#D6E0FF"/>
+
+                <!-- FILA 3 -->
+                <LinearLayout
+                    android:id="@+id/rowRegla3"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical"
+                    android:paddingHorizontal="14dp"
+                    android:paddingVertical="10dp">
+
+                    <ImageView
+                        android:id="@+id/imgRegla3"
+                        android:layout_width="32dp"
+                        android:layout_height="32dp"
+                        android:src="@drawable/ic_crono" />
+
+                    <TextView
+                        android:id="@+id/txtRegla3"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:layout_marginStart="14dp"
+                        android:fontFamily="@font/manrope_regular"
+                        android:textColor="#5E6C84"
+                        android:textSize="12sp"
+                        tools:text="Si vas último: Es casi seguro..." />
+                </LinearLayout>
+            </LinearLayout>
+        </com.google.android.material.card.MaterialCardView>
+
+        <!-- SEPARADOR Y PRECIO IGUAL QUE ANTES -->
+        <View
+            android:id="@+id/dividerTienda"
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:layout_marginTop="14dp"
+            android:background="#D6E0FF"
+            app:layout_constraintTop_toBottomOf="@id/layoutEstadisticasOcultas" />
+
+        <com.google.android.material.card.MaterialCardView
+            android:id="@+id/cardInventarioItem"
+            android:layout_width="wrap_content"
+            android:layout_height="38dp"
+            android:layout_marginTop="14dp"
+            app:cardBackgroundColor="#EEF4FF"
+            app:cardCornerRadius="14dp"
+            app:cardElevation="0dp"
+            app:strokeColor="@color/colorPrimary"
+            app:strokeWidth="1.5dp"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/dividerTienda"
+            app:layout_constraintBottom_toBottomOf="parent">
+
+            <TextView
+                android:id="@+id/txtCantidadInventarioItem"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:fontFamily="@font/lilitaone_regular"
+                android:gravity="center"
+                android:minWidth="80dp"
+                android:paddingHorizontal="12dp"
+                android:textColor="@color/colorPrimary"
+                android:textSize="14sp"
+                tools:text="TIENES: 90" />
+        </com.google.android.material.card.MaterialCardView>
+
+        <ImageView
+            android:id="@+id/btnComprarComodinItem"
+            android:layout_width="140dp"
+            android:layout_height="55dp"
+            android:src="@drawable/btn_tienda_comprar"
+            android:scaleType="fitXY"
+            android:clickable="true"
+            android:focusable="true"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="@id/cardInventarioItem"
+            app:layout_constraintBottom_toBottomOf="@id/cardInventarioItem" />
+
+        <LinearLayout
+            android:id="@+id/layoutPrecio"
+            android:layout_width="wrap_content"
+            android:layout_height="0dp"
+            android:layout_marginEnd="12dp"
+            app:layout_constraintVertical_bias="0.55"
+            android:gravity="center_vertical"
+            android:orientation="horizontal"
+            app:layout_constraintEnd_toStartOf="@id/btnComprarComodinItem"
+            app:layout_constraintTop_toTopOf="@id/btnComprarComodinItem"
+            app:layout_constraintBottom_toBottomOf="@id/btnComprarComodinItem">
+
+            <ImageView
+                android:id="@+id/imgTipoMonedaComodinItem"
+                android:layout_width="24dp"
+                android:layout_height="24dp"
+                android:src="@drawable/ic_monedas" />
+
+            <TextView
+                android:id="@+id/txtPrecioComodinItem"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="6dp"
+                android:fontFamily="@font/summer"
+                android:textColor="#8E5C00"
+                android:textSize="22sp"
+                tools:text="1000" />
+        </LinearLayout>
+    </androidx.constraintlayout.widget.ConstraintLayout>
+</com.google.android.material.card.MaterialCardView>

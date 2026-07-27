@@ -7,8 +7,10 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
+
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
+
 import com.bumptech.glide.Glide;
 import com.example.basta_game.R;
 import com.example.basta_game.models.JugadorSala;
@@ -20,7 +22,6 @@ public class JugadorSalaAdapter extends RecyclerView.Adapter<JugadorSalaAdapter.
 
     private List<JugadorSala> listaJugadores;
 
-
     public JugadorSalaAdapter(List<JugadorSala> listaJugadores) {
         this.listaJugadores = listaJugadores;
     }
@@ -30,6 +31,7 @@ public class JugadorSalaAdapter extends RecyclerView.Adapter<JugadorSalaAdapter.
     public JugadorSalaAdapter.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         View view = LayoutInflater.from(parent.getContext())
                 .inflate(R.layout.item_jugador, parent, false);
+
         return new ViewHolder(view);
     }
 
@@ -45,55 +47,102 @@ public class JugadorSalaAdapter extends RecyclerView.Adapter<JugadorSalaAdapter.
                 .error(R.drawable.outline_person_24)
                 .into(holder.imgAvatar);
 
+        if (!jugador.isEstaConectado()) {
+            aplicarEstadoDesconectado(holder);
+        } else {
+            if (jugador.isEstaListo()) {
+                aplicarEstadoListo(holder);
+            } else {
+                aplicarEstadoEsperando(holder);
+            }
+        }
+    }
 
-       if(!jugador.isEstaConectado()){
-           holder.cardEstado.setCardBackgroundColor(
-                   ColorStateList.valueOf(Color.parseColor("#404040"))
-           );
+    private void aplicarEstadoListo(ViewHolder holder) {
+        holder.cardJugadorLobby.setCardBackgroundColor(
+                ColorStateList.valueOf(Color.parseColor("#F6FFF6"))
+        );
+        holder.cardJugadorLobby.setStrokeColor(
+                ColorStateList.valueOf(Color.parseColor("#BDE8B8"))
+        );
 
-           holder.cardEstadoPill.setCardBackgroundColor(
-                   ColorStateList.valueOf(Color.parseColor("#A4A4A4"))
-           );
-           holder.cardEstadoPill.setStrokeColor(
-                   ColorStateList.valueOf(Color.parseColor("#6E6E6E"))
-           );
+        holder.cardEstado.setCardBackgroundColor(
+                ColorStateList.valueOf(Color.parseColor("#2AA514"))
+        );
 
-           holder.tvEstadoJugador.setTextColor(Color.parseColor("#FFFFFF"));
-           holder.tvEstadoJugador.setText("Desconectado");
+        holder.cardEstadoPill.setCardBackgroundColor(
+                ColorStateList.valueOf(Color.parseColor("#E9FBE8"))
+        );
+        holder.cardEstadoPill.setStrokeColor(
+                ColorStateList.valueOf(Color.parseColor("#74D66A"))
+        );
 
-       }else {
-           if (jugador.isEstaListo()) {
-               holder.cardEstado.setCardBackgroundColor(
-                       ColorStateList.valueOf(Color.parseColor("#4CAF50"))
-               );
+        holder.tvIconoEstado.setText("●");
+        holder.tvIconoEstado.setTextColor(Color.parseColor("#2AA514"));
 
-               holder.cardEstadoPill.setCardBackgroundColor(
-                       ColorStateList.valueOf(Color.parseColor("#F1FFF0"))
-               );
-               holder.cardEstadoPill.setStrokeColor(
-                       ColorStateList.valueOf(Color.parseColor("#BDE8B8"))
-               );
+        holder.tvEstadoJugador.setText("Listo");
+        holder.tvEstadoJugador.setTextColor(Color.parseColor("#2AA514"));
 
-               holder.tvEstadoJugador.setTextColor(Color.parseColor("#4CAF50"));
-               holder.tvEstadoJugador.setText("Listo");
+        holder.tvSubtitulo.setText("Preparado para jugar");
+        holder.tvSubtitulo.setTextColor(Color.parseColor("#4B8B4B"));
+    }
 
-           } else {
-               holder.cardEstado.setCardBackgroundColor(
-                       ColorStateList.valueOf(Color.parseColor("#FF5E5E"))
-               );
+    private void aplicarEstadoEsperando(ViewHolder holder) {
+        holder.cardJugadorLobby.setCardBackgroundColor(
+                ColorStateList.valueOf(Color.parseColor("#FCFDFF"))
+        );
+        holder.cardJugadorLobby.setStrokeColor(
+                ColorStateList.valueOf(Color.parseColor("#BFD0FF"))
+        );
 
-               holder.tvEstadoJugador.setTextColor(Color.parseColor("#CE0000"));
-               holder.tvEstadoJugador.setText("En Espera");
+        holder.cardEstado.setCardBackgroundColor(
+                ColorStateList.valueOf(Color.parseColor("#0017ED"))
+        );
 
-               holder.cardEstadoPill.setCardBackgroundColor(
-                       ColorStateList.valueOf(Color.parseColor("#FFF4CC"))
-               );
-               holder.cardEstadoPill.setStrokeColor(
-                       ColorStateList.valueOf(Color.parseColor("#CE0000"))
-               );
-           }
-       }
+        holder.cardEstadoPill.setCardBackgroundColor(
+                ColorStateList.valueOf(Color.parseColor("#EEF4FF"))
+        );
+        holder.cardEstadoPill.setStrokeColor(
+                ColorStateList.valueOf(Color.parseColor("#BFD0FF"))
+        );
 
+        holder.tvIconoEstado.setText("●");
+        holder.tvIconoEstado.setTextColor(Color.parseColor("#0017ED"));
+
+        holder.tvEstadoJugador.setText("Esperando");
+        holder.tvEstadoJugador.setTextColor(Color.parseColor("#0017ED"));
+
+        holder.tvSubtitulo.setText("Aún no está listo");
+        holder.tvSubtitulo.setTextColor(Color.parseColor("#7596A7"));
+    }
+
+    private void aplicarEstadoDesconectado(ViewHolder holder) {
+        holder.cardJugadorLobby.setCardBackgroundColor(
+                ColorStateList.valueOf(Color.parseColor("#F8FAFC"))
+        );
+        holder.cardJugadorLobby.setStrokeColor(
+                ColorStateList.valueOf(Color.parseColor("#CBD5E1"))
+        );
+
+        holder.cardEstado.setCardBackgroundColor(
+                ColorStateList.valueOf(Color.parseColor("#94A3B8"))
+        );
+
+        holder.cardEstadoPill.setCardBackgroundColor(
+                ColorStateList.valueOf(Color.parseColor("#F1F5F9"))
+        );
+        holder.cardEstadoPill.setStrokeColor(
+                ColorStateList.valueOf(Color.parseColor("#CBD5E1"))
+        );
+
+        holder.tvIconoEstado.setText("●");
+        holder.tvIconoEstado.setTextColor(Color.parseColor("#64748B"));
+
+        holder.tvEstadoJugador.setText("Offline");
+        holder.tvEstadoJugador.setTextColor(Color.parseColor("#64748B"));
+
+        holder.tvSubtitulo.setText("Fuera de la sala");
+        holder.tvSubtitulo.setTextColor(Color.parseColor("#94A3B8"));
     }
 
     @Override
@@ -109,22 +158,29 @@ public class JugadorSalaAdapter extends RecyclerView.Adapter<JugadorSalaAdapter.
     public static class ViewHolder extends RecyclerView.ViewHolder {
 
         TextView tvNombre;
-
+        TextView tvSubtitulo;
         TextView tvEstadoJugador;
-        MaterialCardView cardEstado;
+        TextView tvIconoEstado;
 
+        MaterialCardView cardJugadorLobby;
+        MaterialCardView cardEstado;
         MaterialCardView cardEstadoPill;
 
         ImageView imgAvatar;
 
-
         public ViewHolder(@NonNull View itemView) {
             super(itemView);
 
+            cardJugadorLobby = itemView.findViewById(R.id.cardJugadorLobby);
             tvNombre = itemView.findViewById(R.id.tvNombreJugador);
+            tvSubtitulo = itemView.findViewById(R.id.tvSubtituloJugador);
+
             cardEstado = itemView.findViewById(R.id.cardEstadoJugador);
-            tvEstadoJugador = itemView.findViewById(R.id.tvEstadoJugador);
             cardEstadoPill = itemView.findViewById(R.id.cardEstadoPill);
+
+            tvEstadoJugador = itemView.findViewById(R.id.tvEstadoJugador);
+            tvIconoEstado = itemView.findViewById(R.id.tvIconoEstadoJugador);
+
             imgAvatar = itemView.findViewById(R.id.ivAvatarJugador);
         }
     }

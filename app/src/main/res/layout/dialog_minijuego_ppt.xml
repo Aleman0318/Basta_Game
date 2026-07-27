@@ -1,0 +1,286 @@
+<?xml version="1.0" encoding="utf-8"?>
+<com.google.android.material.card.MaterialCardView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_margin="16dp"
+    app:cardBackgroundColor="#FCFDFF"
+    app:cardCornerRadius="28dp"
+    app:cardElevation="10dp"
+    app:strokeColor="#D6E0FF"
+    app:strokeWidth="2dp">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        android:orientation="vertical"
+        android:paddingHorizontal="16dp"
+        android:paddingTop="24dp"
+        android:paddingBottom="20dp">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:fontFamily="@font/lilitaone_regular"
+            android:text="¡DUELO A MUERTE!"
+            android:textColor="#E65100"
+            android:textSize="28sp" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="2dp"
+            android:layout_marginBottom="24dp"
+            android:fontFamily="@font/manrope_regular"
+            android:text="Piedra, Papel o Tijera (Mejor de 3)"
+            android:textColor="#5E6C84"
+            android:textSize="13sp"
+            android:textStyle="bold" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:baselineAligned="false"
+            android:gravity="center"
+            android:orientation="horizontal">
+
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:gravity="center"
+                android:orientation="vertical">
+
+                <com.google.android.material.card.MaterialCardView
+                    android:layout_width="55dp"
+                    android:layout_height="55dp"
+                    app:cardCornerRadius="27.5dp"
+                    app:strokeColor="#304EDB"
+                    app:strokeWidth="2dp">
+
+                    <ImageView
+                        android:id="@+id/imgAvatarA"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:scaleType="centerCrop"
+                        android:src="@drawable/ic_usuarios_comodines" />
+                </com.google.android.material.card.MaterialCardView>
+
+                <TextView
+                    android:id="@+id/txtNombreA"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="6dp"
+                    android:ellipsize="end"
+                    android:fontFamily="@font/lilitaone_regular"
+                    android:maxLines="1"
+                    android:text="Cargando..."
+                    android:textColor="#304EDB"
+                    android:textSize="15sp" />
+
+                <TextView
+                    android:id="@+id/txtPuntosA"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:fontFamily="@font/lilitaone_regular"
+                    android:text="0"
+                    android:textColor="#2AA514"
+                    android:textSize="34sp" />
+
+                <com.google.android.material.card.MaterialCardView
+                    android:layout_width="75dp"
+                    android:layout_height="75dp"
+                    android:layout_marginTop="8dp"
+                    app:cardBackgroundColor="#EEF4FF"
+                    app:cardCornerRadius="16dp"
+                    app:cardElevation="0dp"
+                    app:strokeColor="#D6E0FF"
+                    app:strokeWidth="1.5dp">
+
+                    <ImageView
+                        android:id="@+id/imgEleccionA"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:padding="12dp"
+                        android:src="@drawable/ic_siluetas" />
+                </com.google.android.material.card.MaterialCardView>
+            </LinearLayout>
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginHorizontal="12dp"
+                android:layout_marginBottom="30dp"
+                android:fontFamily="@font/lilitaone_regular"
+                android:text="VS"
+                android:textColor="#E65100"
+                android:textSize="26sp" />
+
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:gravity="center"
+                android:orientation="vertical">
+
+                <com.google.android.material.card.MaterialCardView
+                    android:layout_width="55dp"
+                    android:layout_height="55dp"
+                    app:cardCornerRadius="27.5dp"
+                    app:strokeColor="#E53935"
+                    app:strokeWidth="2dp">
+
+                    <ImageView
+                        android:id="@+id/imgAvatarV"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:scaleType="centerCrop"
+                        android:src="@drawable/ic_usuarios_comodines" />
+                </com.google.android.material.card.MaterialCardView>
+
+                <TextView
+                    android:id="@+id/txtNombreV"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="6dp"
+                    android:ellipsize="end"
+                    android:fontFamily="@font/lilitaone_regular"
+                    android:maxLines="1"
+                    android:text="Cargando..."
+                    android:textColor="#E53935"
+                    android:textSize="15sp" />
+
+                <TextView
+                    android:id="@+id/txtPuntosV"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:fontFamily="@font/lilitaone_regular"
+                    android:text="0"
+                    android:textColor="#E53935"
+                    android:textSize="34sp" />
+
+                <com.google.android.material.card.MaterialCardView
+                    android:layout_width="75dp"
+                    android:layout_height="75dp"
+                    android:layout_marginTop="8dp"
+                    app:cardBackgroundColor="#FFF3F3"
+                    app:cardCornerRadius="16dp"
+                    app:cardElevation="0dp"
+                    app:strokeColor="#FFCDD2"
+                    app:strokeWidth="1.5dp">
+
+                    <ImageView
+                        android:id="@+id/imgEleccionV"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:padding="12dp"
+                        android:src="@drawable/ic_siluetas" />
+                </com.google.android.material.card.MaterialCardView>
+            </LinearLayout>
+        </LinearLayout>
+
+        <TextView
+            android:id="@+id/txtEstadoPPT"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="24dp"
+            android:fontFamily="@font/manrope_regular"
+            android:gravity="center"
+            android:text="Preparando arena..."
+            android:textColor="#14213D"
+            android:textSize="15sp"
+            android:textStyle="bold" />
+
+        <LinearLayout
+            android:id="@+id/layoutControlesPPT"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:gravity="center"
+            android:orientation="horizontal">
+
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginHorizontal="8dp"
+                android:gravity="center"
+                android:orientation="vertical">
+
+                <ImageView
+                    android:id="@+id/btnPiedra"
+                    android:layout_width="70dp"
+                    android:layout_height="70dp"
+                    android:background="?attr/selectableItemBackgroundBorderless"
+                    android:clickable="true"
+                    android:focusable="true"
+                    android:src="@drawable/ic_piedra" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="4dp"
+                    android:fontFamily="@font/manrope_regular"
+                    android:text="Piedra"
+                    android:textColor="#5E6C84"
+                    android:textSize="12sp"
+                    android:textStyle="bold" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginHorizontal="8dp"
+                android:gravity="center"
+                android:orientation="vertical">
+
+                <ImageView
+                    android:id="@+id/btnPapel"
+                    android:layout_width="70dp"
+                    android:layout_height="70dp"
+                    android:background="?attr/selectableItemBackgroundBorderless"
+                    android:clickable="true"
+                    android:focusable="true"
+                    android:src="@drawable/ic_papel" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="4dp"
+                    android:fontFamily="@font/manrope_regular"
+                    android:text="Papel"
+                    android:textColor="#5E6C84"
+                    android:textSize="12sp"
+                    android:textStyle="bold" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginHorizontal="8dp"
+                android:gravity="center"
+                android:orientation="vertical">
+
+                <ImageView
+                    android:id="@+id/btnTijera"
+                    android:layout_width="70dp"
+                    android:layout_height="70dp"
+                    android:background="?attr/selectableItemBackgroundBorderless"
+                    android:clickable="true"
+                    android:focusable="true"
+                    android:src="@drawable/ic_tijeras" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="4dp"
+                    android:fontFamily="@font/manrope_regular"
+                    android:text="Tijera"
+                    android:textColor="#5E6C84"
+                    android:textSize="12sp"
+                    android:textStyle="bold" />
+            </LinearLayout>
+        </LinearLayout>
+    </LinearLayout>
+</com.google.android.material.card.MaterialCardView>

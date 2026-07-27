@@ -1,53 +1,192 @@
 <?xml version="1.0" encoding="utf-8"?>
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<FrameLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/colorPrimary">
+    android:background="@drawable/bg_fondocuaderno">
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:gravity="center"
-        android:orientation="vertical">
+        android:orientation="vertical"
+        android:paddingHorizontal="26dp">
 
-        <ImageView
-            android:layout_width="140dp"
-            android:layout_height="140dp"
-            android:src="@drawable/logo_basta" />
-
-        <TextView
-            android:layout_width="wrap_content"
+        <com.google.android.material.card.MaterialCardView
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Preparando partida..."
-            android:textColor="@android:color/white"
-            android:textSize="28sp"
-            android:fontFamily="@font/lilitaone_regular"
-            android:layout_marginTop="20dp"/>
+            app:cardBackgroundColor="@color/blanco"
+            app:cardCornerRadius="32dp"
+            app:cardElevation="10dp"
+            app:strokeColor="@color/colorPrimary"
+            app:strokeWidth="2dp">
 
-        <TextView
-            android:id="@+id/txtCuentaRegresiva"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="10"
-            android:textColor="@android:color/white"
-            android:textSize="42sp"
-            android:fontFamily="@font/lilitaone_regular"
-            android:layout_marginTop="12dp"/>
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center_horizontal"
+                android:orientation="vertical"
+                android:paddingHorizontal="22dp"
+                android:paddingTop="28dp"
+                android:paddingBottom="28dp">
 
-        <ProgressBar
-            android:layout_width="60dp"
-            android:layout_height="60dp"
-            android:layout_marginTop="25dp"/>
+                <com.google.android.material.card.MaterialCardView
+                    android:layout_width="170dp"
+                    android:layout_height="118dp"
+                    app:cardBackgroundColor="#EEF4FF"
+                    app:cardCornerRadius="26dp"
+                    app:cardElevation="0dp"
+                    app:strokeColor="#BFD0FF"
+                    app:strokeWidth="1.5dp">
 
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="¡Bienvenidos jugadores a Basta Online!"
-            android:textColor="@android:color/white"
-            android:textSize="18sp"
-            android:gravity="center"
-            android:paddingHorizontal="30dp"
-            android:layout_marginTop="25dp"/>
+                    <ImageView
+                        android:layout_width="140dp"
+                        android:layout_height="100dp"
+                        android:layout_gravity="center"
+                        android:adjustViewBounds="true"
+                        android:scaleType="fitCenter"
+                        android:src="@drawable/logo_basta" />
+
+                </com.google.android.material.card.MaterialCardView>
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="20dp"
+                    android:fontFamily="@font/lilitaone_regular"
+                    android:gravity="center"
+                    android:text="Preparando partida"
+                    android:textColor="@color/colorTextoP"
+                    android:textSize="31sp" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="2dp"
+                    android:fontFamily="@font/manrope_regular"
+                    android:gravity="center"
+                    android:text="La ronda está por comenzar"
+                    android:textColor="@color/colorContenidoInputs"
+                    android:textSize="14sp"
+                    android:textStyle="bold" />
+
+                <com.google.android.material.card.MaterialCardView
+                    android:layout_width="150dp"
+                    android:layout_height="150dp"
+                    android:layout_marginTop="22dp"
+                    app:cardBackgroundColor="#EEF4FF"
+                    app:cardCornerRadius="75dp"
+                    app:cardElevation="4dp"
+                    app:strokeColor="@color/colorPrimary"
+                    app:strokeWidth="2dp">
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:gravity="center"
+                        android:orientation="vertical">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:fontFamily="@font/manrope_regular"
+                            android:text="Inicia en"
+                            android:textColor="@color/colorTextoP"
+                            android:textSize="13sp"
+                            android:textStyle="bold" />
+
+                        <TextView
+                            android:id="@+id/txtCuentaRegresiva"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:fontFamily="@font/lilitaone_regular"
+                            android:text="10"
+                            android:textColor="@color/colorPrimary"
+                            android:textSize="58sp"
+                            android:includeFontPadding="false" />
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:fontFamily="@font/manrope_regular"
+                            android:text="segundos"
+                            android:textColor="@color/colorContenidoInputs"
+                            android:textSize="12sp"
+                            android:textStyle="bold" />
+
+                    </LinearLayout>
+
+                </com.google.android.material.card.MaterialCardView>
+
+                <ProgressBar
+                    android:layout_width="52dp"
+                    android:layout_height="52dp"
+                    android:layout_marginTop="24dp"
+                    android:indeterminate="true"
+                    android:indeterminateTint="@color/colorPrimary" />
+
+                <com.google.android.material.card.MaterialCardView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="24dp"
+                    app:cardBackgroundColor="#FCFDFF"
+                    app:cardCornerRadius="20dp"
+                    app:cardElevation="0dp"
+                    app:strokeColor="#D6E0FF"
+                    app:strokeWidth="1.5dp">
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:gravity="center_vertical"
+                        android:orientation="horizontal"
+                        android:paddingHorizontal="14dp"
+                        android:paddingVertical="12dp">
+
+                        <TextView
+                            android:layout_width="42dp"
+                            android:layout_height="42dp"
+                            android:background="@drawable/bg_chip_blanco_azul"
+                            android:fontFamily="@font/lilitaone_regular"
+                            android:gravity="center"
+                            android:text="ABC"
+                            android:textColor="@color/colorPrimary"
+                            android:textSize="13sp" />
+
+                        <LinearLayout
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_marginStart="12dp"
+                            android:layout_weight="1"
+                            android:orientation="vertical">
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:fontFamily="@font/lilitaone_regular"
+                                android:text="¡Listos para jugar!"
+                                android:textColor="@color/colorTextoP"
+                                android:textSize="18sp" />
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:fontFamily="@font/manrope_regular"
+                                android:text="Piensa rápido y escribe con la letra correcta."
+                                android:textColor="@color/colorContenidoInputs"
+                                android:textSize="12sp"
+                                android:textStyle="bold" />
+
+                        </LinearLayout>
+
+                    </LinearLayout>
+
+                </com.google.android.material.card.MaterialCardView>
+
+            </LinearLayout>
+
+        </com.google.android.material.card.MaterialCardView>
 
     </LinearLayout>
 

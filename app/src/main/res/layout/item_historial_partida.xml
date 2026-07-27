@@ -1,0 +1,635 @@
+<?xml version="1.0" encoding="utf-8"?>
+<com.google.android.material.card.MaterialCardView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_marginHorizontal="6dp"
+    android:layout_marginVertical="10dp"
+    android:animateLayoutChanges="true"
+    app:cardBackgroundColor="#F9F5FF"
+    app:cardCornerRadius="26dp"
+    app:cardElevation="9dp"
+    app:strokeColor="#20294A"
+    app:strokeWidth="2dp">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:animateLayoutChanges="true"
+        android:orientation="vertical">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="48dp"
+            android:background="#304EDB"
+            android:gravity="center_vertical"
+            android:orientation="horizontal"
+            android:paddingStart="14dp"
+            android:paddingEnd="10dp">
+
+            <TextView
+                android:id="@+id/txtCodigoSalaHistorialItem"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:fontFamily="@font/lilitaone_regular"
+                android:shadowColor="#17235F"
+                android:shadowDx="1"
+                android:shadowDy="2"
+                android:shadowRadius="1"
+                android:textColor="@android:color/white"
+                android:textSize="21sp"
+                tools:text="TCMU23" />
+
+            <com.google.android.material.card.MaterialCardView
+                android:layout_width="wrap_content"
+                android:layout_height="30dp"
+                app:cardBackgroundColor="#FFFDF4"
+                app:cardCornerRadius="11dp"
+                app:cardElevation="2dp"
+                app:strokeColor="#D7D0F3"
+                app:strokeWidth="1dp">
+
+                <TextView
+                    android:id="@+id/txtTiempoHaceHistorialItem"
+                    android:layout_width="wrap_content"
+                    android:layout_height="match_parent"
+                    android:fontFamily="@font/lilitaone_regular"
+                    android:gravity="center"
+                    android:paddingHorizontal="11dp"
+                    android:textColor="#3A3354"
+                    android:textSize="12sp"
+                    tools:text="Hace 59m" />
+
+            </com.google.android.material.card.MaterialCardView>
+
+        </LinearLayout>
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="5dp"
+            android:background="#FFD15C" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:animateLayoutChanges="true"
+            android:orientation="vertical"
+            android:paddingStart="14dp"
+            android:paddingTop="12dp"
+            android:paddingEnd="14dp"
+            android:paddingBottom="16dp">
+
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+
+                <LinearLayout
+                    android:id="@+id/layoutResultadoDatos"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintEnd_toStartOf="@id/cardMiPuestoPrincipal"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent">
+
+                    <TextView
+                        android:id="@+id/txtResultadoHistorialItem"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:fontFamily="@font/lilitaone_regular"
+                        android:shadowColor="#D9FFE4"
+                        android:shadowDx="1"
+                        android:shadowDy="2"
+                        android:shadowRadius="1"
+                        android:textColor="#13B947"
+                        android:textSize="30sp"
+                        tools:text="VICTORIA" />
+
+                    <LinearLayout
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:gravity="center_vertical"
+                        android:orientation="horizontal">
+
+                        <com.google.android.material.card.MaterialCardView
+                            android:layout_width="wrap_content"
+                            android:layout_height="28dp"
+                            app:cardBackgroundColor="#FFFFFF"
+                            app:cardCornerRadius="10dp"
+                            app:cardElevation="1dp"
+                            app:strokeColor="#DAD3F3"
+                            app:strokeWidth="1dp">
+
+                            <TextView
+                                android:id="@+id/txtRondasHistorialItem"
+                                android:layout_width="wrap_content"
+                                android:layout_height="match_parent"
+                                android:fontFamily="@font/manrope_regular"
+                                android:gravity="center"
+                                android:paddingHorizontal="9dp"
+                                android:textColor="#4C4663"
+                                android:textSize="11sp"
+                                android:textStyle="bold"
+                                tools:text="3 rondas" />
+
+                        </com.google.android.material.card.MaterialCardView>
+
+                        <com.google.android.material.card.MaterialCardView
+                            android:layout_width="wrap_content"
+                            android:layout_height="28dp"
+                            android:layout_marginStart="7dp"
+                            app:cardBackgroundColor="#FFFFFF"
+                            app:cardCornerRadius="10dp"
+                            app:cardElevation="1dp"
+                            app:strokeColor="#DAD3F3"
+                            app:strokeWidth="1dp">
+
+                            <TextView
+                                android:id="@+id/txtJugadoresHistorialItem"
+                                android:layout_width="wrap_content"
+                                android:layout_height="match_parent"
+                                android:fontFamily="@font/manrope_regular"
+                                android:gravity="center"
+                                android:paddingHorizontal="9dp"
+                                android:textColor="#4C4663"
+                                android:textSize="11sp"
+                                android:textStyle="bold"
+                                tools:text="8 jugadores" />
+
+                        </com.google.android.material.card.MaterialCardView>
+
+                    </LinearLayout>
+
+                </LinearLayout>
+
+                <com.google.android.material.card.MaterialCardView
+                    android:id="@+id/cardMiPuestoPrincipal"
+                    android:layout_width="62dp"
+                    android:layout_height="58dp"
+                    app:cardBackgroundColor="#FFF0A3"
+                    app:cardCornerRadius="17dp"
+                    app:cardElevation="5dp"
+                    app:strokeColor="#D99A00"
+                    app:strokeWidth="2dp"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintTop_toTopOf="parent">
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:gravity="center"
+                        android:orientation="vertical">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:fontFamily="@font/manrope_regular"
+                            android:text="PUESTO"
+                            android:textColor="#8B6300"
+                            android:textSize="8sp"
+                            android:textStyle="bold" />
+
+                        <TextView
+                            android:id="@+id/txtMiPuestoPrincipalHistorialItem"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:fontFamily="@font/lilitaone_regular"
+                            android:gravity="center"
+                            android:textColor="#352700"
+                            android:textSize="26sp"
+                            tools:text="#1" />
+
+                    </LinearLayout>
+
+                </com.google.android.material.card.MaterialCardView>
+
+            </androidx.constraintlayout.widget.ConstraintLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                android:gravity="center_vertical"
+                android:orientation="horizontal">
+
+                <com.google.android.material.card.MaterialCardView
+                    android:layout_width="0dp"
+                    android:layout_height="44dp"
+                    android:layout_weight="1"
+                    app:cardBackgroundColor="#EFFFF1"
+                    app:cardCornerRadius="15dp"
+                    app:cardElevation="2dp"
+                    app:strokeColor="#9CE4A6"
+                    app:strokeWidth="1.5dp">
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:gravity="center_vertical"
+                        android:orientation="horizontal"
+                        android:paddingHorizontal="12dp">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:fontFamily="@font/lilitaone_regular"
+                            android:text="⭐"
+                            android:textSize="17sp" />
+
+                        <TextView
+                            android:id="@+id/txtMiPuntosHistorialItem"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_marginStart="8dp"
+                            android:layout_weight="1"
+                            android:fontFamily="@font/lilitaone_regular"
+                            android:textColor="@color/verde_puntos"
+                            android:textSize="21sp"
+                            tools:text="120 pts" />
+
+                    </LinearLayout>
+
+                </com.google.android.material.card.MaterialCardView>
+
+                <com.google.android.material.card.MaterialCardView
+                    android:layout_width="wrap_content"
+                    android:layout_height="44dp"
+                    android:layout_marginStart="9dp"
+                    app:cardBackgroundColor="#FFF0A3"
+                    app:cardCornerRadius="15dp"
+                    app:cardElevation="2dp"
+                    app:strokeColor="#D99A00"
+                    app:strokeWidth="1.5dp">
+
+                    <LinearLayout
+                        android:layout_width="wrap_content"
+                        android:layout_height="match_parent"
+                        android:gravity="center"
+                        android:orientation="horizontal"
+                        android:paddingHorizontal="12dp">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="🪙"
+                            android:textSize="16sp" />
+
+                        <TextView
+                            android:id="@+id/txtMonedasHistorialItem"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginStart="5dp"
+                            android:fontFamily="@font/lilitaone_regular"
+                            android:textColor="#9A6400"
+                            android:textSize="18sp"
+                            tools:text="+100" />
+
+                    </LinearLayout>
+
+                </com.google.android.material.card.MaterialCardView>
+
+            </LinearLayout>
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="2dp"
+                android:layout_marginTop="14dp"
+                android:background="#D8D0F0" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                android:gravity="center_vertical"
+                android:orientation="horizontal">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:fontFamily="@font/lilitaone_regular"
+                    android:text="PODIO"
+                    android:textColor="#302A49"
+                    android:textSize="20sp" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="7dp"
+                    android:fontFamily="@font/manrope_regular"
+                    android:text="Los 3 mejores de la partida"
+                    android:textColor="#6B5F8A"
+                    android:textSize="11sp"
+                    android:textStyle="bold" />
+
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="165dp"
+                android:layout_marginTop="8dp"
+                android:animateLayoutChanges="true"
+                android:gravity="bottom"
+                android:orientation="horizontal">
+
+                <LinearLayout
+                    android:id="@+id/layoutTop2HistorialItem"
+                    android:layout_width="0dp"
+                    android:layout_height="138dp"
+                    android:layout_weight="1"
+                    android:gravity="bottom|center_horizontal"
+                    android:orientation="vertical">
+
+                    <com.google.android.material.card.MaterialCardView
+                        android:layout_width="match_parent"
+                        android:layout_height="132dp"
+                        android:layout_marginHorizontal="3dp"
+                        app:cardBackgroundColor="#F5F5F5"
+                        app:cardCornerRadius="18dp"
+                        app:cardElevation="3dp"
+                        app:strokeColor="#B8B8B8"
+                        app:strokeWidth="1.5dp">
+
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent"
+                            android:gravity="center"
+                            android:orientation="vertical"
+                            android:paddingHorizontal="5dp"
+                            android:paddingTop="7dp"
+                            android:paddingBottom="7dp">
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:fontFamily="@font/lilitaone_regular"
+                                android:text="#2"
+                                android:textColor="#8C8C8C"
+                                android:textSize="18sp" />
+
+                            <com.google.android.material.card.MaterialCardView
+                                android:layout_width="60dp"
+                                android:layout_height="60dp"
+                                android:layout_marginTop="2dp"
+                                app:cardBackgroundColor="#FFFFFF"
+                                app:cardCornerRadius="30dp"
+                                app:cardElevation="3dp"
+                                app:strokeColor="#B8B8B8"
+                                app:strokeWidth="2dp">
+
+                                <ImageView
+                                    android:id="@+id/imgTop2HistorialItem"
+                                    android:layout_width="match_parent"
+                                    android:layout_height="match_parent"
+                                    android:padding="4dp"
+                                    android:scaleType="centerCrop"
+                                    android:src="@drawable/outline_person_24" />
+
+                            </com.google.android.material.card.MaterialCardView>
+
+                            <TextView
+                                android:id="@+id/txtNombreTop2HistorialItem"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:layout_marginTop="4dp"
+                                android:ellipsize="end"
+                                android:fontFamily="@font/lilitaone_regular"
+                                android:gravity="center"
+                                android:maxLines="1"
+                                android:textColor="#302A49"
+                                android:textSize="11sp"
+                                tools:text="Ariana" />
+
+                            <TextView
+                                android:id="@+id/txtPuntosTop2HistorialItem"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:fontFamily="@font/manrope_regular"
+                                android:gravity="center"
+                                android:textColor="#4C4663"
+                                android:textSize="10sp"
+                                android:textStyle="bold"
+                                tools:text="95 pts" />
+
+                        </LinearLayout>
+
+                    </com.google.android.material.card.MaterialCardView>
+
+                </LinearLayout>
+
+                <LinearLayout
+                    android:id="@+id/layoutTop1HistorialItem"
+                    android:layout_width="0dp"
+                    android:layout_height="165dp"
+                    android:layout_weight="1.22"
+                    android:gravity="bottom|center_horizontal"
+                    android:orientation="vertical">
+
+                    <com.google.android.material.card.MaterialCardView
+                        android:layout_width="match_parent"
+                        android:layout_height="158dp"
+                        android:layout_marginHorizontal="3dp"
+                        app:cardBackgroundColor="#FFF7D6"
+                        app:cardCornerRadius="21dp"
+                        app:cardElevation="7dp"
+                        app:strokeColor="#D99A00"
+                        app:strokeWidth="2dp">
+
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent"
+                            android:gravity="center"
+                            android:orientation="vertical"
+                            android:paddingHorizontal="5dp"
+                            android:paddingTop="8dp"
+                            android:paddingBottom="8dp">
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:fontFamily="@font/lilitaone_regular"
+                                android:text="👑 #1"
+                                android:textColor="#D99A00"
+                                android:textSize="20sp" />
+
+                            <com.google.android.material.card.MaterialCardView
+                                android:layout_width="78dp"
+                                android:layout_height="78dp"
+                                android:layout_marginTop="3dp"
+                                app:cardBackgroundColor="#FFFFFF"
+                                app:cardCornerRadius="39dp"
+                                app:cardElevation="5dp"
+                                app:strokeColor="#D99A00"
+                                app:strokeWidth="3dp">
+
+                                <ImageView
+                                    android:id="@+id/imgTop1HistorialItem"
+                                    android:layout_width="match_parent"
+                                    android:layout_height="match_parent"
+                                    android:padding="5dp"
+                                    android:scaleType="centerCrop"
+                                    android:src="@drawable/outline_person_24" />
+
+                            </com.google.android.material.card.MaterialCardView>
+
+                            <TextView
+                                android:id="@+id/txtNombreTop1HistorialItem"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:layout_marginTop="5dp"
+                                android:ellipsize="end"
+                                android:fontFamily="@font/lilitaone_regular"
+                                android:gravity="center"
+                                android:maxLines="1"
+                                android:textColor="#302A49"
+                                android:textSize="12sp"
+                                tools:text="Alemanga2382" />
+
+                            <TextView
+                                android:id="@+id/txtPuntosTop1HistorialItem"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_marginTop="1dp"
+                                android:fontFamily="@font/manrope_regular"
+                                android:gravity="center"
+                                android:textColor="#4C4663"
+                                android:textSize="11sp"
+                                android:textStyle="bold"
+                                tools:text="140 pts" />
+
+                        </LinearLayout>
+
+                    </com.google.android.material.card.MaterialCardView>
+
+                </LinearLayout>
+
+                <LinearLayout
+                    android:id="@+id/layoutTop3HistorialItem"
+                    android:layout_width="0dp"
+                    android:layout_height="138dp"
+                    android:layout_weight="1"
+                    android:gravity="bottom|center_horizontal"
+                    android:orientation="vertical">
+
+                    <com.google.android.material.card.MaterialCardView
+                        android:layout_width="match_parent"
+                        android:layout_height="132dp"
+                        android:layout_marginHorizontal="3dp"
+                        app:cardBackgroundColor="#FFF0E5"
+                        app:cardCornerRadius="18dp"
+                        app:cardElevation="3dp"
+                        app:strokeColor="#B46B3B"
+                        app:strokeWidth="1.5dp">
+
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent"
+                            android:gravity="center"
+                            android:orientation="vertical"
+                            android:paddingHorizontal="5dp"
+                            android:paddingTop="7dp"
+                            android:paddingBottom="7dp">
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:fontFamily="@font/lilitaone_regular"
+                                android:text="#3"
+                                android:textColor="#B46B3B"
+                                android:textSize="18sp" />
+
+                            <com.google.android.material.card.MaterialCardView
+                                android:layout_width="60dp"
+                                android:layout_height="60dp"
+                                android:layout_marginTop="2dp"
+                                app:cardBackgroundColor="#FFFFFF"
+                                app:cardCornerRadius="30dp"
+                                app:cardElevation="3dp"
+                                app:strokeColor="#B46B3B"
+                                app:strokeWidth="2dp">
+
+                                <ImageView
+                                    android:id="@+id/imgTop3HistorialItem"
+                                    android:layout_width="match_parent"
+                                    android:layout_height="match_parent"
+                                    android:padding="4dp"
+                                    android:scaleType="centerCrop"
+                                    android:src="@drawable/outline_person_24" />
+
+                            </com.google.android.material.card.MaterialCardView>
+
+                            <TextView
+                                android:id="@+id/txtNombreTop3HistorialItem"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:layout_marginTop="4dp"
+                                android:ellipsize="end"
+                                android:fontFamily="@font/lilitaone_regular"
+                                android:gravity="center"
+                                android:maxLines="1"
+                                android:textColor="#302A49"
+                                android:textSize="11sp"
+                                tools:text="Marlon" />
+
+                            <TextView
+                                android:id="@+id/txtPuntosTop3HistorialItem"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:fontFamily="@font/manrope_regular"
+                                android:gravity="center"
+                                android:textColor="#4C4663"
+                                android:textSize="10sp"
+                                android:textStyle="bold"
+                                tools:text="75 pts" />
+
+                        </LinearLayout>
+
+                    </com.google.android.material.card.MaterialCardView>
+
+                </LinearLayout>
+
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/layoutMiExtraHistorialItem"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="13dp"
+                android:animateLayoutChanges="true"
+                android:orientation="vertical"
+                android:visibility="gone"
+                tools:visibility="visible">
+
+                <com.google.android.material.card.MaterialCardView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    app:cardBackgroundColor="#FFFFFF"
+                    app:cardCornerRadius="16dp"
+                    app:cardElevation="3dp"
+                    app:strokeColor="#D8D0F0"
+                    app:strokeWidth="1.5dp">
+
+                    <TextView
+                        android:id="@+id/txtMiExtraHistorialItem"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:fontFamily="@font/lilitaone_regular"
+                        android:gravity="center_vertical"
+                        android:paddingHorizontal="13dp"
+                        android:paddingVertical="10dp"
+                        android:textColor="#302A49"
+                        android:textSize="16sp"
+                        tools:text="Tu puesto: #6 Diego" />
+
+                </com.google.android.material.card.MaterialCardView>
+
+            </LinearLayout>
+
+        </LinearLayout>
+
+    </LinearLayout>
+
+</com.google.android.material.card.MaterialCardView>

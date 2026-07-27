@@ -3,15 +3,15 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    android:layout_width="95dp"
+    android:layout_width="98dp"
     android:layout_height="wrap_content"
     android:layout_marginHorizontal="6dp"
     android:layout_marginVertical="6dp"
-    app:cardBackgroundColor="@color/blanco"
-    app:cardCornerRadius="16dp"
-    app:cardElevation="3dp"
-    app:strokeWidth="1dp"
-    app:strokeColor="@color/colorContenidoInputs">
+    app:cardBackgroundColor="#FCFDFF"
+    app:cardCornerRadius="20dp"
+    app:cardElevation="4dp"
+    app:strokeWidth="1.5dp"
+    app:strokeColor="#D6E0FF">
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -19,18 +19,20 @@
         android:orientation="vertical"
         android:gravity="center"
         android:paddingVertical="12dp"
-        android:paddingHorizontal="4dp">
+        android:paddingHorizontal="5dp">
 
         <FrameLayout
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content">
+            android:layout_width="68dp"
+            android:layout_height="68dp">
 
             <com.google.android.material.card.MaterialCardView
-                android:layout_width="56dp"
-                android:layout_height="56dp"
-                android:layout_margin="4dp"
-                app:cardCornerRadius="28dp"
-                app:cardElevation="0dp">
+                android:layout_width="58dp"
+                android:layout_height="58dp"
+                android:layout_gravity="center"
+                app:cardCornerRadius="29dp"
+                app:cardElevation="0dp"
+                app:strokeWidth="2dp"
+                app:strokeColor="@color/colorPrimary">
 
                 <ImageView
                     android:id="@+id/imgAvatarJugadorPartida"
@@ -38,14 +40,15 @@
                     android:layout_height="match_parent"
                     android:scaleType="centerCrop"
                     android:src="@drawable/outline_person_24" />
+
             </com.google.android.material.card.MaterialCardView>
 
             <ImageView
                 android:id="@+id/imgCoronaHost"
-                android:layout_width="37dp"
-                android:layout_height="35dp"
+                android:layout_width="38dp"
+                android:layout_height="36dp"
                 android:layout_gravity="top|start"
-                android:layout_marginStart="-2dp"
+                android:layout_marginStart="-1dp"
                 android:layout_marginTop="-4dp"
                 android:rotation="-18"
                 android:scaleType="fitCenter"
@@ -54,17 +57,17 @@
 
             <com.google.android.material.card.MaterialCardView
                 android:id="@+id/imgJugadorListoCheck"
-                android:layout_width="20dp"
-                android:layout_height="20dp"
+                android:layout_width="22dp"
+                android:layout_height="22dp"
                 android:layout_gravity="bottom|end"
-                android:layout_marginBottom="2dp"
-                android:layout_marginEnd="2dp"
-                app:cardCornerRadius="10dp"
+                android:layout_marginBottom="3dp"
+                android:layout_marginEnd="3dp"
+                android:visibility="visible"
+                app:cardCornerRadius="11dp"
                 app:cardBackgroundColor="@color/check"
                 app:cardElevation="2dp"
                 app:strokeWidth="1.5dp"
-                app:strokeColor="@color/blanco"
-                android:visibility="visible">
+                app:strokeColor="@color/blanco">
 
                 <TextView
                     android:layout_width="match_parent"
@@ -74,6 +77,7 @@
                     android:textSize="12sp"
                     android:gravity="center"
                     android:includeFontPadding="false" />
+
             </com.google.android.material.card.MaterialCardView>
 
         </FrameLayout>
@@ -82,11 +86,11 @@
             android:id="@+id/txtNombreJugador"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="6dp"
+            android:layout_marginTop="5dp"
             android:gravity="center"
             android:fontFamily="@font/lilitaone_regular"
             android:textColor="@color/colorTextoP"
-            android:textSize="14sp"
+            android:textSize="15sp"
             android:maxLines="1"
             android:ellipsize="end"
             tools:text="Marlon" />
@@ -94,9 +98,9 @@
         <com.google.android.material.card.MaterialCardView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="6dp"
-            app:cardCornerRadius="12dp"
-            app:cardBackgroundColor="@color/blanco"
+            android:layout_marginTop="7dp"
+            app:cardCornerRadius="13dp"
+            app:cardBackgroundColor="#EEF4FF"
             app:cardElevation="0dp"
             app:strokeWidth="1dp"
             app:strokeColor="@color/colorPrimary">
@@ -106,13 +110,15 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:paddingHorizontal="10dp"
-                android:paddingVertical="3dp"
+                android:paddingVertical="4dp"
                 android:fontFamily="@font/manrope_regular"
                 android:textColor="@color/colorPrimary"
                 android:textSize="10sp"
                 android:textStyle="bold"
                 tools:text="Escribiendo..." />
+
         </com.google.android.material.card.MaterialCardView>
 
     </LinearLayout>
+
 </com.google.android.material.card.MaterialCardView>

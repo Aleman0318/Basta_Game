@@ -4,7 +4,17 @@
     <item
         android:id="@+id/nav_jugar"
         android:icon="@drawable/lapiz_icono_menu2"
-        android:title="Salas" />
+        android:title="Jugar" />
+
+    <item
+        android:id="@+id/nav_tienda"
+        android:icon="@drawable/ic_tienda"
+        android:title="Tienda" />
+
+    <item
+        android:id="@+id/nav_historial"
+        android:icon="@drawable/ic_historial"
+        android:title="Historial" />
 
     <item
         android:id="@+id/nav_perfil"
