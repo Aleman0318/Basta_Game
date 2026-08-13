@@ -46,6 +46,9 @@ import java.util.HashMap;
 public class LobbyFragment extends Fragment {
 
     private boolean esAnfitrion = false;
+
+    private HashMap<String, JugadorSala> jugadoresMemoria = new HashMap<>();
+    private boolean primerCargaJugadores = true;
     private boolean estoyListo = false;
     private View notificationLobby;
 
@@ -605,19 +608,34 @@ public class LobbyFragment extends Fragment {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
                 ArrayList<JugadorSala> jugadoresEnSala = new ArrayList<>();
+                HashMap<String, JugadorSala> nuevosJugadores = new HashMap<>();
 
                 for (DataSnapshot hijo : snapshot.getChildren()) {
                     JugadorSala jugador = hijo.getValue(JugadorSala.class);
-
                     if (jugador != null) {
                         jugadoresEnSala.add(jugador);
+                        nuevosJugadores.put(hijo.getKey(), jugador);
                     }
                 }
 
-                if (rvJugadoresLobby == null) {
-                    return;
+                if (!primerCargaJugadores) {
+                    for (String uid : nuevosJugadores.keySet()) {
+                        if (!jugadoresMemoria.containsKey(uid) && !uid.equals(auth.getCurrentUser().getUid())) {
+                            NotificationHelper.show(notificationLobby, nuevosJugadores.get(uid).getNombre() + " entró a la sala", NotificationHelper.INFO);
+                            Sounds.playNotificaciones();
+                        }
+                    }
+                    for (String uid : jugadoresMemoria.keySet()) {
+                        if (!nuevosJugadores.containsKey(uid)) {
+                            NotificationHelper.show(notificationLobby, jugadoresMemoria.get(uid).getNombre() + " abandonó la sala", NotificationHelper.WARNING);
+                        }
+                    }
                 }
+                primerCargaJugadores = false;
+                jugadoresMemoria.clear();
+                jugadoresMemoria.putAll(nuevosJugadores);
 
+                if (rvJugadoresLobby == null) return;
                 JugadorSalaAdapter adaptador = new JugadorSalaAdapter(jugadoresEnSala);
                 rvJugadoresLobby.setAdapter(adaptador);
             }

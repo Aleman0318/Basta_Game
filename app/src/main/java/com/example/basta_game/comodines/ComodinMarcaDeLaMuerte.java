@@ -27,8 +27,17 @@ public class ComodinMarcaDeLaMuerte extends BaseComodin {
     public void activar(String nombreJugador, ComodinCallback callback) {
         descontarInventario(ID_COMODIN, callback, () -> {
 
-            String[] juegos = {"piedra_papel_tijera"};
-            String juegoElegido = juegos[new Random().nextInt(juegos.length)];
+            // --- LÓGICA ALEATORIA CON PROBABILIDADES PONDERADAS (6 PARTES) ---
+            // [0, 1, 2] = Tres en Raya (50%)
+            // [3, 4]    = Piedra, Papel o Tijera (33.3%)
+            // [5]       = Duelo de Reflejos / Tiroteo (16.7%)
+            String[] ruletaPonderada = {
+                    "tres_en_raya", "tres_en_raya", "tres_en_raya",
+                    "piedra_papel_tijera", "piedra_papel_tijera",
+                    "duelo_reflejos"
+            };
+
+            String juegoElegido = ruletaPonderada[new Random().nextInt(ruletaPonderada.length)];
 
             HashMap<String, Object> updates = new HashMap<>();
 
@@ -39,7 +48,7 @@ public class ComodinMarcaDeLaMuerte extends BaseComodin {
             minijuegoData.put("uidAtacante", miUid);
             minijuegoData.put("uidVictima", uidVictima);
 
-            // ¡AQUÍ AGREGAMOS LOS NOMBRES PARA LOS ESPECTADORES!
+            // Nombres para los espectadores
             minijuegoData.put("nombreAtacante", nombreJugador);
             minijuegoData.put("nombreVictima", nombreVictima);
 
@@ -47,12 +56,31 @@ public class ComodinMarcaDeLaMuerte extends BaseComodin {
             minijuegoData.put("estado", "anuncio");
             minijuegoData.put("ganadorUid", "");
 
+            // --- INICIALIZACIÓN DINÁMICA SEGÚN EL MINIJUEGO ---
             HashMap<String, Object> datosJuegoMap = new HashMap<>();
-            datosJuegoMap.put("turnoDe", miUid);
-            datosJuegoMap.put("eleccionA", "");
-            datosJuegoMap.put("eleccionV", "");
-            datosJuegoMap.put("puntosA", 0);
-            datosJuegoMap.put("puntosV", 0);
+            datosJuegoMap.put("turnoDe", miUid); // El Atacante siempre da el primer golpe por defecto
+
+            if (juegoElegido.equals("piedra_papel_tijera")) {
+                datosJuegoMap.put("eleccionA", "");
+                datosJuegoMap.put("eleccionV", "");
+                datosJuegoMap.put("puntosA", 0);
+                datosJuegoMap.put("puntosV", 0);
+            }
+            else if (juegoElegido.equals("tres_en_raya")) {
+                // Creamos las 9 casillas (c0 a c8) vacías para el tablero
+                for (int i = 0; i < 9; i++) {
+                    datosJuegoMap.put("c" + i, "");
+                }
+                datosJuegoMap.put("histA", "");
+                datosJuegoMap.put("histV", "");
+            }
+            else if (juegoElegido.equals("duelo_reflejos")) {
+                datosJuegoMap.put("reaccionA", 0L); // Tiempo en ms
+                datosJuegoMap.put("reaccionV", 0L); // Tiempo en ms
+
+                // Generamos el tiempo de espera aleatorio (entre 2 y 5 segundos) UNA sola vez para ambos
+                datosJuegoMap.put("delayTiroteo", 2000L + new Random().nextInt(3000));
+            }
 
             minijuegoData.put("datosJuego", datosJuegoMap);
             updates.put("minijuegoActual", minijuegoData);
@@ -73,7 +101,7 @@ public class ComodinMarcaDeLaMuerte extends BaseComodin {
     private String formatearNombreJuego(String juego) {
         switch (juego) {
             case "piedra_papel_tijera": return "Piedra, Papel o Tijera";
-            case "tres_en_raya": return "Tres en Raya";
+            case "tres_en_raya": return "Tres en Raya Infinito";
             case "duelo_reflejos": return "Duelo de Reflejos";
             default: return "Muerte Súbita";
         }

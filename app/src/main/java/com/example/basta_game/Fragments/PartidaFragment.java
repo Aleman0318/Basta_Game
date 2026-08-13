@@ -178,6 +178,8 @@ public class PartidaFragment extends Fragment {
     private DatabaseReference nodoMinijuegoRef;
     private Dialog dialogMinijuegoActual;
 
+    private CountDownTimer timerTurnoTER;
+
     private ValueEventListener listenerValidacionesGlobales;
     private DatabaseReference nodoValidacionesGlobalesRef;
 
@@ -706,6 +708,11 @@ public class PartidaFragment extends Fragment {
 
         comodinesUsadosEstaRonda.clear();
 
+        // Limpiamos el chisme global viejo para que no se repita en la siguiente ronda
+        if (salaRef != null) {
+            salaRef.child("eventoCaosGlobal").child("ronda_" + rondaActual).removeValue();
+        }
+
         escucharMinijuegoActivo();
         if (!isAdded()) {
             return;
@@ -1093,6 +1100,9 @@ public class PartidaFragment extends Fragment {
         }, 700);
     }
 
+    private Handler handlerCronometro;
+    private Runnable runnableCronometro;
+
     private void iniciarCronometro(long tiempoRestanteMs, int rondaDelCronometro) {
         if (!isAdded() || tiempoRestanteMs <= 0) {
             return;
@@ -1100,47 +1110,76 @@ public class PartidaFragment extends Fragment {
 
         if (cronometroRonda != null) {
             cronometroRonda.cancel();
+            cronometroRonda = null;
+        }
+
+        if (handlerCronometro != null && runnableCronometro != null) {
+            handlerCronometro.removeCallbacks(runnableCronometro);
         }
 
         rondaActual = rondaDelCronometro;
         final int versionActual = ++versionCronometro;
 
+        // Sumamos los 10 segundos de la pantalla de carga para que no se los robe al jugador
+        long tiempoTotalCorregido = tiempoRestanteMs + 10000L;
+
         txtRondaActual.setText("Ronda " + rondaActual + "/" + rondasMaximas);
-        txtTiempoRestante.setText(formatearTiempo((tiempoRestanteMs + 999) / 1000));
+        txtTiempoRestante.setText(formatearTiempo((tiempoTotalCorregido + 999) / 1000));
 
-        cronometroRonda = new CountDownTimer(tiempoRestanteMs, 1000) {
-            @Override
-            public void onTick(long millisUntilFinished) {
-                if (!isAdded() || yaVolvioAlLobby || versionActual != versionCronometro) {
-                    cancel();
-                    return;
-                }
+        handlerCronometro = new Handler(Looper.getMainLooper());
+        final long[] lastSegTotal = {-1};
 
-                long segundosRestantes = (millisUntilFinished + 999) / 1000;
+        FirebaseDatabase.getInstance().getReference(".info/serverTimeOffset")
+                .addListenerForSingleValueEvent(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(@NonNull DataSnapshot offsetSnapshot) {
+                        if (!isAdded() || yaVolvioAlLobby) return;
 
-                if (segundosRestantes == 5 && !sonidoFinalReproducido) {
-                    sonidoFinalReproducido = true;
-                    Sounds.conteoFinalPlay();
-                }
+                        Long offset = offsetSnapshot.getValue(Long.class);
+                        if (offset == null) offset = 0L;
 
-                txtTiempoRestante.setText(formatearTiempo(segundosRestantes));
-            }
+                        final long finalOffset = offset;
 
-            @Override
-            public void onFinish() {
-                if (!isAdded() || yaVolvioAlLobby || versionActual != versionCronometro) {
-                    return;
-                }
+                        // Calculamos el final real de la partida sumando los 10s de carga
+                        long horaActualServidor = System.currentTimeMillis() + finalOffset;
+                        long finRealPartida = horaActualServidor + tiempoTotalCorregido;
 
-                faseActual = "jugando";
-                estadoPartidaActual = "En juego";
+                        runnableCronometro = new Runnable() {
+                            @Override
+                            public void run() {
+                                if (!isAdded() || yaVolvioAlLobby || versionActual != versionCronometro) return;
 
-                txtTiempoRestante.setText("00:00");
-                guardarRespuestasJugador();
-            }
-        };
+                                long horaActualServidorLoop = System.currentTimeMillis() + finalOffset;
+                                long restanteMsLoop = finRealPartida - horaActualServidorLoop;
 
-        cronometroRonda.start();
+                                if (restanteMsLoop <= 0) {
+                                    if (lastSegTotal[0] != 0) {
+                                        txtTiempoRestante.setText("00:00");
+                                        guardarRespuestasJugador();
+                                        lastSegTotal[0] = 0;
+                                    }
+                                    return;
+                                }
+
+                                long segTotal = (long) Math.ceil(restanteMsLoop / 1000.0);
+                                if (segTotal != lastSegTotal[0]) {
+                                    lastSegTotal[0] = segTotal;
+                                    txtTiempoRestante.setText(formatearTiempo(segTotal));
+
+                                    if (segTotal == 5 && !sonidoFinalReproducido) {
+                                        sonidoFinalReproducido = true;
+                                        Sounds.conteoFinalPlay();
+                                    }
+                                }
+                                handlerCronometro.postDelayed(this, 50);
+                            }
+                        };
+                        handlerCronometro.post(runnableCronometro);
+                    }
+
+                    @Override
+                    public void onCancelled(@NonNull DatabaseError error) {}
+                });
     }
 
 
@@ -2277,9 +2316,11 @@ public class PartidaFragment extends Fragment {
                 comodin.getId().equals("ruleta_caotica")) {
 
             if (comodinesUsadosEstaRonda.contains(comodin.getId())) {
-                NotificationHelper.show(notificationPartida, "Ya usaste este comodín. ¡Espera a la siguiente ronda!", NotificationHelper.WARNING);
-                Sounds.playNotificaciones();
-                return; // Lo rebotamos y no cerramos el diálogo
+
+                // Disparamos la alerta. ¡Garantizado que aparece encima del inventario!
+                mostrarAlertaCooldown("Ya usaste este comodín en esta ronda. ¡Espera a la siguiente!");
+
+                return; // Rebotamos la acción para no gastar el comodín ni cerrar el inventario
             }
         }
         // 👆 FIN DE LO NUEVO 👆
@@ -2329,6 +2370,35 @@ public class PartidaFragment extends Fragment {
                 });
             }
         });
+    }
+
+    private void mostrarAlertaCooldown(String mensaje) {
+        if (!isAdded() || getContext() == null) return;
+
+        // Creamos un diálogo nativo, Android automáticamente lo pondrá encima del inventario
+        Dialog dialogAlerta = new Dialog(getContext());
+        dialogAlerta.setContentView(R.layout.dialog_alerta_flotante);
+        dialogAlerta.setCancelable(true);
+
+        // Fondo transparente para que se vean los bordes curvos y la elevación de tu tarjeta
+        if (dialogAlerta.getWindow() != null) {
+            dialogAlerta.getWindow().setBackgroundDrawable(new android.graphics.drawable.ColorDrawable(android.graphics.Color.TRANSPARENT));
+            dialogAlerta.getWindow().setLayout(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+        }
+
+        TextView txtMensaje = dialogAlerta.findViewById(R.id.txtMensajeAlertaFlotante);
+        android.widget.Button btnEntendido = dialogAlerta.findViewById(R.id.btnEntendidoAlerta);
+
+        if (txtMensaje != null && mensaje != null) {
+            txtMensaje.setText(mensaje);
+        }
+
+        if (btnEntendido != null) {
+            btnEntendido.setOnClickListener(v -> dialogAlerta.dismiss());
+        }
+
+        dialogAlerta.show();
+        Sounds.playNotificaciones();
     }
 
     private void mostrarDialogoSeleccionVictima(String miNombre) {
@@ -2922,6 +2992,10 @@ public class PartidaFragment extends Fragment {
                     }
 
                     reproducirSonidoResultadoRonda(rondaCerrada);
+
+                    // Agrega esta línea justo arriba de btnSalir.setEnabled(true);
+                    ViewPager2 vpCategorias = dialog.findViewById(R.id.vpCategoriasValidacion);
+                    if (vpCategorias != null) { vpCategorias.setUserInputEnabled(true); }
 
                     btnSalir.setEnabled(true);
                     btnSalir.setText("VER PUNTUACIONES");
@@ -3592,14 +3666,11 @@ public class PartidaFragment extends Fragment {
 
                 // Si no hay minijuego activo, cerramos todo
                 if (activo == null || !activo) {
-                    if (dialogMinijuegoActual != null && dialogMinijuegoActual.isShowing()) {
-                        dialogMinijuegoActual.dismiss();
-                        dialogMinijuegoActual = null;
-                    }
-                    if (dialogAnuncioMinijuego != null && dialogAnuncioMinijuego.isShowing()) {
-                        dialogAnuncioMinijuego.dismiss();
-                        dialogAnuncioMinijuego = null;
-                    }
+                    if (timerTurnoTER != null) timerTurnoTER.cancel();
+                    if (dialogMinijuegoActual != null && dialogMinijuegoActual.isShowing()) dialogMinijuegoActual.dismiss();
+                    if (dialogAnuncioMinijuego != null && dialogAnuncioMinijuego.isShowing()) dialogAnuncioMinijuego.dismiss();
+                    dialogMinijuegoActual = null;
+                    dialogAnuncioMinijuego = null;
                     return;
                 }
 
@@ -3615,33 +3686,111 @@ public class PartidaFragment extends Fragment {
                 if (miUid.equals(uidAtacante)) miRol = "atacante";
                 else if (miUid.equals(uidVictima)) miRol = "victima";
 
+                // ==========================================================
+                // 🔥 NUEVO: SISTEMA ANTI-ABANDONO (RAGEQUIT)
+                // ==========================================================
+                if (!"terminado".equals(estado) && !"espectador".equals(miRol)) {
+                    // Dejamos la instrucción en Firebase: "Si me desconecto, gana el otro"
+                    HashMap<String, Object> castigoDesc = new HashMap<>();
+                    castigoDesc.put("estado", "terminado");
+                    castigoDesc.put("ganadorUid", "atacante".equals(miRol) ? uidVictima : uidAtacante);
+                    castigoDesc.put("porDesconexion", true);
+                    nodoMinijuegoRef.onDisconnect().updateChildren(castigoDesc);
+                } else if ("terminado".equals(estado)) {
+                    // Si terminó de forma normal o ya estamos procesando, cancelamos la bomba
+                    nodoMinijuegoRef.onDisconnect().cancel();
+                    if (timerTurnoTER != null) timerTurnoTER.cancel();
+                }
+
+                if ("terminado".equals(estado)) {
+                    Boolean porDesconexion = snapshot.child("porDesconexion").getValue(Boolean.class);
+                    if (porDesconexion != null && porDesconexion) {
+                        String ganadorUid = snapshot.child("ganadorUid").getValue(String.class);
+
+                        // Cerramos las pantallas porque alguien huyó
+                        if (dialogAnuncioMinijuego != null) dialogAnuncioMinijuego.dismiss();
+                        if (dialogMinijuegoActual != null) dialogMinijuegoActual.dismiss();
+
+                        // ¡SOLO EL QUE QUEDÓ VIVO RECLAMA EL PREMIO!
+                        if (miUid.equals(ganadorUid)) {
+                            String nomA = snapshot.child("nombreAtacante").getValue(String.class);
+                            String nomV = snapshot.child("nombreVictima").getValue(String.class);
+                            ejecutarRoboPorDesconexion(ganadorUid.equals(uidAtacante), uidAtacante, uidVictima, nomA, nomV);
+                        }
+                        return; // Frenamos la carga normal de la arena
+                    }
+                }
+                // ==========================================================
+
+                // LA MÁQUINA DE ESTADOS
                 // LA MÁQUINA DE ESTADOS
                 if ("anuncio".equals(estado)) {
-                    // Estamos en el pre-show
-                    if (dialogMinijuegoActual != null && dialogMinijuegoActual.isShowing()) {
-                        dialogMinijuegoActual.dismiss();
-                    }
+                    if (dialogMinijuegoActual != null && dialogMinijuegoActual.isShowing()) dialogMinijuegoActual.dismiss();
                     mostrarPantallaAnuncioMinijuego(tipoJuego, miRol, snapshot);
                 } else {
-                    // Ya estamos en la batalla (jugando, revelando, terminado)
-                    if (dialogAnuncioMinijuego != null && dialogAnuncioMinijuego.isShowing()) {
-                        dialogAnuncioMinijuego.dismiss();
-                        dialogAnuncioMinijuego = null;
+                    if (dialogAnuncioMinijuego != null && dialogAnuncioMinijuego.isShowing()) dialogAnuncioMinijuego.dismiss();
+
+                    // --- ENRUTADOR DE MINIJUEGOS ---
+                    if ("piedra_papel_tijera".equals(tipoJuego)) {
+                        abrirPantallaMinijuego(tipoJuego, miRol, uidAtacante, uidVictima, estado, snapshot);
+                    } else if ("tres_en_raya".equals(tipoJuego)) {
+                        abrirPantallaMinijuegoTER(miRol, uidAtacante, uidVictima, estado, snapshot);
+                    } else if ("duelo_reflejos".equals(tipoJuego)) {
+                        // 👇 NUEVO 👇
+                        abrirPantallaMinijuegoTiroteo(miRol, uidAtacante, uidVictima, estado, snapshot);
                     }
-                    abrirPantallaMinijuego(tipoJuego, miRol, uidAtacante, uidVictima, estado, snapshot);
                 }
             }
-
-            @Override
-            public void onCancelled(@NonNull DatabaseError error) {}
+            @Override public void onCancelled(@NonNull DatabaseError error) {}
         });
+    }
+
+    private void ejecutarRoboPorDesconexion(boolean atacanteGano, String uidAtacante, String uidVictima, String nombreA, String nombreV) {
+
+        // SOLUCIÓN: Usamos variables finales para que el Listener de Firebase no se queje
+        final String finalNombreA = (nombreA == null) ? "El Atacante" : nombreA;
+        final String finalNombreV = (nombreV == null) ? "La Víctima" : nombreV;
+
+        salaRef.child("puntajesRondas").child("ronda_" + rondaActual)
+                .addListenerForSingleValueEvent(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(@NonNull DataSnapshot snapshotPuntos) {
+                        int puntosRobados = leerEntero(snapshotPuntos.child(uidVictima), 0);
+                        int misPuntos = leerEntero(snapshotPuntos.child(uidAtacante), 0);
+
+                        HashMap<String, Object> actualizacionesFinales = new HashMap<>();
+                        actualizacionesFinales.put("minijuegoActual", null); // Destruye arena
+
+                        String idUso = "marca_desc_" + rondaActual + "_" + System.currentTimeMillis();
+                        String tituloGlobal = atacanteGano ? "¡VICTORIA POR ABANDONO!" : "¡DEFENSA POR ABANDONO!";
+                        String mensajeGlobal;
+
+                        if (atacanteGano) {
+                            actualizacionesFinales.put("puntajesRondas/ronda_" + rondaActual + "/" + uidVictima, 0);
+                            actualizacionesFinales.put("puntajesRondas/ronda_" + rondaActual + "/" + uidAtacante, misPuntos + puntosRobados);
+                            mensajeGlobal = "<b><font color='#E53935'>" + finalNombreV + "</font></b> huyó de la arena por miedo. <b><font color='#2AA514'>" + finalNombreA.toUpperCase() + "</font></b> le robó todos sus puntos sin esfuerzo.";
+                        } else {
+                            mensajeGlobal = "<b><font color='#E53935'>" + finalNombreA + "</font></b> se acobardó y abandonó el duelo. <b><font color='#2AA514'>" + finalNombreV.toUpperCase() + "</font></b> conserva sus puntos intactos.";
+                        }
+
+                        actualizacionesFinales.put("eventoCaosGlobal/ronda_" + rondaActual + "/idUso", idUso);
+                        actualizacionesFinales.put("eventoCaosGlobal/ronda_" + rondaActual + "/titulo", tituloGlobal);
+                        actualizacionesFinales.put("eventoCaosGlobal/ronda_" + rondaActual + "/mensaje", mensajeGlobal);
+                        actualizacionesFinales.put("eventoCaosGlobal/ronda_" + rondaActual + "/esExito", atacanteGano);
+                        actualizacionesFinales.put("eventoCaosGlobal/ronda_" + rondaActual + "/timestamp", ServerValue.TIMESTAMP);
+                        actualizacionesFinales.put("eventoCaosGlobal/ronda_" + rondaActual + "/uidAtacante", uidAtacante);
+                        actualizacionesFinales.put("eventoCaosGlobal/ronda_" + rondaActual + "/uidVictima", uidVictima);
+
+                        salaRef.updateChildren(actualizacionesFinales);
+                    }
+                    @Override public void onCancelled(@NonNull DatabaseError error) {}
+                });
     }
 
     // --- NUEVO: LA SECUENCIA DE ANUNCIO ÉPICA ---
     private void mostrarPantallaAnuncioMinijuego(String tipoJuego, String miRol, DataSnapshot snapshot) {
         if (!isAdded()) return;
 
-        // Evitamos reiniciar la animación si el diálogo ya está abierto
         if (dialogAnuncioMinijuego != null && dialogAnuncioMinijuego.isShowing()) return;
 
         dialogAnuncioMinijuego = new Dialog(requireContext());
@@ -3661,7 +3810,6 @@ public class PartidaFragment extends Fragment {
         String nombreAtacante = snapshot.child("nombreAtacante").getValue(String.class);
         String nombreVictima = snapshot.child("nombreVictima").getValue(String.class);
 
-        // Textos personalizados según quién eres
         if ("victima".equals(miRol)) {
             txtTitulo.setText("¡TE HAN MARCADO!");
             txtMensaje.setText(android.text.Html.fromHtml("<b><font color='#304EDB'>" + nombreAtacante + "</font></b> te retó usando Marca de la Muerte. ¡Gana el minijuego para defender tus puntos!"));
@@ -3673,50 +3821,59 @@ public class PartidaFragment extends Fragment {
             txtMensaje.setText(android.text.Html.fromHtml("<b><font color='#304EDB'>" + nombreAtacante + "</font></b> retó a <b><font color='#E53935'>" + nombreVictima + "</font></b>. ¡Vaya tensión!"));
         }
 
-        // LA ANIMACIÓN DE SUSPENSO EN TODOS LOS TELÉFONOS (Secuencia de 5 segundos)
         Handler handlerSecuencia = new Handler(Looper.getMainLooper());
 
-        // Seg 0: "Eligiendo minijuego..." (Ya está por defecto en el XML)
-
-        // Seg 2: Revela el juego con letras épicas
+        // Seg 2: Revela el juego y las REGLAS
         handlerSecuencia.postDelayed(() -> {
             if (dialogAnuncioMinijuego != null && dialogAnuncioMinijuego.isShowing()) {
-                String nombreJuego = "piedra_papel_tijera".equals(tipoJuego) ? "PIEDRA, PAPEL O TIJERA" : "MINIJUEGO MISTERIOSO";
+                String nombreJuego = "MINIJUEGO MISTERIOSO";
+                String reglas = "";
 
-                // Usamos HTML para que "Duelo Seleccionado" sea negro y el nombre del juego sea Azul y más grande
-                String textoEpico = "<font color='#14213D'>Duelo seleccionado:</font><br><b><font color='#304EDB'>" + nombreJuego + "</font></b>";
+                if ("piedra_papel_tijera".equals(tipoJuego)) {
+                    nombreJuego = "PIEDRA, PAPEL O TIJERA";
+                    reglas = "El primero en ganar 2 rondas se lleva todo.";
+                } else if ("tres_en_raya".equals(tipoJuego)) {
+                    nombreJuego = "TRES EN RAYA INFINITO";
+                    reglas = "Haz línea de 3. ¡Ojo: Al poner tu 4ta ficha, la 1ra desaparecerá!";
+                } else if ("duelo_reflejos".equals(tipoJuego)) {
+                    nombreJuego = "DUELO DE REFLEJOS";
+                    reglas = "¡Toca el arma lo más rápido que puedas en cuanto se ponga VERDE!";
+                }
+
+                String textoEpico = "<font color='#14213D'>Duelo seleccionado:</font><br><b><font color='#304EDB'>" +
+                        nombreJuego + "</font></b><br><br><small><font color='#5E5777'>" + reglas + "</font></small>";
+
                 txtAccion.setText(android.text.Html.fromHtml(textoEpico));
             }
         }, 2000);
 
-        // Seg 3.5: Empieza cuenta regresiva visual
+        // Seg 6: ¡Pasaron 4 SEGUNDOS para leer! Empieza cuenta regresiva visual
         handlerSecuencia.postDelayed(() -> {
             if (dialogAnuncioMinijuego != null && dialogAnuncioMinijuego.isShowing()) {
                 txtAccion.setText("¡Abriendo la arena en...!");
-                txtAccion.setTextColor(android.graphics.Color.parseColor("#E53935")); // Lo pintamos rojo de urgencia
+                txtAccion.setTextColor(android.graphics.Color.parseColor("#E53935"));
                 txtContador.setVisibility(View.VISIBLE);
                 txtContador.setText("3");
-
-                // AQUÍ PONES TU NUEVO AUDIO
                 Sounds.playCombate();
             }
-        }, 3500);
+        }, 6000);
 
+        // Seg 7
         handlerSecuencia.postDelayed(() -> {
             if (dialogAnuncioMinijuego != null) txtContador.setText("2");
-        }, 4500);
+        }, 7000);
 
+        // Seg 8
         handlerSecuencia.postDelayed(() -> {
             if (dialogAnuncioMinijuego != null) txtContador.setText("1");
-        }, 5500);
+        }, 8000);
 
-        // Seg 6.5: ¡EL ATACANTE ABRE LAS PUERTAS DE LA ARENA!
+        // Seg 9: ¡ABRE LA ARENA!
         handlerSecuencia.postDelayed(() -> {
             if ("atacante".equals(miRol) && salaRef != null) {
-                // Solo el atacante le avisa a Firebase para que no haya duplicados
                 salaRef.child("minijuegoActual").child("estado").setValue("jugando");
             }
-        }, 6500);
+        }, 9000);
     }
 
     private void limpiarListenerMinijuego() {
@@ -6240,6 +6397,507 @@ public class PartidaFragment extends Fragment {
             case "canciones": return "Cancion";
             default: return categoriaApi;
         }
+    }
+
+    // =========================================================================
+    // ================ LÓGICA DE TRES EN RAYA INFINITO (TER) ==================
+    // =========================================================================
+
+    private void abrirPantallaMinijuegoTER(String miRol, String uidAtacante, String uidVictima, String estado, DataSnapshot snapshotCompleto) {
+        if (!isAdded()) return;
+
+        if (dialogMinijuegoActual == null || !dialogMinijuegoActual.isShowing()) {
+            dialogMinijuegoActual = new Dialog(requireContext());
+            dialogMinijuegoActual.setContentView(R.layout.dialog_minijuego_ter);
+            dialogMinijuegoActual.setCancelable(false);
+
+            if (dialogMinijuegoActual.getWindow() != null) {
+                dialogMinijuegoActual.getWindow().setBackgroundDrawable(new android.graphics.drawable.ColorDrawable(android.graphics.Color.TRANSPARENT));
+                dialogMinijuegoActual.getWindow().setLayout(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+            }
+            dialogMinijuegoActual.show();
+
+            TextView txtNombreA = dialogMinijuegoActual.findViewById(R.id.txtNombreA_TER);
+            TextView txtNombreV = dialogMinijuegoActual.findViewById(R.id.txtNombreV_TER);
+            String nombreA = snapshotCompleto.child("nombreAtacante").getValue(String.class);
+            String nombreV = snapshotCompleto.child("nombreVictima").getValue(String.class);
+
+            if (txtNombreA != null) txtNombreA.setText(nombreA != null ? nombreA : "Atacante");
+            if (txtNombreV != null) txtNombreV.setText(nombreV != null ? nombreV : "Víctima");
+        }
+
+        DataSnapshot datos = snapshotCompleto.child("datosJuego");
+        String turnoDe = datos.child("turnoDe").getValue(String.class);
+
+        // Extraemos los historiales para saber qué pieza se borrará pronto
+        String histA = datos.child("histA").getValue(String.class);
+        String histV = datos.child("histV").getValue(String.class);
+        if (histA == null) histA = "";
+        if (histV == null) histV = "";
+
+        String[] arrA = histA.isEmpty() ? new String[0] : histA.split("-");
+        String[] arrV = histV.isEmpty() ? new String[0] : histV.split("-");
+
+        // Identificamos las piezas más viejas (si ya tienen 3 puestas)
+        String oldestA = arrA.length == 3 ? arrA[0] : "-1";
+        String oldestV = arrV.length == 3 ? arrV[0] : "-1";
+
+        TextView txtTurno = dialogMinijuegoActual.findViewById(R.id.txtTurnoTER);
+        boolean esMiTurno = auth.getCurrentUser().getUid().equals(turnoDe) && !"espectador".equals(miRol);
+        String simboloMio = "atacante".equals(miRol) ? "X" : "O";
+        String miHistorial = "atacante".equals(miRol) ? histA : histV;
+
+        // --- ESTADOS DE CABECERA ---
+        // --- ESTADOS DE CABECERA ---
+        if ("terminado".equals(estado)) {
+            // ... (Lo que ya tienes de 'terminado' se queda igual) ...
+            if (timerTurnoTER != null) timerTurnoTER.cancel();
+            String ganadorUid = snapshotCompleto.child("ganadorUid").getValue(String.class);
+            if (ganadorUid != null) {
+                if (auth.getCurrentUser().getUid().equals(ganadorUid)) {
+                    txtTurno.setText("¡GANASTE EL DUELO!");
+                    txtTurno.setTextColor(android.graphics.Color.parseColor("#2AA514"));
+                } else if (!"espectador".equals(miRol)){
+                    txtTurno.setText("¡PERDISTE!");
+                    txtTurno.setTextColor(android.graphics.Color.parseColor("#E53935"));
+                } else {
+                    txtTurno.setText("Duelo Finalizado");
+                    txtTurno.setTextColor(android.graphics.Color.parseColor("#E65100"));
+                }
+            }
+        } else {
+            // ⏱️ LIMPIAMOS EL TIMER ANTERIOR
+            if (timerTurnoTER != null) {
+                timerTurnoTER.cancel();
+                timerTurnoTER = null;
+            }
+
+            if ("espectador".equals(miRol)) {
+                txtTurno.setText(turnoDe.equals(uidAtacante) ? "Turno de: Atacante (X)" : "Turno de: Víctima (O)");
+            } else {
+                if (esMiTurno) {
+                    txtTurno.setTextColor(android.graphics.Color.parseColor("#2AA514"));
+
+                    // ⏱️ INICIAMOS EL TIMER DE 10 SEGUNDOS (Solo en el celular del que le toca)
+                    timerTurnoTER = new CountDownTimer(10000, 1000) {
+                        @Override
+                        public void onTick(long millis) {
+                            if (txtTurno != null) txtTurno.setText("¡ES TU TURNO! (" + (millis / 1000) + "s)");
+                        }
+                        @Override
+                        public void onFinish() {
+                            if (txtTurno != null) txtTurno.setText("¡TIEMPO AGOTADO!");
+
+                            // SOLUCIÓN: Reconstruimos un tablero local leyendo de 'datos'
+                            // para saber cuáles están vacías sin dar error de símbolo
+                            String[] tableroLocal = new String[9];
+                            java.util.ArrayList<Integer> vacias = new java.util.ArrayList<>();
+
+                            for (int i = 0; i < 9; i++) {
+                                String val = datos.child("c" + i).getValue(String.class);
+                                if (val == null) val = "";
+                                tableroLocal[i] = val;
+
+                                if (val.isEmpty()) vacias.add(i);
+                            }
+
+                            if (!vacias.isEmpty()) {
+                                int posAleatoria = vacias.get(new java.util.Random().nextInt(vacias.size()));
+                                jugarTurnoTER(posAleatoria, simboloMio, miRol, uidAtacante, uidVictima, tableroLocal, miHistorial);
+                            }
+                        }
+                    }.start();
+
+                } else {
+                    txtTurno.setText("Esperando jugada del rival...");
+                    txtTurno.setTextColor(android.graphics.Color.parseColor("#E65100"));
+                }
+            }
+        }
+
+        // --- DIBUJAR TABLERO INFINITO ---
+        String[] tablero = new String[9];
+        for (int i = 0; i < 9; i++) {
+            String valor = datos.child("c" + i).getValue(String.class);
+            if (valor == null) valor = "";
+            tablero[i] = valor;
+
+            int resId = getResources().getIdentifier("celda" + i, "id", requireContext().getPackageName());
+            TextView celda = dialogMinijuegoActual.findViewById(resId);
+
+            if (celda != null) {
+                celda.setText(valor);
+
+                // Pintar X azul y O rojo
+                if (valor.equals("X")) celda.setTextColor(android.graphics.Color.parseColor("#304EDB"));
+                else if (valor.equals("O")) celda.setTextColor(android.graphics.Color.parseColor("#E53935"));
+
+                // ¡MAGIA VISUAL! Hacemos fantasmal la pieza que está a punto de desaparecer
+                if (String.valueOf(i).equals(oldestA) || String.valueOf(i).equals(oldestV)) {
+                    celda.setAlpha(0.3f); // Se ve desvanecida
+                } else {
+                    celda.setAlpha(1.0f); // Se ve normal
+                }
+
+                final int posicion = i;
+
+                // Solo habilitar el clic si es mi turno, el juego no ha terminado y la celda está vacía
+                if (!"terminado".equals(estado) && esMiTurno && valor.isEmpty()) {
+                    celda.setOnClickListener(v -> jugarTurnoTER(posicion, simboloMio, miRol, uidAtacante, uidVictima, tablero, miHistorial));
+                } else {
+                    celda.setOnClickListener(null);
+                }
+            }
+        }
+
+        // Si el juego ya terminó en Firebase, le pintamos las celdas ganadoras al jugador que estaba esperando
+        if ("terminado".equals(estado)) {
+            String ganadorData = verificarGanadorTER(tablero);
+            if (ganadorData != null) {
+                String[] partes = ganadorData.split("_");
+                pintarCeldasGanadorasTER(Integer.parseInt(partes[1]), Integer.parseInt(partes[2]), Integer.parseInt(partes[3]));
+            }
+        }
+    }
+
+    private void jugarTurnoTER(int posicion, String simbolo, String miRol, String uidAtacante, String uidVictima, String[] tableroActual, String miHistorial) {
+        HashMap<String, Object> updates = new HashMap<>();
+
+        // 1. Procesar el historial como una lista
+        java.util.ArrayList<String> listaHist = new java.util.ArrayList<>();
+        if (!miHistorial.isEmpty()) {
+            listaHist.addAll(java.util.Arrays.asList(miHistorial.split("-")));
+        }
+
+        // Agregamos la nueva jugada al historial
+        listaHist.add(String.valueOf(posicion));
+
+        // 2. Si ya hay más de 3 piezas, ¡La más vieja explota!
+        if (listaHist.size() > 3) {
+            String viejo = listaHist.remove(0); // Quitamos la posición más antigua
+            int posVieja = Integer.parseInt(viejo);
+            tableroActual[posVieja] = ""; // Se borra del tablero local
+            updates.put("datosJuego/c" + posVieja, ""); // Se borra de Firebase
+        }
+
+        // 3. Guardar la nueva jugada
+        tableroActual[posicion] = simbolo;
+        updates.put("datosJuego/c" + posicion, simbolo);
+
+        // Guardar el nuevo historial
+        String nuevoHistorial = android.text.TextUtils.join("-", listaHist);
+        if ("atacante".equals(miRol)) {
+            updates.put("datosJuego/histA", nuevoHistorial);
+        } else {
+            updates.put("datosJuego/histV", nuevoHistorial);
+        }
+
+        // 4. Verificar si con esta jugada alguien hizo línea de 3
+        String ganadorData = verificarGanadorTER(tableroActual);
+
+        if (ganadorData != null) {
+            String[] partes = ganadorData.split("_");
+            String ganador = partes[0];
+
+            // ¡PINTAMOS DE DORADO INMEDIATAMENTE!
+            pintarCeldasGanadorasTER(Integer.parseInt(partes[1]), Integer.parseInt(partes[2]), Integer.parseInt(partes[3]));
+
+            // ¡EL JUEGO TERMINÓ!
+            updates.put("estado", "terminado");
+            String ganadorUid = ganador.equals("X") ? uidAtacante : uidVictima;
+            updates.put("ganadorUid", ganadorUid);
+            salaRef.child("minijuegoActual").updateChildren(updates);
+
+            new android.os.Handler(android.os.Looper.getMainLooper()).postDelayed(() -> {
+                boolean atacanteGano = ganador.equals("X");
+                ejecutarRoboFase4TER(atacanteGano, uidAtacante, uidVictima);
+            }, 3500);
+
+        } else {
+            // EL JUEGO SIGUE, CAMBIO DE TURNO
+            String siguienteTurno = "atacante".equals(miRol) ? uidVictima : uidAtacante;
+            updates.put("datosJuego/turnoDe", siguienteTurno);
+            salaRef.child("minijuegoActual").updateChildren(updates);
+        }
+    }
+
+    private String verificarGanadorTER(String[] tablero) {
+        int[][] combinaciones = {
+                {0, 1, 2}, {3, 4, 5}, {6, 7, 8}, // Horizontales
+                {0, 3, 6}, {1, 4, 7}, {2, 5, 8}, // Verticales
+                {0, 4, 8}, {2, 4, 6}             // Diagonales
+        };
+
+        for (int[] pos : combinaciones) {
+            if (!tablero[pos[0]].isEmpty() &&
+                    tablero[pos[0]].equals(tablero[pos[1]]) &&
+                    tablero[pos[0]].equals(tablero[pos[2]])) {
+
+                // Retornamos el ganador Y las posiciones exactas separadas por "_"
+                return tablero[pos[0]] + "_" + pos[0] + "_" + pos[1] + "_" + pos[2];
+            }
+        }
+        return null;
+    }
+
+    private void pintarCeldasGanadorasTER(int c1, int c2, int c3) {
+        if (dialogMinijuegoActual == null || !isAdded()) return;
+
+        int[] celdas = {c1, c2, c3};
+        for (int i : celdas) {
+            int resId = getResources().getIdentifier("celda" + i, "id", requireContext().getPackageName());
+            TextView celda = dialogMinijuegoActual.findViewById(resId);
+
+            if (celda != null) {
+                // Fondo dorado épico y letra blanca para resaltar
+                celda.setBackgroundColor(android.graphics.Color.parseColor("#FFD700"));
+                celda.setTextColor(android.graphics.Color.parseColor("#FFFFFF"));
+                celda.setAlpha(1.0f); // Le quitamos lo fantasma por si era la ficha más vieja
+            }
+        }
+    }
+
+    private void ejecutarRoboFase4TER(boolean atacanteGano, String uidAtacante, String uidVictima) {
+        salaRef.child("puntajesRondas").child("ronda_" + rondaActual)
+                .addListenerForSingleValueEvent(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(@NonNull DataSnapshot snapshotPuntos) {
+                        int puntosRobados = leerEntero(snapshotPuntos.child(uidVictima), 0);
+                        int misPuntos = leerEntero(snapshotPuntos.child(uidAtacante), 0);
+
+                        HashMap<String, Object> actualizacionesFinales = new HashMap<>();
+                        actualizacionesFinales.put("minijuegoActual", null); // Destruye arena
+
+                        String idUso = "marca_res_ter_" + rondaActual + "_" + System.currentTimeMillis();
+                        String tituloGlobal, mensajeGlobal;
+                        boolean esExitoGlobal;
+
+                        TextView txtA = dialogMinijuegoActual != null ? dialogMinijuegoActual.findViewById(R.id.txtNombreA_TER) : null;
+                        TextView txtV = dialogMinijuegoActual != null ? dialogMinijuegoActual.findViewById(R.id.txtNombreV_TER) : null;
+                        String nombreA = txtA != null ? txtA.getText().toString() : "Atacante";
+                        String nombreV = txtV != null ? txtV.getText().toString() : "Víctima";
+
+                        if (atacanteGano) {
+                            actualizacionesFinales.put("puntajesRondas/ronda_" + rondaActual + "/" + uidVictima, 0);
+                            actualizacionesFinales.put("puntajesRondas/ronda_" + rondaActual + "/" + uidAtacante, misPuntos + puntosRobados);
+                            tituloGlobal = "¡ATRACO MENTAL PERFECTO!";
+                            mensajeGlobal = "<b><font color='#2AA514'>" + nombreA.toUpperCase() + "</font></b> destrozó a <b><font color='#E53935'>" + nombreV + "</font></b> en Tres en Raya y robó sus puntos.";
+                            esExitoGlobal = true;
+                        } else {
+                            tituloGlobal = "¡DEFENSA INTELECTUAL!";
+                            mensajeGlobal = "<b><font color='#2AA514'>" + nombreV.toUpperCase() + "</font></b> humilló a <b><font color='#E53935'>" + nombreA + "</font></b> en Tres en Raya, protegiendo todos sus puntos.";
+                            esExitoGlobal = false;
+                        }
+
+                        actualizacionesFinales.put("eventoCaosGlobal/ronda_" + rondaActual + "/idUso", idUso);
+                        actualizacionesFinales.put("eventoCaosGlobal/ronda_" + rondaActual + "/titulo", tituloGlobal);
+                        actualizacionesFinales.put("eventoCaosGlobal/ronda_" + rondaActual + "/mensaje", mensajeGlobal);
+                        actualizacionesFinales.put("eventoCaosGlobal/ronda_" + rondaActual + "/esExito", esExitoGlobal);
+                        actualizacionesFinales.put("eventoCaosGlobal/ronda_" + rondaActual + "/timestamp", ServerValue.TIMESTAMP);
+                        actualizacionesFinales.put("eventoCaosGlobal/ronda_" + rondaActual + "/uidAtacante", uidAtacante);
+                        actualizacionesFinales.put("eventoCaosGlobal/ronda_" + rondaActual + "/uidVictima", uidVictima);
+
+                        salaRef.updateChildren(actualizacionesFinales).addOnCompleteListener(task -> {
+                            if (dialogMinijuegoActual != null) {
+                                dialogMinijuegoActual.dismiss();
+                                dialogMinijuegoActual = null;
+                            }
+                        });
+                    }
+                    @Override
+                    public void onCancelled(@NonNull DatabaseError error) {}
+                });
+    }
+
+    // =========================================================================
+    // ==================== LÓGICA DE DUELO DE REFLEJOS ========================
+    // =========================================================================
+
+    private void abrirPantallaMinijuegoTiroteo(String miRol, String uidAtacante, String uidVictima, String estado, DataSnapshot snapshotCompleto) {
+        if (!isAdded()) return;
+
+        DataSnapshot datos = snapshotCompleto.child("datosJuego");
+        long delayTiroteo = leerLong(datos.child("delayTiroteo"), 3000L);
+        long reaccionA = leerLong(datos.child("reaccionA"), 0L);
+        long reaccionV = leerLong(datos.child("reaccionV"), 0L);
+
+        // CREACIÓN DE LA ARENA (Solo se ejecuta 1 vez cuando se abre)
+        if (dialogMinijuegoActual == null || !dialogMinijuegoActual.isShowing()) {
+            dialogMinijuegoActual = new Dialog(requireContext());
+            dialogMinijuegoActual.setContentView(R.layout.dialog_minijuego_tiroteo);
+            dialogMinijuegoActual.setCancelable(false);
+
+            if (dialogMinijuegoActual.getWindow() != null) {
+                dialogMinijuegoActual.getWindow().setBackgroundDrawable(new android.graphics.drawable.ColorDrawable(android.graphics.Color.TRANSPARENT));
+                dialogMinijuegoActual.getWindow().setLayout(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+            }
+            dialogMinijuegoActual.show();
+
+            // Seteamos Nombres
+            TextView txtNombreA = dialogMinijuegoActual.findViewById(R.id.txtNombreA_Tiro);
+            TextView txtNombreV = dialogMinijuegoActual.findViewById(R.id.txtNombreV_Tiro);
+            String nombreA = snapshotCompleto.child("nombreAtacante").getValue(String.class);
+            String nombreV = snapshotCompleto.child("nombreVictima").getValue(String.class);
+            if (txtNombreA != null) txtNombreA.setText(nombreA != null ? nombreA : "Atacante");
+            if (txtNombreV != null) txtNombreV.setText(nombreV != null ? nombreV : "Víctima");
+
+            // --- LÓGICA DE CRONÓMETRO INTERNO (Solo para los que juegan) ---
+            if (!"espectador".equals(miRol) && !"terminado".equals(estado)) {
+                com.google.android.material.card.MaterialCardView btnDisparo = dialogMinijuegoActual.findViewById(R.id.btnAreaDisparo);
+                TextView txtEstadoTiro = dialogMinijuegoActual.findViewById(R.id.txtEstadoTiroteo);
+
+                final boolean[] estadoLocal = {false, false}; // [0: yaDisparó, 1: estaVerde]
+                final long[] tiempoVerdeLocal = {0L};
+
+                // Acción de disparar
+                btnDisparo.setOnClickListener(v -> {
+                    if (estadoLocal[0]) return; // Si ya disparaste, no haces nada
+                    estadoLocal[0] = true;
+
+                    long miReaccion = 99999; // Foul por defecto
+
+                    if (estadoLocal[1]) {
+                        // Disparó bien, calculamos los milisegundos reales
+                        miReaccion = System.currentTimeMillis() - tiempoVerdeLocal[0];
+                    } else {
+                        // Disparó antes de tiempo
+                        txtEstadoTiro.setText("¡FALSO INICIO!");
+                        btnDisparo.setCardBackgroundColor(android.graphics.Color.parseColor("#E53935")); // Rojo Foul
+                    }
+
+                    // Subimos el tiempo a Firebase
+                    String nodo = "atacante".equals(miRol) ? "reaccionA" : "reaccionV";
+                    salaRef.child("minijuegoActual").child("datosJuego").child(nodo).setValue(miReaccion);
+                });
+
+                // El Timer invisible que cambia el color a verde
+                new android.os.Handler(android.os.Looper.getMainLooper()).postDelayed(() -> {
+                    if (dialogMinijuegoActual != null && dialogMinijuegoActual.isShowing() && !estadoLocal[0] && !"terminado".equals(estado)) {
+                        estadoLocal[1] = true;
+                        tiempoVerdeLocal[0] = System.currentTimeMillis(); // ¡Aquí inicia el reloj de reflejos!
+                        btnDisparo.setCardBackgroundColor(android.graphics.Color.parseColor("#2AA514")); // Verde
+                        txtEstadoTiro.setText("¡DISPARA!");
+
+                        // Quitamos el conteo de 5s para que sea una sorpresa
+                        Sounds.playDisparo(); // Un simple ¡Pum! cuando se pone verde
+                    }
+                }, delayTiroteo);
+            }
+        }
+
+        // --- ACTUALIZAR VISTAS EN TIEMPO REAL ---
+        TextView txtReaccionA = dialogMinijuegoActual.findViewById(R.id.txtReaccionA);
+        TextView txtReaccionV = dialogMinijuegoActual.findViewById(R.id.txtReaccionV);
+        com.google.android.material.card.MaterialCardView btnDisparo = dialogMinijuegoActual.findViewById(R.id.btnAreaDisparo);
+        TextView txtEstadoTiro = dialogMinijuegoActual.findViewById(R.id.txtEstadoTiroteo);
+
+        if (reaccionA > 0) {
+            txtReaccionA.setText(reaccionA == 99999 ? "Presiono Antes" : reaccionA + " ms");
+            txtReaccionA.setTextColor(reaccionA == 99999 ? android.graphics.Color.RED : android.graphics.Color.parseColor("#5E6C84"));
+        }
+        if (reaccionV > 0) {
+            txtReaccionV.setText(reaccionV == 99999 ? "Presiono Antes" : reaccionV + " ms");
+            txtReaccionV.setTextColor(reaccionV == 99999 ? android.graphics.Color.RED : android.graphics.Color.parseColor("#5E6C84"));
+        }
+
+        // --- ÁRBITRO: EL ATACANTE REVISA SI YA HAY DOS TIEMPOS ---
+        if ("atacante".equals(miRol) && reaccionA > 0 && reaccionV > 0 && !"terminado".equals(estado)) {
+
+            salaRef.child("minijuegoActual").child("estado").setValue("terminado");
+
+            String ganadorUid;
+            if (reaccionA == 99999 && reaccionV == 99999) {
+                ganadorUid = uidVictima; // Si ambos hacen Foul, la víctima sobrevive por default
+            } else if (reaccionA < reaccionV) {
+                ganadorUid = uidAtacante;
+            } else if (reaccionV < reaccionA) {
+                ganadorUid = uidVictima;
+            } else {
+                ganadorUid = uidVictima; // Empate perfecto (rarísimo), el defensor gana
+            }
+
+            salaRef.child("minijuegoActual").child("ganadorUid").setValue(ganadorUid);
+
+            boolean atacanteGano = ganadorUid.equals(uidAtacante);
+            new android.os.Handler(android.os.Looper.getMainLooper()).postDelayed(() -> {
+                ejecutarRoboFase4Tiroteo(atacanteGano, uidAtacante, uidVictima);
+            }, 3500);
+        }
+
+        // --- ESTADOS DE CABECERA Y COLOR FINAL ---
+        if ("terminado".equals(estado)) {
+            if (btnDisparo != null) btnDisparo.setOnClickListener(null); // Bloquear
+
+            String ganadorUid = snapshotCompleto.child("ganadorUid").getValue(String.class);
+
+            if (ganadorUid != null) {
+                if (auth.getCurrentUser().getUid().equals(ganadorUid)) {
+                    txtEstadoTiro.setText("¡EL MÁS RÁPIDO!");
+                    btnDisparo.setCardBackgroundColor(android.graphics.Color.parseColor("#FFD700")); // Dorado
+                    Sounds.playCelebracion();
+                } else if (!"espectador".equals(miRol)) {
+                    txtEstadoTiro.setText("¡FUISTE MUY LENTO!");
+                    btnDisparo.setCardBackgroundColor(android.graphics.Color.parseColor("#E53935")); // Rojo
+                    Sounds.playPerdedor();
+                } else {
+                    txtEstadoTiro.setText("¡DUELO TERMINADO!");
+                    btnDisparo.setCardBackgroundColor(android.graphics.Color.parseColor("#5E6C84")); // Gris
+                }
+            }
+        }
+    }
+
+    private void ejecutarRoboFase4Tiroteo(boolean atacanteGano, String uidAtacante, String uidVictima) {
+        salaRef.child("puntajesRondas").child("ronda_" + rondaActual)
+                .addListenerForSingleValueEvent(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(@NonNull DataSnapshot snapshotPuntos) {
+                        int puntosRobados = leerEntero(snapshotPuntos.child(uidVictima), 0);
+                        int misPuntos = leerEntero(snapshotPuntos.child(uidAtacante), 0);
+
+                        HashMap<String, Object> actualizacionesFinales = new HashMap<>();
+                        actualizacionesFinales.put("minijuegoActual", null);
+
+                        String idUso = "marca_res_tiro_" + rondaActual + "_" + System.currentTimeMillis();
+                        String tituloGlobal, mensajeGlobal;
+
+                        TextView txtA = dialogMinijuegoActual != null ? dialogMinijuegoActual.findViewById(R.id.txtNombreA_Tiro) : null;
+                        TextView txtV = dialogMinijuegoActual != null ? dialogMinijuegoActual.findViewById(R.id.txtNombreV_Tiro) : null;
+
+                        String nombreA = txtA != null ? txtA.getText().toString() : null;
+                        String nombreV = txtV != null ? txtV.getText().toString() : null;
+
+                        // Variables finales para evitar el error de compilación
+                        final String finalNombreA = (nombreA != null) ? nombreA : "El Atacante";
+                        final String finalNombreV = (nombreV != null) ? nombreV : "La Víctima";
+
+                        if (atacanteGano) {
+                            actualizacionesFinales.put("puntajesRondas/ronda_" + rondaActual + "/" + uidVictima, 0);
+                            actualizacionesFinales.put("puntajesRondas/ronda_" + rondaActual + "/" + uidAtacante, misPuntos + puntosRobados);
+                            tituloGlobal = "¡MANO RÁPIDA!";
+                            mensajeGlobal = "<b><font color='#2AA514'>" + finalNombreA.toUpperCase() + "</font></b> desenfundó más rápido en el Duelo de Reflejos y le robó sus puntos a <b><font color='#E53935'>" + finalNombreV + "</font></b>.";
+                        } else {
+                            tituloGlobal = "¡REFLEJOS INTACTOS!";
+                            mensajeGlobal = "<b><font color='#2AA514'>" + finalNombreV.toUpperCase() + "</font></b> fue más rápido que <b><font color='#E53935'>" + finalNombreA + "</font></b> y conservó todos sus puntos.";
+                        }
+
+                        actualizacionesFinales.put("eventoCaosGlobal/ronda_" + rondaActual + "/idUso", idUso);
+                        actualizacionesFinales.put("eventoCaosGlobal/ronda_" + rondaActual + "/titulo", tituloGlobal);
+                        actualizacionesFinales.put("eventoCaosGlobal/ronda_" + rondaActual + "/mensaje", mensajeGlobal);
+                        actualizacionesFinales.put("eventoCaosGlobal/ronda_" + rondaActual + "/esExito", atacanteGano);
+                        actualizacionesFinales.put("eventoCaosGlobal/ronda_" + rondaActual + "/timestamp", ServerValue.TIMESTAMP);
+                        actualizacionesFinales.put("eventoCaosGlobal/ronda_" + rondaActual + "/uidAtacante", uidAtacante);
+                        actualizacionesFinales.put("eventoCaosGlobal/ronda_" + rondaActual + "/uidVictima", uidVictima);
+
+                        salaRef.updateChildren(actualizacionesFinales).addOnCompleteListener(task -> {
+                            if (dialogMinijuegoActual != null) {
+                                dialogMinijuegoActual.dismiss();
+                                dialogMinijuegoActual = null;
+                            }
+                        });
+                    }
+                    @Override public void onCancelled(@NonNull DatabaseError error) {}
+                });
     }
 
     private static class HistorialClaveFecha {

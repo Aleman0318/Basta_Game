@@ -16,6 +16,7 @@ public class Sounds {
     public static int conteoFinalSound;
     public static int bastaSound;
     public static int conteoCombate;
+    public static int disparoSound;
 
     private static boolean initialized = false;
 
@@ -43,6 +44,7 @@ public class Sounds {
         conteoFinalSound = soundPool.load(context, R.raw.conteo_final, 1);
         bastaSound = soundPool.load(context, R.raw.bastaaa, 1);
         conteoCombate = soundPool.load(context, R.raw.cuenta_combate, 1);
+        disparoSound = soundPool.load(context, R.raw.disparo, 1);
 
         initialized = true;
     }
@@ -83,6 +85,13 @@ public class Sounds {
             soundPool.play(conteoCombate, 1f, 1f, 1, 0, 1f);
         }
     }
+
+    public static void playDisparo() {
+        if (soundPool != null) {
+            soundPool.play(disparoSound, 1f, 1f, 1, 0, 1f);
+        }
+    }
+
     public static void release() {
         if(soundPool != null){
             soundPool.release();

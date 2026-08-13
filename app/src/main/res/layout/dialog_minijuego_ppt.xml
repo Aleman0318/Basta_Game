@@ -24,20 +24,20 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:fontFamily="@font/lilitaone_regular"
-            android:text="¡DUELO A MUERTE!"
+            android:text="¡PIEDRA, PAPEL O TIJERAS!"
             android:textColor="#E65100"
             android:textSize="28sp" />
 
         <TextView
-            android:layout_width="wrap_content"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="2dp"
-            android:layout_marginBottom="24dp"
+            android:layout_marginTop="4dp"
+            android:layout_marginBottom="12dp"
             android:fontFamily="@font/manrope_regular"
-            android:text="Piedra, Papel o Tijera (Mejor de 3)"
-            android:textColor="#5E6C84"
-            android:textSize="13sp"
-            android:textStyle="bold" />
+            android:gravity="center"
+            android:text="Elige tu arma y derrota a tu rival. El primero en conseguir 2 victorias gana el robo."
+            android:textColor="#5E5777"
+            android:textSize="13sp" />
 
         <LinearLayout
             android:layout_width="match_parent"

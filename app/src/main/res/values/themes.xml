@@ -8,4 +8,16 @@
     <style name="Theme.Basta_Game" parent="Base.Theme.Basta_Game" >
         <item name="android:windowBackground">@color/colorBg</item>
     </style>
+
+    <style name="CasillaTER">
+        <item name="android:layout_width">80dp</item>
+        <item name="android:layout_height">80dp</item>
+        <item name="android:layout_margin">2dp</item>
+        <item name="android:background">#FCFDFF</item>
+        <item name="android:gravity">center</item>
+        <item name="android:fontFamily">@font/lilitaone_regular</item>
+        <item name="android:textSize">48sp</item>
+        <item name="android:clickable">true</item>
+        <item name="android:focusable">true</item>
+    </style>
 </resources>

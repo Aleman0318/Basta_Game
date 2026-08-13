@@ -285,7 +285,6 @@ public class ValidacionAdapter extends RecyclerView.Adapter<ValidacionAdapter.Vi
         }
 
         String clave = obtenerClaveRespuesta(respuesta);
-
         cancelarTemporizadorPuntaje(respuesta);
 
         respuesta.setTimerIniciado(true);
@@ -293,19 +292,14 @@ public class ValidacionAdapter extends RecyclerView.Adapter<ValidacionAdapter.Vi
 
         long inicio = System.currentTimeMillis();
         tiemposInicio.put(clave, inicio);
-
+        final long[] lastSeg = {-1}; // Control de parpadeos
         Runnable runnable = new Runnable() {
             @Override
             public void run() {
                 Long inicioGuardado = tiemposInicio.get(clave);
+                if (inicioGuardado == null) return;
 
-                if (inicioGuardado == null) {
-                    return;
-                }
-
-                if (respuesta.isMostrarPuntaje() ||
-                        respuesta.isVotacionResuelta() ||
-                        esRespuestaVacia(respuesta)) {
+                if (respuesta.isMostrarPuntaje() || respuesta.isVotacionResuelta() || esRespuestaVacia(respuesta)) {
                     cancelarTemporizadorPuntaje(respuesta);
                     notificarEstadoDeRespuesta(respuesta);
                     return;
@@ -317,21 +311,24 @@ public class ValidacionAdapter extends RecyclerView.Adapter<ValidacionAdapter.Vi
                 if (restante <= 0) {
                     respuesta.setMostrarPuntaje(true);
                     respuesta.setTimerIniciado(false);
-
                     temporizadores.remove(clave);
                     tiemposInicio.remove(clave);
-
                     notificarEstadoDeRespuesta(respuesta);
                     return;
                 }
 
-                notificarContadorRespuesta(respuesta);
-                handler.postDelayed(this, 1000);
+                long segTotal = (long) Math.ceil(restante / 1000.0);
+                if (segTotal != lastSeg[0]) {
+                    lastSeg[0] = segTotal;
+                    notificarContadorRespuesta(respuesta);
+                }
+
+                // Bucle de 50ms (Precisión máxima espejo a la Web)
+                handler.postDelayed(this, 50);
             }
         };
-
         temporizadores.put(clave, runnable);
-        handler.postDelayed(runnable, 250);
+        handler.post(runnable);
     }
 
     private void pausarTemporizadorDeRespuesta(RespuestaValidacion respuesta) {
