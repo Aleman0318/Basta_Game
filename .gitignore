@@ -1,0 +1,45 @@
+# Archivos de compilación
+*.apk
+*.aab
+*.ap_
+*.dex
+*.class
+
+# Carpetas de build
+build/
+*/build/
+
+# Gradle
+.gradle/
+gradle-app.setting
+!gradle-wrapper.jar
+
+# Local properties
+local.properties
+
+# Android Studio / IntelliJ
+.idea/
+*.iml
+
+# Captures
+captures/
+
+# Archivos del sistema
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+
+# Keystore / firmas
+*.jks
+*.keystore
+
+# Google Services - OJO: ver explicación abajo
+# google-services.json
+
+# Configuracion privada/local y herramientas generadas
+app/google-services.json
+graphify-out/
+.codex/
+app/release/

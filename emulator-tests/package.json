@@ -1,0 +1,12 @@
+{
+  "name": "basta-emulator-tests",
+  "private": true,
+  "version": "1.0.0",
+  "scripts": {
+    "test": "firebase emulators:exec --project demo-basta-concurrency --only database --config firebase.json \"..\\gradlew.bat -p . test --offline --console=plain\"",
+    "test:presence-limit": "firebase emulators:exec --project demo-basta-concurrency --only database --config firebase.json \"..\\gradlew.bat -p . presenceLimit --offline --console=plain\""
+  },
+  "devDependencies": {
+    "firebase-tools": "15.36.0"
+  }
+}

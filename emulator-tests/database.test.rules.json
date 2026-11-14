@@ -1,0 +1,14 @@
+{
+  "rules": {
+    ".read": false,
+    ".write": false,
+    "runs": {
+      ".read": true,
+      ".write": true
+    },
+    "denied": {
+      ".read": true,
+      ".write": false
+    }
+  }
+}

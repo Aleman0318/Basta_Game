@@ -1,0 +1,56 @@
+plugins { id 'java' }
+repositories { mavenCentral() }
+java {
+    sourceCompatibility = JavaVersion.VERSION_21
+    targetCompatibility = JavaVersion.VERSION_21
+}
+dependencies {
+    implementation('com.google.firebase:firebase-admin:9.12.0') {
+        exclude group: 'com.google.cloud', module: 'google-cloud-storage'
+        exclude group: 'com.google.cloud', module: 'google-cloud-firestore'
+    }
+    testImplementation 'junit:junit:4.13.2'
+}
+// Compile the real app algorithms, never a JavaScript translation of them.
+sourceSets.main.java {
+    srcDirs = ['../app/src/main/java']
+    include 'com/example/basta_game/utils/RecompensasPartida.java'
+    include 'com/example/basta_game/utils/TransferenciaHost.java'
+    include 'com/example/basta_game/utils/InicioPartida.java'
+    include 'com/example/basta_game/utils/PlazoRonda.java'
+    include 'com/example/basta_game/utils/IdentidadJugador.java'
+    include 'com/example/basta_game/utils/VotacionRevision.java'
+    include 'com/example/basta_game/utils/EstadoRevision.java'
+}
+test {
+    useJUnit()
+    maxParallelForks = 1
+    filter { excludeTestsMatching '*conexionAnteriorNoDebeDesconectarOtraSesionActiva' }
+    outputs.upToDateWhen { false }
+    testLogging { events 'passed', 'failed', 'skipped'; exceptionFormat 'full' }
+    doFirst {
+        if (System.getenv('FIREBASE_DATABASE_EMULATOR_HOST') != '127.0.0.1:9000') {
+            throw new GradleException('Only the local RTDB emulator 127.0.0.1:9000 is permitted')
+        }
+    }
+}
+
+// One-time official SDK preparation; test execution remains offline.
+tasks.register('prepareEmulatorTests') {
+    doLast { configurations.testRuntimeClasspath.files }
+}
+
+// Separate diagnostic: this is a known failing session-isolation requirement, not a passing guarantee.
+tasks.register('presenceLimit', Test) {
+    testClassesDirs = sourceSets.test.output.classesDirs
+    classpath = sourceSets.test.runtimeClasspath
+    useJUnit()
+    filter { includeTestsMatching '*conexionAnteriorNoDebeDesconectarOtraSesionActiva' }
+    outputs.upToDateWhen { false }
+    testLogging { events 'passed', 'failed'; exceptionFormat 'full'; showStandardStreams = true }
+    doFirst {
+        if (System.getenv('FIREBASE_DATABASE_EMULATOR_HOST') != '127.0.0.1:9000') {
+            throw new GradleException('Only the local RTDB emulator 127.0.0.1:9000 is permitted')
+        }
+    }
+}
