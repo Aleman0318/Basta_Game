@@ -52,7 +52,7 @@ public class HomeActivity extends AppCompatActivity {
 
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main_home), (v, insets) -> {
             Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
-            v.setPadding(systemBars.left, systemBars.top, systemBars.right, 0);
+            v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
             return insets;
         });
 
@@ -63,10 +63,10 @@ public class HomeActivity extends AppCompatActivity {
             boolean seDesconecto = getIntent().getExtras().getBoolean("DESCONEXION");
             boolean seDesconectoSiendoHost = getIntent().getExtras().getBoolean("CREADOR_DESCONEXION");
 
-            if (seDesconecto && !seDesconectoSiendoHost) {
+            if ((seDesconecto || getIntent().hasExtra("MOTIVO_SALIDA")) && !seDesconectoSiendoHost) {
                 NotificationHelper.show(
                         notificationHome,
-                        "Has abandonado la partida",
+                        getIntent().getStringExtra("MOTIVO_SALIDA") == null ? "Abandonaste la sala" : getIntent().getStringExtra("MOTIVO_SALIDA"),
                         NotificationHelper.WARNING
                 );
                 Sounds.playNotificaciones();

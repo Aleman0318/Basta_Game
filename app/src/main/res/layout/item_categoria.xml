@@ -3,7 +3,7 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:id="@+id/cardCategoria"
-    android:layout_width="wrap_content"
+    android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:layout_margin="7dp"
     android:clickable="true"
@@ -16,11 +16,10 @@
     app:strokeWidth="1.5dp">
 
     <LinearLayout
-        android:layout_width="150dp"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
-        android:paddingHorizontal="12dp"
-        android:paddingVertical="12dp">
+        android:padding="10dp">
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -30,8 +29,8 @@
 
             <com.google.android.material.card.MaterialCardView
                 android:id="@+id/cardIconoCategoria"
-                android:layout_width="42dp"
-                android:layout_height="42dp"
+                android:layout_width="32dp"
+                android:layout_height="32dp"
                 app:cardBackgroundColor="#FFFFFF"
                 app:cardCornerRadius="14dp"
                 app:cardElevation="0dp"
@@ -52,14 +51,14 @@
                 android:id="@+id/tvNombreCategoria"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:layout_marginStart="9dp"
+                android:layout_marginStart="6dp"
                 android:layout_weight="1"
                 android:ellipsize="end"
                 android:fontFamily="@font/lilitaone_regular"
                 android:maxLines="1"
                 android:text="Nombre"
                 android:textColor="@color/colorTextoP"
-                android:textSize="18sp" />
+                android:textSize="15sp" />
 
         </LinearLayout>
 

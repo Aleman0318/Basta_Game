@@ -21,6 +21,12 @@ public class CategoriaTiendaAdapter extends RecyclerView.Adapter<CategoriaTienda
     private List<CategoriaTienda> listaCategorias;
     private ComodinTiendaAdapter.OnComprarClickListener listener;
     private Map<String, Integer> inventarioGlobal;
+    private boolean enCompra;
+
+    public void compraEnCurso(boolean valor) {
+        enCompra=valor;
+        if(listaCategorias!=null) notifyItemRangeChanged(0,listaCategorias.size(),"ACTUALIZAR_INVENTARIO");
+    }
 
     public CategoriaTiendaAdapter(List<CategoriaTienda> listaCategorias, ComodinTiendaAdapter.OnComprarClickListener listener) {
         this.listaCategorias = listaCategorias;
@@ -49,7 +55,7 @@ public class CategoriaTiendaAdapter extends RecyclerView.Adapter<CategoriaTienda
         if (!payloads.isEmpty() && payloads.contains("ACTUALIZAR_INVENTARIO")) {
             // Solo avisamos a las tarjetas que actualicen sus números
             ComodinTiendaAdapter adapterHorizontal = (ComodinTiendaAdapter) holder.rvCarrilHorizontal.getAdapter();
-            if (adapterHorizontal != null && inventarioGlobal != null) {
+            if (adapterHorizontal != null) {
                 adapterHorizontal.actualizarInventario(inventarioGlobal);
             }
         } else {
@@ -68,11 +74,11 @@ public class CategoriaTiendaAdapter extends RecyclerView.Adapter<CategoriaTienda
         ComodinTiendaAdapter adapterHorizontal = (ComodinTiendaAdapter) holder.rvCarrilHorizontal.getAdapter();
 
         if (adapterHorizontal == null) {
-            adapterHorizontal = new ComodinTiendaAdapter(categoria.getComodines(), listener);
+            adapterHorizontal = new ComodinTiendaAdapter(categoria.getComodines(), listener, () -> enCompra);
             LinearLayoutManager layoutManager = new LinearLayoutManager(holder.itemView.getContext(), LinearLayoutManager.HORIZONTAL, false);
             holder.rvCarrilHorizontal.setLayoutManager(layoutManager);
-            holder.rvCarrilHorizontal.setHasFixedSize(true);
-            holder.rvCarrilHorizontal.setItemViewCacheSize(10);
+            holder.rvCarrilHorizontal.setHasFixedSize(false);
+            holder.rvCarrilHorizontal.setItemViewCacheSize(2);
             holder.rvCarrilHorizontal.setAdapter(adapterHorizontal);
         } else {
             adapterHorizontal.setListaComodines(categoria.getComodines());

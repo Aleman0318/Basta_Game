@@ -29,7 +29,19 @@ public class LayoutsPartidaTest {
         Element lista=porId(doc,"rvRespuestasTarjeta");
         assertEquals("match_parent",lista.getAttributeNS(ANDROID,"layout_width"));
         assertEquals("",lista.getAttributeNS(ANDROID,"minWidth"));
-        assertTrue(doc.getElementsByTagName("ScrollView").getLength()>0);
+        assertEquals(0,doc.getElementsByTagName("ScrollView").getLength());
+        assertEquals("androidx.recyclerview.widget.RecyclerView",lista.getTagName());
+        assertEquals("0dp",lista.getAttributeNS(ANDROID,"layout_height"));
+        assertEquals("1",lista.getAttributeNS(ANDROID,"layout_weight"));
+    }
+    @Test public void avanceAutomaticoNoDependeDeBotonFinalizarCategoria() throws Exception {
+        Document doc=layout("dialogo_respuestas");
+        NodeList nodos=doc.getElementsByTagName("*");
+        for(int i=0;i<nodos.getLength();i++) assertNotEquals("@+id/btnFinalizarCategoria",
+                ((Element)nodos.item(i)).getAttributeNS(ANDROID,"id"));
+        Element pager=porId(doc,"vpCategoriasValidacion");
+        assertEquals("0dp",pager.getAttributeNS(ANDROID,"layout_height"));
+        assertEquals("1",pager.getAttributeNS(ANDROID,"layout_weight"));
     }
     @Test public void votarYPuntosEstanDebajoDePalabraConAnchoDisponible() throws Exception {
         Document doc=layout("item_respuestas");

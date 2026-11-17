@@ -43,7 +43,7 @@ public class AvatarAdapter extends RecyclerView.Adapter<AvatarAdapter.AvatarVH> 
             Glide.with(holder.itemView.getContext())
                     .load(avatar.getUrlDescarga())
                     .placeholder(android.R.color.darker_gray)
-                    .into(holder.imgAvatarItem);
+                    .override(320,320).into(holder.imgAvatarItem);
         } else {
 
             holder.imgAvatarItem.setImageResource(R.drawable.outline_person_24);

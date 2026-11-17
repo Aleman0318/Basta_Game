@@ -37,7 +37,7 @@ public class CustomDialogHelper {
         }
     }
 
-    public static void show(
+    public static Dialog show(
             Context context,
             String titulo,
             String mensaje,
@@ -132,6 +132,7 @@ public class CustomDialogHelper {
         }
 
         dialog.show();
+        com.example.basta_game.utils.NotificationHelper.acompanar(dialog);
 
         if (dialog.getWindow() != null) {
             dialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
@@ -142,6 +143,7 @@ public class CustomDialogHelper {
                     LinearLayout.LayoutParams.WRAP_CONTENT
             );
         }
+        return dialog;
     }
 
     private static int dpToPx(Context context, int dp) {

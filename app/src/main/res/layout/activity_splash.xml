@@ -11,7 +11,7 @@
     android:id="@+id/img_logo_splash"
     android:layout_width="220dp"
     android:layout_height="220dp"
-    android:src="@drawable/icono_launcher"
+    android:src="@drawable/basta_splash"
     android:scaleType="fitCenter"
     app:layout_constraintTop_toTopOf="parent"
     app:layout_constraintBottom_toBottomOf="parent"

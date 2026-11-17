@@ -1,0 +1,8 @@
+﻿
+com.example.basta_game.ResponsiveLayoutsTest:.....
+
+Time: 5.31
+
+OK (5 tests)
+
+

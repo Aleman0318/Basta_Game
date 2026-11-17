@@ -80,8 +80,13 @@ public class LoginActivity extends AppCompatActivity {
                     Sounds.playNotificaciones();
                 }else {
 
+                    if(!com.example.basta_game.utils.CargaBoton.iniciar(btnEntrar))return;
+        final Object operacion=com.example.basta_game.utils.CargaBoton.token(btnEntrar);
+                    android.util.Log.d("AuthFlujo","Solicitando autenticación");
                     auth.signInWithEmailAndPassword(usuarioIngresado, passwordIngresada)
                             .addOnCompleteListener(taskLoguearse ->{
+                               com.example.basta_game.utils.CargaBoton.terminar(btnEntrar,operacion); if(isFinishing() || isDestroyed())return;
+                               android.util.Log.d("AuthFlujo","Auth finalizó: exito="+taskLoguearse.isSuccessful());
                                Exception exception = taskLoguearse.getException();
 
                                if(auth != null && taskLoguearse.isSuccessful() && auth.getCurrentUser() != null){
@@ -106,6 +111,8 @@ public class LoginActivity extends AppCompatActivity {
                                     Sounds.playNotificaciones();
                                     etCorreoUsuario.setText("");
                                     etPassword.setText("");
+                                } else {
+                                    NotificationHelper.show(notificationLogin, exception!=null ? exception.getLocalizedMessage() : "No se pudo iniciar sesión", NotificationHelper.ERROR);
                                 }
                             });
                 }

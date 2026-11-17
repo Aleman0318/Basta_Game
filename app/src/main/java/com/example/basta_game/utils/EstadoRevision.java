@@ -8,6 +8,6 @@ public final class EstadoRevision {
     }
 
     public static boolean definitiva(String palabra, boolean validada, int puntos, boolean resuelta, boolean mostrada) {
-        return vacia(palabra) || (validada && (puntos == 5 || resuelta || mostrada));
+        return vacia(palabra) || (validada && (puntos == 0 || puntos == 5 || resuelta || mostrada));
     }
 }

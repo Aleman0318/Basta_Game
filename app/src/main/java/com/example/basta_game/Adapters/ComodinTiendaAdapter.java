@@ -28,14 +28,17 @@ public class ComodinTiendaAdapter extends RecyclerView.Adapter<ComodinTiendaAdap
     private List<ComodinTienda> listaComodines;
     private OnComprarClickListener listener;
     private Map<String, Integer> inventarioActual;
+    private final java.util.function.BooleanSupplier enCompra;
+    private int anchoMedido,altoUniforme;
 
     public interface OnComprarClickListener {
         void onComprarClick(ComodinTienda comodin);
     }
 
-    public ComodinTiendaAdapter(List<ComodinTienda> listaComodines, OnComprarClickListener listener) {
+    public ComodinTiendaAdapter(List<ComodinTienda> listaComodines, OnComprarClickListener listener, java.util.function.BooleanSupplier enCompra) {
         this.listaComodines = listaComodines;
         this.listener = listener;
+        this.enCompra=enCompra;
     }
 
     // EL SECRETO 2: La tarjeta avisa que solo va a cambiar "La cantidad"
@@ -47,7 +50,10 @@ public class ComodinTiendaAdapter extends RecyclerView.Adapter<ComodinTiendaAdap
     }
 
     public void setListaComodines(List<ComodinTienda> nuevaLista) {
+        if(this.listaComodines==nuevaLista) return;
         this.listaComodines = nuevaLista;
+        altoUniforme=0;
+        notifyDataSetChanged();
     }
 
     @NonNull
@@ -55,7 +61,31 @@ public class ComodinTiendaAdapter extends RecyclerView.Adapter<ComodinTiendaAdap
     public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         View view = LayoutInflater.from(parent.getContext())
                 .inflate(R.layout.item_comodin_tienda, parent, false);
+        float dp=parent.getResources().getDisplayMetrics().density;
+        int disponible=(parent.getWidth()>0 ? parent.getWidth() : parent.getResources().getDisplayMetrics().widthPixels)-Math.round(48*dp);
+        view.getLayoutParams().width=Math.min(parent.getResources().getDimensionPixelSize(R.dimen.ancho_producto),Math.max(1,disponible));
         return new ViewHolder(view);
+    }
+    private void ajustarAlturaUniforme(View view) {
+        int ancho=view.getLayoutParams().width;
+        if(altoUniforme>0 && ancho==anchoMedido) {view.getLayoutParams().height=altoUniforme;return;}
+        view.getLayoutParams().height=ViewGroup.LayoutParams.WRAP_CONTENT;
+        // Measure the entire lane at this width/font scale; long text grows every card equally.
+        int alto=0;
+        TextView nombre=view.findViewById(R.id.txtNombreComodinItem);
+        TextView descripcion=view.findViewById(R.id.txtDescripcionComodinItem);
+        TextView precio=view.findViewById(R.id.txtPrecioComodinItem);
+        TextView cantidad=view.findViewById(R.id.txtCantidadInventarioItem);
+        for(ComodinTienda comodin:listaComodines) {
+            nombre.setText(comodin.getNombre());descripcion.setText(comodin.getDescripcion());
+            precio.setText(String.valueOf(comodin.getPrecio()));
+            cantidad.setText("TIENES: "+(inventarioActual==null ? 0 : inventarioActual.getOrDefault(comodin.getId(),0)));
+            view.measure(View.MeasureSpec.makeMeasureSpec(view.getLayoutParams().width,View.MeasureSpec.EXACTLY),
+                    View.MeasureSpec.makeMeasureSpec(0,View.MeasureSpec.UNSPECIFIED));
+            alto=Math.max(alto,view.getMeasuredHeight());
+        }
+        altoUniforme=alto;anchoMedido=ancho;
+        if(alto>0) view.getLayoutParams().height=alto;
     }
 
     // NUEVO MÉTODO: Cambia únicamente el texto de "TIENES" y NADA MÁS.
@@ -68,6 +98,7 @@ public class ComodinTiendaAdapter extends RecyclerView.Adapter<ComodinTiendaAdap
                 cantidad = inventarioActual.get(comodin.getId());
             }
             holder.txtCantidad.setText("TIENES: " + cantidad);
+            estadoCompra(holder);
         } else {
             super.onBindViewHolder(holder, position, payloads);
         }
@@ -75,6 +106,7 @@ public class ComodinTiendaAdapter extends RecyclerView.Adapter<ComodinTiendaAdap
 
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
+        ajustarAlturaUniforme(holder.itemView);
         ComodinTienda comodin = listaComodines.get(position);
 
         holder.txtNombre.setText(comodin.getNombre());
@@ -155,12 +187,22 @@ public class ComodinTiendaAdapter extends RecyclerView.Adapter<ComodinTiendaAdap
             mostrarModalEstadisticas(v.getContext(), comodin, colorFondoLiviano, colorBorde);
         });
 
+        estadoCompra(holder);
         holder.btnComprar.setOnClickListener(v -> {
-            v.animate().scaleX(0.90f).scaleY(0.90f).setDuration(100).withEndAction(() -> {
-                v.animate().scaleX(1f).scaleY(1f).setDuration(250).setInterpolator(new OvershootInterpolator()).start();
-                if (listener != null) listener.onComprarClick(comodin);
-            }).start();
+            if(enCompra.getAsBoolean()) return;
+            if(listener!=null) listener.onComprarClick(comodin);
+            v.animate().scaleX(0.90f).scaleY(0.90f).setDuration(100).withEndAction(() ->
+                    v.animate().scaleX(1f).scaleY(1f).setDuration(250).setInterpolator(new OvershootInterpolator()).start()).start();
         });
+    }
+
+    private void estadoCompra(ViewHolder holder) {
+        boolean ocupado=enCompra.getAsBoolean();
+        com.example.basta_game.utils.CargaBoton.mostrar((TextView)holder.btnComprar.findViewById(R.id.txtComprarComodin),ocupado && com.example.basta_game.utils.ConexionJuego.disponible());
+        holder.btnComprar.setEnabled(!ocupado && com.example.basta_game.utils.ConexionJuego.disponible());
+        holder.btnComprar.setAlpha(ocupado ? 0.45f : 1f);
+        holder.btnComprar.setContentDescription(ocupado ? "Compra en curso" : "Comprar comodin");
+
     }
 
     private void mostrarModalEstadisticas(Context context, ComodinTienda comodin, String colorFondo, String colorTema) {
@@ -219,6 +261,7 @@ public class ComodinTiendaAdapter extends RecyclerView.Adapter<ComodinTiendaAdap
             }
         }
         dialog.show();
+        com.example.basta_game.utils.NotificationHelper.acompanar(dialog);
     }
 
     private int obtenerIconoRegla(String textoHTML) {

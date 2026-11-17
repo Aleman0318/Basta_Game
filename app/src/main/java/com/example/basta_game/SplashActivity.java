@@ -30,7 +30,9 @@ public class SplashActivity extends AppCompatActivity {
     public ImageView img_logo_splash;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        setTheme(R.style.Theme_Basta_Game);
         super.onCreate(savedInstanceState);
+        if(android.os.Build.VERSION.SDK_INT>=31) getSplashScreen().setOnExitAnimationListener(v -> v.remove());
         EdgeToEdge.enable(this);
         setContentView(R.layout.activity_splash);
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -> {

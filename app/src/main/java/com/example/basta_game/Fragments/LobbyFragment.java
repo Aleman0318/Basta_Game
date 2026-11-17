@@ -149,7 +149,7 @@ public class LobbyFragment extends Fragment {
         notificationLobby = view.findViewById(R.id.notificationLobby);
         txtCodigoSala = view.findViewById(R.id.tvidSalaLobby);
 
-        txtCodigoSala.setText(codigoSala);
+        com.example.basta_game.utils.InvitacionSala.configurar(view,codigoSala);
 
         Animations.animacionAparicion(btnComenzarPartidaVista);
         Animations.animacionAparicion(btnToggleListo);
@@ -229,10 +229,32 @@ public class LobbyFragment extends Fragment {
 
     public void actualizarAnfitrion(boolean actual) {
         esAnfitrion = actual;
+        if(getView()!=null) getView().findViewById(R.id.txtAyudaExpulsar).setVisibility(actual ? View.VISIBLE : View.GONE);
         if (bundleDatosPartida != null) bundleDatosPartida.putBoolean("ES_ANFITRION", actual);
         if (btnComenzarPartida != null) btnComenzarPartida.setVisibility(actual ? View.VISIBLE : View.GONE);
     }
 
+    private void confirmarExpulsion(String uid) {
+        if(!isAdded() || !esAnfitrion || !VerificacionesAuth.VerificarInicioSesion(auth)) return;
+        JugadorSala jugador=jugadoresMemoria.get(uid);
+        if(uid.equals(auth.getCurrentUser().getUid()) || jugador==null) return;
+        CustomDialogHelper.show(requireContext(),"Expulsar jugador","¿Expulsar a "+jugador.getNombre()+" de la sala?",true,
+                new CustomDialogHelper.DialogButton("Cancelar",Color.GRAY,Color.WHITE,true,null),
+                new CustomDialogHelper.DialogButton("Expulsar",Color.rgb(229,57,53),Color.WHITE,true,() -> {
+                    final String host=auth.getCurrentUser().getUid();
+                    final long conexion=com.example.basta_game.utils.ConexionJuego.version();
+        salaRef.runTransaction(new Transaction.Handler() {
+                        @Override public Transaction.Result doTransaction(MutableData sala) {
+                            if(!com.example.basta_game.utils.ConexionJuego.vigente(conexion)) return Transaction.abort();
+                            if(sala.getValue()==null) return Transaction.success(sala);
+                            return InicioPartida.expulsarEnEspera(sala,host,uid) ? Transaction.success(sala) : Transaction.abort();
+                        }
+                        @Override public void onComplete(DatabaseError error,boolean committed,DataSnapshot sala) {
+                            if(error!=null || !committed) NotificationHelper.showGlobal("No se pudo retirar: revisa tu rol y el estado de la sala",NotificationHelper.WARNING);
+                        }
+                    },false);
+                }));
+    }
     private void validarJugadoresEIniciarPartida() {
         if (!VerificacionesAuth.VerificarInicioSesion(auth)) {
             return;
@@ -260,16 +282,16 @@ public class LobbyFragment extends Fragment {
                     if (hijo.exists()) {
                         contadorJugadores++;
 
-                        if (player != null && player.isEstaListo()) {
+                        if (player != null && player.isEstaConectado() && player.isEstaListo()) {
                             contadorListos++;
                         }
                     }
                 }
 
-                if (contadorJugadores <= 0) {
+                if (contadorJugadores < 2) {
                     NotificationHelper.show(
                             notificationLobby,
-                            "No hay jugadores en la sala",
+                            "Se necesitan al menos dos jugadores conectados",
                             NotificationHelper.ERROR
                     );
                     Sounds.playNotificaciones();
@@ -279,7 +301,7 @@ public class LobbyFragment extends Fragment {
                 if (contadorListos < contadorJugadores) {
                     NotificationHelper.show(
                             notificationLobby,
-                            "Todos los jugadores deben estar listos",
+                            "Todos deben estar conectados y confirmar que estan listos",
                             NotificationHelper.ERROR
                     );
                     Sounds.playNotificaciones();
@@ -318,6 +340,7 @@ public class LobbyFragment extends Fragment {
         actualizaciones.put("estadoPartida", "En juego");
         actualizaciones.put("fase", "jugando");
         actualizaciones.put("rondaActual", 1);
+        actualizaciones.put("letrasPartida",com.example.basta_game.utils.LetraSala.nuevaPartida());
         actualizaciones.put("inicioRonda", ServerValue.TIMESTAMP);
         actualizaciones.put("inicioRondaDe", 1);
 
@@ -348,10 +371,12 @@ public class LobbyFragment extends Fragment {
         actualizaciones.put("historialGuardado", null);
         actualizaciones.put("cambioRondaTimestamp", ServerValue.TIMESTAMP);
 
+        final long conexion=com.example.basta_game.utils.ConexionJuego.version();
         salaRef.runTransaction(new Transaction.Handler() {
             @NonNull
             @Override
             public Transaction.Result doTransaction(@NonNull MutableData sala) {
+                if(!com.example.basta_game.utils.ConexionJuego.vigente(conexion)) return Transaction.abort();
                 // Una cache vacia debe contrastarse con el servidor, no crear una sala parcial.
                 if (sala.getValue() == null) return Transaction.success(sala);
                 return InicioPartida.aplicar(sala, idPartida, uidHost, actualizaciones)
@@ -378,13 +403,13 @@ public class LobbyFragment extends Fragment {
     private void cambiarEstadoListoJugador(boolean listo, AppCompatButton btnToggleListo) {
         if (!VerificacionesAuth.VerificarInicioSesion(auth) || salaRef == null) return;
         String uid = auth.getCurrentUser().getUid();
+        final long conexion=com.example.basta_game.utils.ConexionJuego.version();
         btnToggleListo.setEnabled(false);
-        salaRef.child("jugadores").child(uid).runTransaction(new Transaction.Handler() {
+        salaRef.runTransaction(new Transaction.Handler() {
             @NonNull @Override public Transaction.Result doTransaction(@NonNull MutableData jugador) {
-                if (jugador.getValue() == null) return Transaction.success(jugador);
-                // Never serialize a stale player: preserve identity, host and presence fields.
-                jugador.child("estaListo").setValue(listo);
-                return Transaction.success(jugador);
+                if(!com.example.basta_game.utils.ConexionJuego.vigente(conexion)) return Transaction.abort();
+                if(jugador.getValue()==null) return Transaction.success(jugador);
+                return InicioPartida.marcarListo(jugador,uid,listo) ? Transaction.success(jugador) : Transaction.abort();
             }
             @Override public void onComplete(DatabaseError error, boolean committed, DataSnapshot jugador) {
                 if (!isAdded() || getView() == null) return;
@@ -588,6 +613,7 @@ public class LobbyFragment extends Fragment {
                 for (DataSnapshot hijo : snapshot.getChildren()) {
                     JugadorSala jugador = hijo.getValue(JugadorSala.class);
                     if (jugador != null) {
+                        jugador.setUid(hijo.getKey());
                         jugadoresEnSala.add(jugador);
                         nuevosJugadores.put(hijo.getKey(), jugador);
                     }
@@ -608,7 +634,17 @@ public class LobbyFragment extends Fragment {
 
                 if (rvJugadoresLobby == null) return;
                 JugadorSalaAdapter adaptador = new JugadorSalaAdapter(jugadoresEnSala);
+                adaptador.configurarExpulsion(esAnfitrion, auth.getCurrentUser().getUid(), thisUid -> confirmarExpulsion(thisUid));
                 rvJugadoresLobby.setAdapter(adaptador);
+                if(getView()!=null) getView().findViewById(R.id.txtAyudaExpulsar).setVisibility(esAnfitrion ? View.VISIBLE : View.GONE);
+                DataSnapshot yo=snapshot.child(auth.getCurrentUser().getUid());
+                estoyListo=Boolean.TRUE.equals(yo.child("estaConectado").getValue()) && Boolean.TRUE.equals(yo.child("estaListo").getValue());
+                View vista=getView();
+                if(vista!=null) {
+                    AppCompatButton boton=vista.findViewById(R.id.btnToggleListo);
+                    boton.setText(estoyListo ? "NO ESTOY LISTO" : "ESTOY LISTO");
+                    boton.setBackgroundTintList(ColorStateList.valueOf(Color.parseColor(estoyListo ? "#888888" : "#4CAF50")));
+                }
             }
 
             @Override

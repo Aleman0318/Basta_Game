@@ -1,0 +1,28 @@
+﻿D/AuthFlujo(13678): Solicitando autenticación
+D/AuthFlujo(13678): Registro Auth finalizó: exito=true
+D/AuthFlujo(13678): Solicitando autenticación
+D/AuthFlujo(13678): Auth finalizó: exito=false
+D/AuthFlujo(13678): Solicitando autenticación
+D/AuthFlujo(13678): Auth finalizó: exito=true
+D/AuthFlujo(13678): Solicitando autenticación
+D/AuthFlujo(13678): Registro Auth finalizó: exito=false
+D/AuthFlujo(13910): Solicitando autenticación
+D/AuthFlujo(13910): Registro Auth finalizó: exito=true
+D/AuthFlujo(14142): Solicitando autenticación
+D/AuthFlujo(14142): Registro Auth finalizó: exito=true
+D/AuthFlujo(14379): Solicitando autenticación
+D/AuthFlujo(14379): Registro Auth finalizó: exito=true
+D/AuthFlujo(14379): Solicitando autenticación
+D/AuthFlujo(14379): Auth finalizó: exito=false
+D/AuthFlujo(14379): Solicitando autenticación
+D/AuthFlujo(14379): Auth finalizó: exito=true
+D/AuthFlujo(14379): Solicitando autenticación
+D/AuthFlujo(14379): Registro Auth finalizó: exito=false
+D/AuthFlujo(14595): Solicitando autenticación
+D/AuthFlujo(14595): Registro Auth finalizó: exito=true
+D/AuthFlujo(14595): Solicitando autenticación
+D/AuthFlujo(14595): Auth finalizó: exito=false
+D/AuthFlujo(14595): Solicitando autenticación
+D/AuthFlujo(14595): Auth finalizó: exito=true
+D/AuthFlujo(14595): Solicitando autenticación
+D/AuthFlujo(14595): Registro Auth finalizó: exito=false

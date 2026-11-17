@@ -85,7 +85,6 @@ public class PartidaFragment extends Fragment {
     private static final boolean USAR_API_VALIDACION = false;
 
     // En modo sin API, una respuesta debe tener mínimo 3 letras reales.
-    private static final int MIN_LETRAS_RESPUESTA_LOCAL = 3;
     private static final String NODO_USUARIOS = "usuarios";
     private static final String NODO_HISTORIAL_PARTIDAS = "historialPartidas";
 
@@ -138,15 +137,18 @@ public class PartidaFragment extends Fragment {
     private java.util.HashSet<String> comodinesUsadosEstaRonda = new java.util.HashSet<>();
 
     private AppCompatButton btnBasta;
+    private long inicioRespuestasActual;
+    private boolean solicitudBastaPendiente;
     private MaterialButton btnComodines;
 
-    private ScrollView scrollPartida;
+    private View scrollPartida;
     private RecyclerView rvJugadoresPartida;
     private RecyclerView rvCategoriasJuego;
 
     private ValueEventListener listenerMiRolHost;
     private DatabaseReference nodoMiJugadorPartidaRef;
     private boolean yaVolvioAlLobby = false;
+    private boolean avisoCierrePorAbandono;
 
     private HashMap<String, String> respuestasJugador = new HashMap<>();
 
@@ -209,6 +211,7 @@ public class PartidaFragment extends Fragment {
 
     private String idVotacionModalActual = null;
     private boolean resolviendoVotacion = false;
+    private com.example.basta_game.utils.CoordinadorRevision coordinadorRevision;
     private boolean hayVotacionActivaEnRevision = false;
     private int cantidadJugadoresEnSala = 0;
 
@@ -314,6 +317,7 @@ public class PartidaFragment extends Fragment {
         configurarBotones();
         ObtenerJugadoresYLlenarPartida(idSala);
         cambiarEstadoUsuarios();
+        escucharCierreRespuestas();
     }
 
     @Override public void onSaveInstanceState(@NonNull Bundle estado) {
@@ -351,6 +355,7 @@ public class PartidaFragment extends Fragment {
         btnAbandonar = view.findViewById(R.id.btnSalida);
         imgLetraActual = view.findViewById(R.id.imgLetraActual);
         btnBasta = view.findViewById(R.id.btnBasta);
+        androidx.core.widget.TextViewCompat.setAutoSizeTextTypeUniformWithConfiguration(btnBasta,12,26,1,android.util.TypedValue.COMPLEX_UNIT_SP);
         btnComodines = view.findViewById(R.id.btnComodines);
         scrollPartida = view.findViewById(R.id.scrollPartida);
         rvJugadoresPartida = view.findViewById(R.id.rvJugadoresPartida);
@@ -365,7 +370,7 @@ public class PartidaFragment extends Fragment {
     }
 
     private void cargarDatosIniciales() {
-        txtCodigoSala.setText(codigoSala);
+        com.example.basta_game.utils.InvitacionSala.colorear(txtCodigoSala,codigoSala);
         txtRondaActual.setText("Ronda " + rondaActual + "/" + rondasMaximas);
         txtTiempoRestante.setText(formatearTiempo(tiempoSeconds));
         mostrarLetra(letraElegida);
@@ -374,8 +379,7 @@ public class PartidaFragment extends Fragment {
                 new LinearLayoutManager(getContext(), LinearLayoutManager.HORIZONTAL, false)
         );
 
-        rvCategoriasJuego.setLayoutManager(new LinearLayoutManager(getContext()));
-        rvCategoriasJuego.setNestedScrollingEnabled(false);
+        CategoriaPartidaAdapter.configurarScrollInterno(rvCategoriasJuego);
 
         cargarCategoriasJuego();
     }
@@ -415,7 +419,7 @@ public class PartidaFragment extends Fragment {
         }
 
         btnBasta.setOnClickListener(v -> {
-            if (bastaActivado ||
+            if (!PlazoRonda.bastaDisponible(inicioRespuestasActual,finDelPlazo,com.example.basta_game.utils.ConexionJuego.ahoraServidor()) || bastaActivado ||
                     respuestasGuardadas ||
                     modalValidacionMostrado ||
                     cierreRondaSolicitado ||
@@ -432,62 +436,34 @@ public class PartidaFragment extends Fragment {
                 return;
             }
 
+            solicitudBastaPendiente=true;
             bloquearBotonBastaPorBasta();
 
-            DatabaseReference nodoBasta = FirebaseDatabase.getInstance()
-                    .getReference("salas")
-                    .child(idSala)
-                    .child("bastaPresionado");
-
-            nodoBasta.runTransaction(new Transaction.Handler() {
-                @NonNull
-                @Override
-                public Transaction.Result doTransaction(@NonNull MutableData currentData) {
-                    Boolean valorActual = currentData.getValue(Boolean.class);
-
-                    if (valorActual != null && valorActual) {
-                        return Transaction.abort();
-                    }
-
-                    currentData.setValue(true);
-                    return Transaction.success(currentData);
+            final String partida=idPartidaActual, uid=auth.getCurrentUser().getUid();
+            final int ronda=rondaActual;
+            FirebaseDatabase.getInstance().getReference(".info/serverTimeOffset").addListenerForSingleValueEvent(new ValueEventListener() {
+                @Override public void onDataChange(DataSnapshot offset) {
+                    if(!(offset.getValue() instanceof Number)) {solicitudBastaPendiente=false;desbloquearBotonBastaSiCorresponde();return;}
+                    final long desfase=((Number)offset.getValue()).longValue();
+                    salaRef.runTransaction(new Transaction.Handler() {
+                        @Override public Transaction.Result doTransaction(MutableData sala) {
+                            if(sala.getValue()==null) return Transaction.success(sala);
+                            return PlazoRonda.aceptarBasta(sala,partida,ronda,uid,System.currentTimeMillis()+desfase)
+                                    ? Transaction.success(sala) : Transaction.abort();
+                        }
+                        @Override public void onComplete(DatabaseError error,boolean committed,DataSnapshot sala) {
+                            solicitudBastaPendiente=false;
+                            if(!isAdded() || getView()==null) return;
+                            if(error!=null) NotificationHelper.show(notificationPartida,"No se pudo confirmar BASTA. Reintenta al conectar",NotificationHelper.WARNING);
+                            if(committed && sala!=null && Boolean.TRUE.equals(sala.child("bastaPresionado").getValue())) {
+                                bastaActivado=true;bloquearBotonBastaPorBasta();setearCronometroGlobal();
+                            } else desbloquearBotonBastaSiCorresponde();
+                        }
+                    },false);
                 }
-
-                @Override
-                public void onComplete(DatabaseError error, boolean committed, DataSnapshot currentData) {
-                    if (error != null) {
-                        Log.d("BASTA", "Error en transaction: " + error.getMessage());
-                        desbloquearBotonBastaSiCorresponde();
-                        return;
-                    }
-
-                    if (committed) {
-                        bastaActivado = true;
-                        bloquearBotonBastaPorBasta();
-
-                        DatabaseReference nodoSala = FirebaseDatabase.getInstance()
-                                .getReference("salas")
-                                .child(idSala);
-
-                        Map<String, Object> datosBasta = new HashMap<>();
-                        datosBasta.put("bastaPresionadoPor", auth.getCurrentUser().getUid());
-                        datosBasta.put("bastaTimeStamp", ServerValue.TIMESTAMP);
-
-                        nodoSala.updateChildren(datosBasta).addOnCompleteListener(task -> {
-                            if (task.isSuccessful()) {
-                                Log.d("BASTA", "BASTA activado correctamente");
-                            } else {
-                                Log.d("BASTA", "Error guardando datos de BASTA");
-                            }
-                        });
-                    } else {
-                        Log.d("BASTA", "Otro jugador ya presionó BASTA primero");
-                        desbloquearBotonBastaSiCorresponde();
-                    }
-                }
+                @Override public void onCancelled(DatabaseError e) {solicitudBastaPendiente=false;desbloquearBotonBastaSiCorresponde();}
             });
         });
-
         btnAbandonar.setOnClickListener(view -> {
             CustomDialogHelper.show(
                     requireContext(),
@@ -517,13 +493,20 @@ public class PartidaFragment extends Fragment {
             return;
         }
 
-        String miUid = auth.getCurrentUser().getUid();
-
-        HashMap<String, Object> datosEntrada = new HashMap<>();
-        datosEntrada.put("entradaPartida/ronda_" + rondaActual + "/" + miUid + "/dentro", true);
-        datosEntrada.put("entradaPartida/ronda_" + rondaActual + "/" + miUid + "/timestamp", ServerValue.TIMESTAMP);
-
-        salaRef.updateChildren(datosEntrada);
+        final String miUid=auth.getCurrentUser().getUid(),partida=idPartidaActual;
+        final int ronda=rondaActual;
+        final long conexion=com.example.basta_game.utils.ConexionJuego.version();
+        final SalaActivity actividad=(SalaActivity)requireActivity();
+        salaRef.runTransaction(new Transaction.Handler() {
+            @Override public Transaction.Result doTransaction(MutableData datos) {
+                if(actividad.haSalidoDeSala() || !com.example.basta_game.utils.ConexionJuego.vigente(conexion)) return Transaction.abort();
+                if(datos.getValue()==null) return Transaction.success(datos);
+                return InicioPartida.registrarEntrada(datos,partida,ronda,miUid) ? Transaction.success(datos) : Transaction.abort();
+            }
+            @Override public void onComplete(DatabaseError error,boolean ok,DataSnapshot datos) {
+                if(error!=null) Log.w("ENTRADA_PARTIDA","No se pudo confirmar la entrada",error.toException());
+            }
+        },false);
     }
 
     private void bloquearBotonBastaPorBasta() {
@@ -534,7 +517,8 @@ public class PartidaFragment extends Fragment {
         btnBasta.setEnabled(false);
         btnBasta.setClickable(false);
         btnBasta.setAlpha(0.45f);
-        btnBasta.setText("FINALIZANDO...");
+        btnBasta.setText("FINALIZANDO");
+        btnBasta.setTextSize(17);
     }
 
     private void desbloquearBotonBastaSiCorresponde() {
@@ -542,14 +526,16 @@ public class PartidaFragment extends Fragment {
             return;
         }
 
-        if (bastaActivado || bastaBloqueadoPorComodin || respuestasGuardadas || modalValidacionMostrado || cierreRondaSolicitado) {
+        if (solicitudBastaPendiente || bastaActivado || bastaBloqueadoPorComodin || respuestasGuardadas || modalValidacionMostrado || cierreRondaSolicitado) {
             return;
         }
 
-        btnBasta.setEnabled(true);
-        btnBasta.setClickable(true);
-        btnBasta.setAlpha(1f);
-        btnBasta.setText("¡BASTA!");
+        boolean habilitado=PlazoRonda.bastaDisponible(inicioRespuestasActual,finDelPlazo,com.example.basta_game.utils.ConexionJuego.ahoraServidor());
+        if(btnBasta.isEnabled()==habilitado && "¡BASTA!".contentEquals(btnBasta.getText()))return;
+        btnBasta.setEnabled(habilitado);
+        btnBasta.setClickable(habilitado);
+        btnBasta.setAlpha(habilitado ? 1f : 0.45f);
+        btnBasta.setText("¡BASTA!");btnBasta.setTextSize(26);
     }
 
     private void resetearEstadosParaPartidaActiva() {
@@ -840,7 +826,7 @@ public class PartidaFragment extends Fragment {
             letra = "A";
         }
 
-        txtInstruccionLetra.setText("Escribe respuestas que empiecen con la letra " + letra);
+        txtInstruccionLetra.setText("Empieza con " + letra);
 
         String nombreDrawable = "letra_" + letra.toLowerCase(Locale.ROOT);
         int idDrawable = getResources().getIdentifier(
@@ -849,6 +835,9 @@ public class PartidaFragment extends Fragment {
                 requireContext().getPackageName()
         );
 
+        TextView sinRecurso=getView().findViewById(R.id.txtLetraSinRecurso);
+        sinRecurso.setText(letra);sinRecurso.setVisibility(idDrawable==0 ? View.VISIBLE : View.GONE);
+        imgLetraActual.setVisibility(idDrawable==0 ? View.GONE : View.VISIBLE);
         if (idDrawable != 0) {
             imgLetraActual.setImageResource(idDrawable);
         }
@@ -871,7 +860,13 @@ public class PartidaFragment extends Fragment {
             default: return R.drawable.perfil_menuu;
         }
     }
-    public void setearCronometroGlobal() {
+    public void recuperarEstadoConectado() {
+        if(!isAdded() || getView()==null || yaVolvioAlLobby) return;
+        if(coordinadorRevision!=null) coordinadorRevision.actualizar();
+        if(!modalValidacionMostrado && dialogPuntuacionesActual==null && dialogResumenActual==null) {
+            respuestasGuardadas=false;setearCronometroGlobal();
+        }
+    }    public void setearCronometroGlobal() {
         if (salaRef == null || !isAdded() || getView() == null) {
             return;
         }
@@ -972,7 +967,9 @@ public class PartidaFragment extends Fragment {
 
                 final int rondaDelCronometro = rondaFirebase;
                 final int duracionRonda = tiempoSeconds;
+                final long inicioRespuestas=PlazoRonda.inicioRespuestas(inicioRonda,rondaFirebase,leerLong(snapshotSala.child("preparacionInicialMs"),0));
 
+                inicioRespuestasActual=inicioRespuestas;
                 FirebaseDatabase.getInstance()
                         .getReference(".info/serverTimeOffset")
                         .addListenerForSingleValueEvent(new ValueEventListener() {
@@ -989,16 +986,16 @@ public class PartidaFragment extends Fragment {
                                 }
 
                                 Long bastaTimestamp = snapshotSala.child("bastaTimeStamp").getValue(Long.class);
-                                long fin = PlazoRonda.calcularFin(inicioRonda, duracionRonda, bastaTimestamp);
-                                iniciarCronometro(fin, rondaDelCronometro, offset);
+                                long fin = PlazoRonda.calcularFin(inicioRespuestas, duracionRonda, bastaTimestamp);
+                                iniciarCronometro(fin, rondaDelCronometro, offset,bastaTimestamp);
                             }
 
                             @Override
                             public void onCancelled(@NonNull DatabaseError error) {
                                 Log.d("TIEMPO", "No se pudo leer offset. Conservando plazo con hora local.");
                                 Long bastaTimestamp = snapshotSala.child("bastaTimeStamp").getValue(Long.class);
-                                iniciarCronometro(PlazoRonda.calcularFin(inicioRonda, duracionRonda, bastaTimestamp),
-                                        rondaDelCronometro, 0L);
+                                iniciarCronometro(PlazoRonda.calcularFin(inicioRespuestas, duracionRonda, bastaTimestamp),
+                                        rondaDelCronometro, 0L,bastaTimestamp);
                             }
                         });
             }
@@ -1011,91 +1008,18 @@ public class PartidaFragment extends Fragment {
     }
 
     private void prepararInicioRondaSiHaceFalta(int rondaParaIniciar) {
-        if (salaRef == null || rondaParaIniciar <= 0) {
-            return;
-        }
-
-        if (!esAnfitrion) {
-            return;
-        }
-
-        salaRef.addListenerForSingleValueEvent(new ValueEventListener() {
-            @Override
-            public void onDataChange(@NonNull DataSnapshot snapshotSala) {
-                if (!esAnfitrion || !isAdded() || yaVolvioAlLobby ||
-                        !auth.getCurrentUser().getUid().equals(snapshotSala.child("hostUID").getValue(String.class))) {
-                    return;
-                }
-
-                int inicioRondaListoDe = leerEntero(snapshotSala.child("inicioRondaListoDe"), -1);
-
-                if (inicioRondaListoDe == rondaParaIniciar) {
-                    return;
-                }
-
-                long cantidadJugadores = snapshotSala.child("jugadores").getChildrenCount();
-                long jugadoresDentro = snapshotSala
-                        .child("entradaPartida")
-                        .child("ronda_" + rondaParaIniciar)
-                        .getChildrenCount();
-
-                long esperaDesde = leerLong(
-                        snapshotSala
-                                .child("esperaInicioRonda")
-                                .child("ronda_" + rondaParaIniciar)
-                                .child("desde"),
-                        0L
-                );
-
-                long ahora = System.currentTimeMillis();
-
-                if (esperaDesde <= 0) {
-                    HashMap<String, Object> espera = new HashMap<>();
-                    espera.put("esperaInicioRonda/ronda_" + rondaParaIniciar + "/desde", ServerValue.TIMESTAMP);
-                    espera.put("esperaInicioRonda/ronda_" + rondaParaIniciar + "/jugadoresEsperados", cantidadJugadores);
-                    espera.put("esperaInicioRonda/ronda_" + rondaParaIniciar + "/jugadoresDentro", jugadoresDentro);
-
-                    salaRef.updateChildren(espera);
-                    return;
-                }
-
-                boolean todosEntraron = cantidadJugadores > 0 && jugadoresDentro >= cantidadJugadores;
-                boolean esperaAgotada = (ahora - esperaDesde) >= ESPERA_MAXIMA_INICIO_RONDA_MS;
-
-                if (!todosEntraron && !esperaAgotada) {
-                    HashMap<String, Object> progreso = new HashMap<>();
-                    progreso.put("esperaInicioRonda/ronda_" + rondaParaIniciar + "/jugadoresEsperados", cantidadJugadores);
-                    progreso.put("esperaInicioRonda/ronda_" + rondaParaIniciar + "/jugadoresDentro", jugadoresDentro);
-                    salaRef.updateChildren(progreso);
-                    return;
-                }
-
-                HashMap<String, Object> actualizaciones = new HashMap<>();
-
-                actualizaciones.put("estadoPartida", "En juego");
-                actualizaciones.put("fase", "jugando");
-                actualizaciones.put("rondaActual", rondaParaIniciar);
-                actualizaciones.put("inicioRonda", ServerValue.TIMESTAMP);
-                actualizaciones.put("inicioRondaDe", rondaParaIniciar);
-                actualizaciones.put("inicioRondaListoDe", rondaParaIniciar);
-                actualizaciones.put("bastaPresionado", false);
-                actualizaciones.put("bastaPresionadoPor", null);
-                actualizaciones.put("bastaTimeStamp", null);
-                actualizaciones.put("cambioRondaTimestamp", ServerValue.TIMESTAMP);
-                actualizaciones.put("esperaInicioRonda/ronda_" + rondaParaIniciar + "/iniciada", true);
-
-                salaRef.updateChildren(actualizaciones).addOnCompleteListener(task -> {
-                    if (task.isSuccessful()) {
-                        Log.d("TIEMPO", "Host confirmó inicio exacto para ronda " + rondaParaIniciar);
-                    } else {
-                        Log.d("TIEMPO", "No se pudo confirmar inicio de ronda");
-                    }
-                });
+        if(salaRef==null || !VerificacionesAuth.VerificarInicioSesion(auth)) return;
+        final String uid=auth.getCurrentUser().getUid(), partida=idPartidaActual;
+        salaRef.runTransaction(new Transaction.Handler() {
+            @Override public Transaction.Result doTransaction(MutableData datos) {
+                if(datos.getValue()==null) return Transaction.success(datos);
+                return InicioPartida.confirmarInicio(datos,partida,rondaParaIniciar,uid)
+                        ? Transaction.success(datos) : Transaction.abort();
             }
-
-            @Override
-            public void onCancelled(@NonNull DatabaseError error) { }
-        });
+            @Override public void onComplete(DatabaseError e,boolean committed,DataSnapshot datos) {
+                if(e!=null) Log.w("TIEMPO","No se pudo confirmar el plazo compartido",e.toException());
+            }
+        },false);
     }
 
     private void reintentarCronometro(int rondaEsperada) {
@@ -1114,16 +1038,18 @@ public class PartidaFragment extends Fragment {
 
     private int rondaDelPlazo = -1;
     private long finDelPlazo;
+    private Long marcaBastaDelPlazo;
 
-    private void iniciarCronometro(long finCompartido, int rondaDelCronometro, long offsetServidor) {
+    private void iniciarCronometro(long finCompartido, int rondaDelCronometro, long offsetServidor,Long marcaBasta) {
         if (!rondaSigueSiendoActual(rondaDelCronometro) || getView() == null || yaVolvioAlLobby || respuestasGuardadas) {
             return;
         }
 
         // Una lectura anterior a BASTA nunca debe alargar el plazo ya recibido.
         if (rondaDelPlazo == rondaDelCronometro) {
-            finCompartido = Math.min(finCompartido, finDelPlazo);
+            if(!PlazoRonda.lecturaAplicable(marcaBastaDelPlazo,marcaBasta)) return;
         }
+        marcaBastaDelPlazo=marcaBasta;
         rondaDelPlazo = rondaDelCronometro;
         finDelPlazo = finCompartido;
         final long finRealPartida = finCompartido;
@@ -1146,6 +1072,7 @@ public class PartidaFragment extends Fragment {
                 if (!rondaSigueSiendoActual(rondaDelCronometro) || getView() == null || yaVolvioAlLobby ||
                         versionActual != versionCronometro) return;
 
+                desbloquearBotonBastaSiCorresponde();
                 long restanteMs = PlazoRonda.restante(finRealPartida, System.currentTimeMillis(), offsetServidor);
                 if (restanteMs <= 0) {
                     txtTiempoRestante.setText("00:00");
@@ -1169,6 +1096,12 @@ public class PartidaFragment extends Fragment {
 
     @Override
     public void onDestroyView() {
+        handlerCierreRespuestas.removeCallbacksAndMessages(null);
+        if (listenerCierreRespuestas != null) salaRef.removeEventListener(listenerCierreRespuestas);
+        listenerCierreRespuestas = null;
+        estadoCierreRespuestas = null;
+        if(dialogRuletaActual!=null){dialogRuletaActual.dismiss();dialogRuletaActual=null;}
+        handlerAnuncio.removeCallbacksAndMessages(null);
         if (dialogResumenActual != null) { dialogResumenActual.dismiss(); dialogResumenActual = null; }
         super.onDestroyView();
         versionCronometro++;
@@ -1328,23 +1261,11 @@ public class PartidaFragment extends Fragment {
 
 
     private void cambiarEstadoUsuarios() {
-        if (VerificacionesAuth.VerificarInicioSesion(auth)) {
-            DatabaseReference nodoEstadoUsuario = FirebaseDatabase.getInstance()
-                    .getReference("salas")
-                    .child(idSala)
-                    .child("jugadores")
-                    .child(auth.getCurrentUser().getUid())
-                    .child("estaListo");
-
-            nodoEstadoUsuario.setValue(false).addOnCompleteListener(task -> {
-                if (task.isSuccessful()) {
-                    Log.d("CAMBIAR", "ESTADO DE USUARIO CAMBIADO A DESACTIVADO");
-                }
-            });
-        }
+        marcarEntradaPartidaActual();
     }
 
     private void guardarRespuestasJugador() {
+        if(!com.example.basta_game.utils.ConexionJuego.disponible()) return;
         if (!esFaseJugando()) {
             Log.d("RESPUESTAS", "No se guardan respuestas porque la fase actual no es jugando: " + faseActual);
             return;
@@ -1384,17 +1305,20 @@ public class PartidaFragment extends Fragment {
                 .child("ronda_" + rondaGuardada)
                 .child(uid);
 
-        nodoRespuestaJugador.setValue(respuestasFinales).addOnCompleteListener(task -> {
-            if (task.isSuccessful()) {
-                Log.d("RESPUESTAS", "Respuestas guardadas correctamente en ronda " + rondaGuardada);
-                esperarRespuestasYMostrarModal(rondaGuardada);
-            } else {
-                Log.d("RESPUESTAS", "Error al guardar respuestas");
-                respuestasGuardadas = false;
+        final String partida=idPartidaActual;final long conexion=com.example.basta_game.utils.ConexionJuego.version();
+        salaRef.runTransaction(new Transaction.Handler() {
+            @Override public Transaction.Result doTransaction(MutableData s) {
+                if(!com.example.basta_game.utils.ConexionJuego.vigente(conexion)) return Transaction.abort();
+                if(s.getValue()==null) return Transaction.success(s);
+                return InicioPartida.enviarRespuestas(s,partida,rondaGuardada,uid,respuestasFinales) ? Transaction.success(s) : Transaction.abort();
             }
-        });
+            @Override public void onComplete(DatabaseError e,boolean ok,DataSnapshot s) {
+                if(!isAdded() || !rondaSigueSiendoActual(rondaGuardada)) return;
+                if(e==null) handlerCierreRespuestas.post(reintentarCierreRespuestas);
+                else respuestasGuardadas=false;
+            }
+        },false);
     }
-
     private void validarRespuestasConApi(
             Map<String, List<RespuestaValidacion>> respuestasPorCategoria,
             int rondaDeEstaRevision
@@ -1580,15 +1504,19 @@ public class PartidaFragment extends Fragment {
             validacionesJugador.put(categoriaOriginal, datosCat);
         }
 
-        salaRef.child("validaciones")
-                .child("ronda_" + rondaDeEstaRevision)
-                .child(auth.getCurrentUser().getUid())
-                .setValue(validacionesJugador)
-                .addOnCompleteListener(task -> {
-                    if (task.isSuccessful()) {
-                        Log.d("VALIDACION", "Validaciones guardadas en ronda " + rondaDeEstaRevision);
-                    }
-                });
+        final String partida = idPartidaActual;
+        final String uid = auth.getCurrentUser().getUid();
+        salaRef.runTransaction(new Transaction.Handler() {
+            @Override public Transaction.Result doTransaction(MutableData datos) {
+                if(datos.getValue()==null) return Transaction.success(datos);
+                return com.example.basta_game.utils.RelojRevision.guardarIniciales(
+                        datos,partida,rondaDeEstaRevision,uid,validacionesJugador)
+                        ? Transaction.success(datos) : Transaction.abort();
+            }
+            @Override public void onComplete(DatabaseError error,boolean committed,DataSnapshot datos) {
+                if(error!=null) Log.w("VALIDACION","No se guardaron validaciones iniciales",error.toException());
+            }
+        },false);
     }
 
     private int contarRepeticionesRespuesta(
@@ -1615,44 +1543,7 @@ public class PartidaFragment extends Fragment {
     }
 
     private boolean validarRespuestaLocalmente(String letra, String respuesta) {
-        if (respuesta == null || respuesta.trim().isEmpty()) {
-            return false;
-        }
-
-        if (respuesta.trim().equalsIgnoreCase("Sin respuesta")) {
-            return false;
-        }
-
-        String letraNormalizada = normalizarTextoBasico(letra);
-        String respuestaNormalizada = normalizarTextoBasico(respuesta);
-
-        if (letraNormalizada.isEmpty() || respuestaNormalizada.isEmpty()) {
-            return false;
-        }
-
-        int cantidadLetras = contarLetrasRespuesta(respuestaNormalizada);
-
-        if (cantidadLetras < MIN_LETRAS_RESPUESTA_LOCAL) {
-            return false;
-        }
-
-        return respuestaNormalizada.startsWith(letraNormalizada.substring(0, 1));
-    }
-
-    private int contarLetrasRespuesta(String texto) {
-        if (texto == null) {
-            return 0;
-        }
-
-        int contador = 0;
-
-        for (int i = 0; i < texto.length(); i++) {
-            if (Character.isLetter(texto.charAt(i))) {
-                contador++;
-            }
-        }
-
-        return contador;
+        return com.example.basta_game.utils.ValidacionBasica.correcta(letra,respuesta);
     }
 
     private boolean votacionesLimitadas() {
@@ -1710,51 +1601,79 @@ public class PartidaFragment extends Fragment {
     }
 
 
-    private void esperarRespuestasYMostrarModal(int rondaDeEstaRevision) {
-        nodoRespuestasRondaRef = salaRef
-                .child("respuestas")
-                .child("ronda_" + rondaDeEstaRevision);
+    private final Handler handlerCierreRespuestas = new Handler(Looper.getMainLooper());
+    private final Runnable reintentarCierreRespuestas = this::recuperarCierreRespuestas;
+    private ValueEventListener listenerCierreRespuestas;
+    private DataSnapshot estadoCierreRespuestas;
+    private boolean publicandoCierreRespuestas;
 
-        new Handler(Looper.getMainLooper()).postDelayed(() -> {
-            if (!rondaSigueSiendoActual(rondaDeEstaRevision)) {
-                return;
+    private void escucharCierreRespuestas() {
+        listenerCierreRespuestas = salaRef.addValueEventListener(new ValueEventListener() {
+            @Override public void onDataChange(@NonNull DataSnapshot sala) {
+                estadoCierreRespuestas = sala;
+                handlerCierreRespuestas.removeCallbacks(reintentarCierreRespuestas);
+                handlerCierreRespuestas.post(reintentarCierreRespuestas);
             }
-
-            if (!modalValidacionMostrado && isAdded() && esFaseJugando()) {
-                Log.d("VALIDACION", "Forzando apertura del modal por Timeout de jugadores lentos");
-                modalValidacionMostrado = true;
-                cargarRespuestasValidacionYMostrarModal(rondaDeEstaRevision);
+            @Override public void onCancelled(@NonNull DatabaseError error) {
+                estadoCierreRespuestas = null;
+                Log.w("CIERRE_RESPUESTAS", "No se pudo observar el cierre compartido", error.toException());
             }
-        }, 5000);
-
-        listenerRespuestasValidacion = nodoRespuestasRondaRef.addValueEventListener(new ValueEventListener() {
-            @Override
-            public void onDataChange(@NonNull DataSnapshot snapshotRespuestas) {
-                if (!rondaSigueSiendoActual(rondaDeEstaRevision)) {
-                    return;
-                }
-
-                long cantidadRespuestas = snapshotRespuestas.getChildrenCount();
-                int jugadoresEsperados = Math.max(cantidadJugadoresEnSala, 1);
-
-                if (cantidadRespuestas >= jugadoresEsperados) {
-                    if (modalValidacionMostrado) {
-                        return;
-                    }
-
-                    modalValidacionMostrado = true;
-
-                    if (!isAdded()) {
-                        return;
-                    }
-
-                    cargarRespuestasValidacionYMostrarModal(rondaDeEstaRevision);
-                }
-            }
-
-            @Override
-            public void onCancelled(@NonNull DatabaseError error) { }
         });
+    }
+
+    private void recuperarCierreRespuestas() {
+        handlerCierreRespuestas.removeCallbacks(reintentarCierreRespuestas);
+        DataSnapshot sala = estadoCierreRespuestas;
+        if (!isAdded() || getView() == null || requireActivity().isFinishing() ||
+                ((SalaActivity)requireActivity()).haSalidoDeSala() || yaVolvioAlLobby || sala == null || auth.getCurrentUser() == null ||
+                idPartidaActual == null || !idPartidaActual.equals(sala.child("idPartida").getValue(String.class)) ||
+                leerEntero(sala.child("rondaActual"), -1) != rondaActual ||
+                !"jugando".equals(sala.child("fase").getValue(String.class))) return;
+        // Replay the durable acknowledgement, independent of this client's answer callback.
+        if (sala.child(com.example.basta_game.utils.RelojRevision.ruta(rondaActual) + "/reloj").exists()) {
+            respuestasGuardadas = true;
+            btnBasta.setEnabled(false);
+            versionCronometro++;
+            if (!modalValidacionMostrado) {
+                modalValidacionMostrado = true;
+                cargarRespuestasValidacionYMostrarModal(rondaActual);
+            }
+            if (dialogValidacionActual == null) handlerCierreRespuestas.postDelayed(reintentarCierreRespuestas, 1000);
+            return;
+        }
+        Long inicio = sala.child("inicioRonda").getValue(Long.class);
+        if (inicio == null || !com.example.basta_game.utils.ConexionJuego.disponible()) {
+            handlerCierreRespuestas.postDelayed(reintentarCierreRespuestas, 1000);
+            return;
+        }
+        long preparacion = com.example.basta_game.utils.RelojRevision.numero(sala.child("preparacionInicialMs").getValue(), 0);
+        long fin = PlazoRonda.calcularFin(PlazoRonda.inicioRespuestas(inicio, rondaActual, preparacion),
+                leerEntero(sala.child("tiempoRonda"), tiempoSeconds), sala.child("bastaTimeStamp").getValue(Long.class));
+        long ahora = com.example.basta_game.utils.ConexionJuego.ahoraServidor();
+        handlerCierreRespuestas.postDelayed(reintentarCierreRespuestas, Math.max(500, fin - ahora));
+        if (ahora < fin) return;
+        guardarRespuestasJugador();
+        if (publicandoCierreRespuestas) return;
+        publicandoCierreRespuestas = true;
+        final String partida = idPartidaActual, uid = auth.getCurrentUser().getUid();
+        final int ronda = rondaActual;
+        final long conexion = com.example.basta_game.utils.ConexionJuego.version();
+        salaRef.runTransaction(new Transaction.Handler() {
+            @Override public Transaction.Result doTransaction(MutableData datos) {
+                if (!com.example.basta_game.utils.ConexionJuego.vigente(conexion)) return Transaction.abort();
+                if (datos.getValue() == null) return Transaction.success(datos);
+                return com.example.basta_game.utils.CierreRespuestas.aplicar(datos, partida, ronda, uid,
+                        com.example.basta_game.utils.ConexionJuego.ahoraServidor()) ? Transaction.success(datos) : Transaction.abort();
+            }
+            @Override public void onComplete(DatabaseError error, boolean committed, DataSnapshot datos) {
+                publicandoCierreRespuestas = false;
+                if (error != null) {
+                    Log.w("CIERRE_RESPUESTAS", "Cierre pendiente de sincronizacion", error.toException());
+                    handlerCierreRespuestas.removeCallbacks(reintentarCierreRespuestas);
+                    if (isAdded() && getView() != null) handlerCierreRespuestas.postDelayed(reintentarCierreRespuestas, 3000);
+                }
+            }
+        }, false);
     }
 
 
@@ -1783,6 +1702,7 @@ public class PartidaFragment extends Fragment {
 
                                 if (listaNombresCategorias == null || listaNombresCategorias.isEmpty()) {
                                     Log.d("VALIDACION", "No hay categorías para validar");
+                                    reintentarAperturaRevision();
                                     return;
                                 }
 
@@ -1849,13 +1769,19 @@ public class PartidaFragment extends Fragment {
                             @Override
                             public void onCancelled(@NonNull DatabaseError error) {
                                 Log.d("VALIDACION", "Error cargando respuestas: " + error.getMessage());
+                                reintentarAperturaRevision();
                             }
                         });
             }
 
             @Override
-            public void onCancelled(@NonNull DatabaseError error) { }
+            public void onCancelled(@NonNull DatabaseError error) { reintentarAperturaRevision(); }
         });
+    }
+    private void reintentarAperturaRevision() {
+        modalValidacionMostrado=false;
+        handlerCierreRespuestas.removeCallbacks(reintentarCierreRespuestas);
+        if(isAdded() && getView()!=null) handlerCierreRespuestas.postDelayed(reintentarCierreRespuestas,3000);
     }
     private void escucharBastaParaCronometro() {
         if (salaRef == null) {
@@ -2046,7 +1972,7 @@ public class PartidaFragment extends Fragment {
 
         RecyclerView rvComodines = vista.findViewById(R.id.rvComodinesPartida);
         TextView txtComodinesVacios = vista.findViewById(R.id.txtComodinesVaciosPartida);
-        MaterialButton btnCerrar = vista.findViewById(R.id.btnCerrarComodinesPartida);
+        View btnCerrar = vista.findViewById(R.id.btnCerrarComodinesPartida);
 
         List<ComodinPartida> comodinesInventario = new ArrayList<>();
 
@@ -2061,7 +1987,7 @@ public class PartidaFragment extends Fragment {
         rvComodines.setLayoutManager(new LinearLayoutManager(requireContext()));
         rvComodines.setAdapter(adapterComodines);
 
-        txtComodinesVacios.setVisibility(View.VISIBLE);
+        vista.findViewById(R.id.estadoVacioComodines).setVisibility(View.VISIBLE);
         txtComodinesVacios.setText("Cargando tus comodines...");
 
         btnCerrar.setOnClickListener(v -> dialog.dismiss());
@@ -2106,20 +2032,20 @@ public class PartidaFragment extends Fragment {
                         adapterComodines.notifyDataSetChanged();
 
                         if (comodinesInventario.isEmpty()) {
-                            txtComodinesVacios.setVisibility(View.VISIBLE);
+                            vista.findViewById(R.id.estadoVacioComodines).setVisibility(View.VISIBLE);
                             if (esFaseFinal) {
-                                txtComodinesVacios.setText("No tienes comodines de fase final en tu inventario.");
+                                txtComodinesVacios.setText("¡Tu mochila está vacía! Consigue comodines en la tienda.");
                             } else {
-                                txtComodinesVacios.setText("No tienes comodines de juego en tu inventario.");
+                                txtComodinesVacios.setText("¡Tu mochila está vacía! Consigue comodines en la tienda.");
                             }
                         } else {
-                            txtComodinesVacios.setVisibility(View.GONE);
+                            vista.findViewById(R.id.estadoVacioComodines).setVisibility(View.GONE);
                         }
                     }
 
                     @Override
                     public void onCancelled(@NonNull DatabaseError error) {
-                        txtComodinesVacios.setVisibility(View.VISIBLE);
+                        vista.findViewById(R.id.estadoVacioComodines).setVisibility(View.VISIBLE);
                         txtComodinesVacios.setText("No se pudo cargar tu inventario.");
 
                         NotificationHelper.show(
@@ -2137,6 +2063,7 @@ public class PartidaFragment extends Fragment {
         });
 
         dialog.show();
+        com.example.basta_game.utils.NotificationHelper.acompanar(dialog);
 
         if (dialog.getWindow() != null) {
             dialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
@@ -2322,6 +2249,7 @@ public class PartidaFragment extends Fragment {
         }
 
         dialogAlerta.show();
+        com.example.basta_game.utils.NotificationHelper.acompanar(dialogAlerta);
         Sounds.playNotificaciones();
     }
 
@@ -2380,6 +2308,7 @@ public class PartidaFragment extends Fragment {
                 rvVictimas.setAdapter(adapter);
 
                 dialogVictima.show();
+        com.example.basta_game.utils.NotificationHelper.acompanar(dialogVictima);
                 if (dialogVictima.getWindow() != null) {
                     dialogVictima.getWindow().setBackgroundDrawable(new android.graphics.drawable.ColorDrawable(Color.TRANSPARENT));
                     dialogVictima.getWindow().setLayout(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
@@ -2501,6 +2430,7 @@ public class PartidaFragment extends Fragment {
                     if (isAdded() && getView() != null) mostrarModalPuntuaciones(rondaCerrada, esFinal);
                 });
                 dialog.show();
+        com.example.basta_game.utils.NotificationHelper.acompanar(dialog);
                 if (dialog.getWindow() != null) {
                     dialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
                     dialog.getWindow().setLayout(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT);
@@ -2663,6 +2593,7 @@ public class PartidaFragment extends Fragment {
                     return;
                 }
 
+                
                 FirebaseDatabase.getInstance()
                         .getReference(".info/serverTimeOffset")
                         .addListenerForSingleValueEvent(new ValueEventListener() {
@@ -2708,6 +2639,7 @@ public class PartidaFragment extends Fragment {
         btnBasta.setClickable(false);
         btnBasta.setAlpha(0.45f);
         btnBasta.setText("CONGELADO");
+        btnBasta.setTextSize(17);
 
         boolean esNuevoCongelador = idUso != null && !idUso.equals(ultimoCongeladorProcesado);
 
@@ -2799,7 +2731,7 @@ public class PartidaFragment extends Fragment {
                 respuesta -> solicitarVotacionRespuesta(respuesta, rondaDeEstaRevision),
                 () -> !hayVotacionActivaEnRevision,
                 esAnfitrion,
-                siguienteIndice -> avanzarCategoriaRevision(rondaDeEstaRevision, siguienteIndice)
+                siguienteIndice -> { }
         );
 
         adapterValidacionActual = adapter;
@@ -2809,6 +2741,7 @@ public class PartidaFragment extends Fragment {
 
         dialog.setCancelable(false);
         dialog.show();
+        com.example.basta_game.utils.NotificationHelper.acompanar(dialog);
 
         if (dialog.getWindow() != null) {
             dialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
@@ -2821,7 +2754,7 @@ public class PartidaFragment extends Fragment {
         escucharValidacionesGlobales(respuestasPorCategoria, adapter, rondaDeEstaRevision);
         escucharResultadosVotacionesPalabras(respuestasPorCategoria, adapter, rondaDeEstaRevision);
         escucharCooldownVotaciones(adapter, rondaDeEstaRevision);
-        prepararRevisionCategoriasSiHaceFalta(rondaDeEstaRevision);
+
         escucharIndiceRevisionCategoria(vpCategorias, adapter, rondaDeEstaRevision);
     }
 
@@ -3033,90 +2966,42 @@ public class PartidaFragment extends Fragment {
         desbloquearBotonBastaSiCorresponde();
     }
 
-    private void prepararRevisionCategoriasSiHaceFalta(int rondaDeEstaRevision) {
-        if (salaRef == null || (!esAnfitrion)) {
-            return;
+    private void pintarRelojVotacion(TextView contador,String texto) {
+        android.text.SpannableString t=new android.text.SpannableString(texto);
+        int separador=texto.indexOf('\n');
+        if(separador>0) {
+            t.setSpan(new android.text.style.AbsoluteSizeSpan(42,true),0,separador,0);
+            t.setSpan(new android.text.style.AbsoluteSizeSpan(15,true),separador+1,t.length(),0);
         }
-
-        DatabaseReference ref = salaRef
-                .child("revisionCategorias")
-                .child("ronda_" + rondaDeEstaRevision);
-
-        ref.child("indiceActual").runTransaction(new Transaction.Handler() {
-            @NonNull
-            @Override
-            public Transaction.Result doTransaction(@NonNull MutableData currentData) {
-                Object valor = currentData.getValue();
-
-                if (valor != null) {
-                    return Transaction.abort();
-                }
-
-                currentData.setValue(0);
-                return Transaction.success(currentData);
-            }
-
-            @Override
-            public void onComplete(DatabaseError error, boolean committed, DataSnapshot currentData) { }
-        });
+        contador.setText(t);
     }
 
-    private void escucharIndiceRevisionCategoria(
-            ViewPager2 vpCategorias,
-            TarjetasValidacionAdapter adapter,
-            int rondaDeEstaRevision
-    ) {
+    private void escucharIndiceRevisionCategoria(ViewPager2 pager,TarjetasValidacionAdapter adapter,int ronda) {
         limpiarListenerRevisionCategorias();
-
-        nodoRevisionCategoriasRef = salaRef
-                .child("revisionCategorias")
-                .child("ronda_" + rondaDeEstaRevision)
-                .child("indiceActual");
-
-        listenerRevisionCategorias = nodoRevisionCategoriasRef.addValueEventListener(new ValueEventListener() {
-            @Override
-            public void onDataChange(@NonNull DataSnapshot snapshot) {
-                if (!isAdded() || !rondaSigueSiendoActual(rondaDeEstaRevision)) {
-                    return;
-                }
-
-                int indice = leerEntero(snapshot, 0);
-
-                if (indice < 0 || adapter == null || indice >= adapter.getItemCount()) {
-                    return;
-                }
-
-                if (vpCategorias.getCurrentItem() != indice) {
-                    vpCategorias.setCurrentItem(indice, true);
-                }
-
-                adapter.iniciarAnimacionEnPaginaPublica(indice);
-            }
-
-            @Override
-            public void onCancelled(@NonNull DatabaseError error) { }
-        });
+        if(!VerificacionesAuth.VerificarInicioSesion(auth)) return;
+        coordinadorRevision=new com.example.basta_game.utils.CoordinadorRevision(salaRef,idPartidaActual,ronda,
+                auth.getCurrentUser().getUid(),adapter,pager,texto -> {
+                    if(dialogValidacionActual!=null) {
+                        TextView contador=dialogValidacionActual.findViewById(R.id.txtRelojGeneralRevision);
+                        if(contador!=null) pintarRelojVotacion(contador,texto);
+                    }
+                    if(dialogVotacionActual!=null) {
+                        TextView contador=dialogVotacionActual.findViewById(R.id.txtTiempoVotacion);
+                        if(contador!=null) pintarRelojVotacion(contador,texto);
+                    }
+                }, habilitado -> {
+                    if(dialogVotacionActual!=null) for(int id:new int[]{R.id.btnVotoNo,R.id.btnVotoSi,R.id.btnVotoAbstenerse}) {
+                        View boton=dialogVotacionActual.findViewById(id); if(boton!=null) boton.setEnabled(habilitado);
+                    }
+                }, id -> id!=null && id.equals(idVotacionModalActual) && dialogVotacionActual!=null && dialogVotacionActual.isShowing(),
+                voto -> revisarSiTodosVotaronYResolver(ronda,voto));
+        coordinadorRevision.iniciar();
     }
-
-    private void avanzarCategoriaRevision(int rondaDeEstaRevision, int siguienteIndice) {
-        if (salaRef == null || (!esAnfitrion)) {
-            return;
-        }
-
-        salaRef.child("revisionCategorias")
-                .child("ronda_" + rondaDeEstaRevision)
-                .child("indiceActual")
-                .setValue(siguienteIndice);
-    }
-
     private void limpiarListenerRevisionCategorias() {
-        if (nodoRevisionCategoriasRef != null && listenerRevisionCategorias != null) {
-            nodoRevisionCategoriasRef.removeEventListener(listenerRevisionCategorias);
-            listenerRevisionCategorias = null;
-            nodoRevisionCategoriasRef = null;
-        }
+        if(coordinadorRevision!=null) { coordinadorRevision.cerrar(); coordinadorRevision=null; }
+        if(nodoRevisionCategoriasRef!=null && listenerRevisionCategorias!=null) nodoRevisionCategoriasRef.removeEventListener(listenerRevisionCategorias);
+        nodoRevisionCategoriasRef=null; listenerRevisionCategorias=null;
     }
-
     private void escucharResultadosVotacionesPalabras(
             Map<String, List<RespuestaValidacion>> respuestasPorCategoria,
             TarjetasValidacionAdapter adapter,
@@ -3251,10 +3136,7 @@ public class PartidaFragment extends Fragment {
             String categoria,
             String respuesta
     ) {
-        return "r" + ronda + "_" +
-                normalizarTextoClave(uidJugador) + "_" +
-                normalizarTextoClave(categoria) + "_" +
-                normalizarTextoClave(respuesta);
+        return com.example.basta_game.utils.ClaveRevision.de(ronda,uidJugador,categoria,respuesta);
     }
 
     private String normalizarTextoClave(String texto) {
@@ -3310,6 +3192,7 @@ public class PartidaFragment extends Fragment {
 
 
     private void solicitarVotacionRespuesta(RespuestaValidacion respuesta, int rondaDeEstaRevision) {
+        final long turnoSolicitado=coordinadorRevision==null ? -1 : coordinadorRevision.turnoActual();
         if (!rondaSigueSiendoActual(rondaDeEstaRevision)) {
             return;
         }
@@ -3428,7 +3311,7 @@ public class PartidaFragment extends Fragment {
                     return;
                 }
 
-                crearVotacionActiva(respuesta, rondaDeEstaRevision);
+                crearVotacionActiva(respuesta, rondaDeEstaRevision, turnoSolicitado);
             }
 
             @Override
@@ -3438,7 +3321,7 @@ public class PartidaFragment extends Fragment {
 
 
 
-    private void crearVotacionActiva(RespuestaValidacion respuesta, int rondaDeEstaRevision) {
+    private void crearVotacionActiva(RespuestaValidacion respuesta, int rondaDeEstaRevision, long turnoSolicitado) {
         String claveVotacion = respuesta.getClaveVotacion();
 
         if (claveVotacion == null || claveVotacion.trim().isEmpty()) {
@@ -3462,6 +3345,7 @@ public class PartidaFragment extends Fragment {
 
         HashMap<String, Object> datos = new HashMap<>();
         datos.put("activa", true);
+        datos.put("turnoRevision",turnoSolicitado);
         datos.put("resuelta", false);
         datos.put("idVotacion", idVotacion);
         datos.put("claveVotacion", claveVotacion);
@@ -3475,12 +3359,15 @@ public class PartidaFragment extends Fragment {
 
         final String partida = idPartidaActual;
         final String uid = auth.getCurrentUser().getUid();
+        final com.example.basta_game.utils.CoordinadorRevision reloj=coordinadorRevision;
+        final long conexion=com.example.basta_game.utils.ConexionJuego.version();
         salaRef.runTransaction(new Transaction.Handler() {
             @NonNull
             @Override
             public Transaction.Result doTransaction(@NonNull MutableData currentData) {
+                if(reloj==null || !reloj.disponible() || !com.example.basta_game.utils.ConexionJuego.vigente(conexion)) return Transaction.abort();
                 if (currentData.getValue() == null) return Transaction.success(currentData);
-                return com.example.basta_game.utils.VotacionRevision.crear(currentData,partida,rondaDeEstaRevision,uid,datos)
+                return com.example.basta_game.utils.VotacionRevision.crear(currentData,partida,rondaDeEstaRevision,uid,datos,reloj.ahora())
                         ? Transaction.success(currentData) : Transaction.abort();
             }
             @Override
@@ -3641,6 +3528,7 @@ public class PartidaFragment extends Fragment {
     }
 
     // --- NUEVO: LA SECUENCIA DE ANUNCIO ÉPICA ---
+    private final Handler handlerAnuncio=new Handler(Looper.getMainLooper());
     private void mostrarPantallaAnuncioMinijuego(String tipoJuego, String miRol, DataSnapshot snapshot) {
         if (!isAdded()) return;
 
@@ -3654,6 +3542,7 @@ public class PartidaFragment extends Fragment {
             dialogAnuncioMinijuego.getWindow().setLayout(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
         }
         dialogAnuncioMinijuego.show();
+        com.example.basta_game.utils.NotificationHelper.acompanar(dialogAnuncioMinijuego);
 
         TextView txtTitulo = dialogAnuncioMinijuego.findViewById(R.id.txtTituloAnuncio);
         TextView txtMensaje = dialogAnuncioMinijuego.findViewById(R.id.txtMensajeAnuncio);
@@ -3674,61 +3563,40 @@ public class PartidaFragment extends Fragment {
             txtMensaje.setText(android.text.Html.fromHtml("<b><font color='#304EDB'>" + nombreAtacante + "</font></b> retó a <b><font color='#E53935'>" + nombreVictima + "</font></b>. ¡Vaya tensión!"));
         }
 
-        Handler handlerSecuencia = new Handler(Looper.getMainLooper());
-
-        // Seg 2: Revela el juego y las REGLAS
-        handlerSecuencia.postDelayed(() -> {
-            if (dialogAnuncioMinijuego != null && dialogAnuncioMinijuego.isShowing()) {
-                String nombreJuego = "MINIJUEGO MISTERIOSO";
-                String reglas = "";
-
-                if ("piedra_papel_tijera".equals(tipoJuego)) {
-                    nombreJuego = "PIEDRA, PAPEL O TIJERA";
-                    reglas = "El primero en ganar 2 rondas se lleva todo.";
-                } else if ("tres_en_raya".equals(tipoJuego)) {
-                    nombreJuego = "TRES EN RAYA INFINITO";
-                    reglas = "Haz línea de 3. ¡Ojo: Al poner tu 4ta ficha, la 1ra desaparecerá!";
-                } else if ("duelo_reflejos".equals(tipoJuego)) {
-                    nombreJuego = "DUELO DE REFLEJOS";
-                    reglas = "¡Toca el arma lo más rápido que puedas en cuanto se ponga VERDE!";
+        txtTitulo.setText("espectador".equals(miRol) ? "MODO ESPECTADOR" : "¡DUELO A MUERTE!");
+        txtTitulo.setTextSize(22);txtMensaje.setTextSize(18);txtAccion.setTextSize(18);
+        txtMensaje.setText(android.text.Html.fromHtml("<b>"+android.text.TextUtils.htmlEncode(nombreAtacante==null ? "Atacante" : nombreAtacante)+"</b> reta a <b>"+android.text.TextUtils.htmlEncode(nombreVictima==null ? "Victima" : nombreVictima)+"</b>."));
+        String juego="tres_en_raya".equals(tipoJuego) ? "Tres en Raya: forma una linea de tres; la cuarta ficha retira la primera."
+                : "piedra_papel_tijera".equals(tipoJuego) ? "Piedra, Papel o Tijera: gana dos rondas." : "Tiroteo: toca el arma cuando se ponga verde.";
+        txtAccion.setText(juego);txtAccion.setTypeface(txtAccion.getTypeface(),android.graphics.Typeface.BOLD);
+        final long desde=leerLong(snapshot.child("anuncioDesde"),0);
+        final Dialog anuncio=dialogAnuncioMinijuego;
+        handlerAnuncio.removeCallbacksAndMessages(null);
+        obtenerHoraServidor(hora -> {
+            final long base=android.os.SystemClock.elapsedRealtime();
+            final boolean[] sonido={false};
+            Runnable tick=new Runnable() {
+                @Override public void run() {
+                    if(!isAdded() || getView()==null || dialogAnuncioMinijuego!=anuncio || !anuncio.isShowing() || desde<=0) return;
+                    long restante=desde+9000-(hora+android.os.SystemClock.elapsedRealtime()-base);
+                    if(restante>0) {
+                        txtContador.setVisibility(restante<=3000 ? View.VISIBLE : View.GONE);
+                        if(restante<=3000) {txtContador.setText(String.valueOf((restante+999)/1000));if(!sonido[0]) {sonido[0]=true;Sounds.playCombate();}}
+                        handlerAnuncio.postDelayed(this,100);return;
+                    }
+                    salaRef.child("minijuegoActual").runTransaction(new Transaction.Handler() {
+                        @Override public Transaction.Result doTransaction(MutableData d) {
+                            if(!"anuncio".equals(d.child("estado").getValue()) || com.example.basta_game.utils.RelojRevision.numero(d.child("anuncioDesde").getValue(),-1)!=desde) return Transaction.abort();
+                            d.child("estado").setValue("jugando");return Transaction.success(d);
+                        }
+                        @Override public void onComplete(DatabaseError e,boolean ok,DataSnapshot d) {
+                            if(e!=null) NotificationHelper.showGlobal("No se pudo sincronizar el inicio del duelo",NotificationHelper.WARNING);
+                        }
+                    },false);
                 }
-
-                String textoEpico = "<font color='#14213D'>Duelo seleccionado:</font><br><b><font color='#304EDB'>" +
-                        nombreJuego + "</font></b><br><br><small><font color='#5E5777'>" + reglas + "</font></small>";
-
-                txtAccion.setText(android.text.Html.fromHtml(textoEpico));
-            }
-        }, 2000);
-
-        // Seg 6: ¡Pasaron 4 SEGUNDOS para leer! Empieza cuenta regresiva visual
-        handlerSecuencia.postDelayed(() -> {
-            if (dialogAnuncioMinijuego != null && dialogAnuncioMinijuego.isShowing()) {
-                txtAccion.setText("¡Abriendo la arena en...!");
-                txtAccion.setTextColor(android.graphics.Color.parseColor("#E53935"));
-                txtContador.setVisibility(View.VISIBLE);
-                txtContador.setText("3");
-                Sounds.playCombate();
-            }
-        }, 6000);
-
-        // Seg 7
-        handlerSecuencia.postDelayed(() -> {
-            if (dialogAnuncioMinijuego != null) txtContador.setText("2");
-        }, 7000);
-
-        // Seg 8
-        handlerSecuencia.postDelayed(() -> {
-            if (dialogAnuncioMinijuego != null) txtContador.setText("1");
-        }, 8000);
-
-        // Seg 9: ¡ABRE LA ARENA!
-        handlerSecuencia.postDelayed(() -> {
-            if ("atacante".equals(miRol) && salaRef != null) {
-                salaRef.child("minijuegoActual").child("estado").setValue("jugando");
-            }
-        }, 9000);
+            };tick.run();
+        });
     }
-
     private void limpiarListenerMinijuego() {
         if (nodoMinijuegoRef != null && listenerMinijuego != null) {
             nodoMinijuegoRef.removeEventListener(listenerMinijuego);
@@ -3757,6 +3625,8 @@ public class PartidaFragment extends Fragment {
                 dialogMinijuegoActual.getWindow().setLayout(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
             }
             dialogMinijuegoActual.show();
+            if(dialogMinijuegoActual.findViewById(R.id.txtModoEspectador)!=null) dialogMinijuegoActual.findViewById(R.id.txtModoEspectador).setVisibility("espectador".equals(miRol) ? View.VISIBLE : View.GONE);
+        com.example.basta_game.utils.NotificationHelper.acompanar(dialogMinijuegoActual);
 
             // --- CARGAR AVATARES Y NOMBRES REALES UNA SOLA VEZ AL ABRIR ---
             TextView txtNombreA = dialogMinijuegoActual.findViewById(R.id.txtNombreA);
@@ -3891,8 +3761,17 @@ public class PartidaFragment extends Fragment {
     // --- MÉTODOS AYUDANTES PARA EL MINIJUEGO PPT ---
 
     private void enviarEleccionPPT(String eleccion, String miRol) {
-        String nodo = "atacante".equals(miRol) ? "eleccionA" : "eleccionV";
-        salaRef.child("minijuegoActual").child("datosJuego").child(nodo).setValue(eleccion);
+        if(!VerificacionesAuth.VerificarInicioSesion(auth)) return;
+        final String uid=auth.getCurrentUser().getUid();
+        salaRef.child("minijuegoActual").runTransaction(new Transaction.Handler() {
+            @Override public Transaction.Result doTransaction(MutableData juego) {
+                if(juego.getValue()==null) return Transaction.success(juego);
+                return com.example.basta_game.utils.SeleccionMinijuego.elegirPPT(juego,uid,eleccion) ? Transaction.success(juego) : Transaction.abort();
+            }
+            @Override public void onComplete(DatabaseError e,boolean ok,DataSnapshot juego) {
+                if(e!=null) Log.w("DUELO","No se pudo confirmar eleccion",e.toException());
+            }
+        },false);
     }
 
     private void setearIconoEleccion(ImageView img, String eleccion) {
@@ -4138,6 +4017,7 @@ public class PartidaFragment extends Fragment {
 
         String miUid = auth.getCurrentUser().getUid();
 
+        btnNo.setEnabled(false); btnSi.setEnabled(false); btnAbstenerse.setEnabled(false);
         btnNo.setOnClickListener(v -> registrarVoto(rondaVotacion, idVotacion, miUid, "no"));
         btnSi.setOnClickListener(v -> registrarVoto(rondaVotacion, idVotacion, miUid, "si"));
         btnAbstenerse.setOnClickListener(v -> registrarVoto(rondaVotacion, idVotacion, miUid, "abstenerse"));
@@ -4200,7 +4080,8 @@ public class PartidaFragment extends Fragment {
                     btnSi.setEnabled(false);
                     btnAbstenerse.setEnabled(false);
 
-                    txtEstado.setText("Tu voto: " + textoVotoBonito(miVoto));
+                    btnNo.setVisibility(View.GONE);btnSi.setVisibility(View.GONE);btnAbstenerse.setVisibility(View.GONE);
+                    txtEstado.setText("¡Has realizado tu voto!\nTu elección: " + ("si".equals(miVoto) ? "Válida" : "no".equals(miVoto) ? "Inválida" : "Abstencion"));
                 } else {
                     txtEstado.setText("Elige tu voto");
                 }
@@ -4217,9 +4098,14 @@ public class PartidaFragment extends Fragment {
         dialog.setOnDismissListener(d -> votacionRef.removeEventListener(listenerDialogo));
 
         dialog.show();
+        com.example.basta_game.utils.NotificationHelper.acompanar(dialog);
+        if(coordinadorRevision!=null) coordinadorRevision.actualizar();
 
         if (dialog.getWindow() != null) {
             dialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+            dialog.getWindow().addFlags(android.view.WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL);
+            dialog.getWindow().clearFlags(android.view.WindowManager.LayoutParams.FLAG_DIM_BEHIND);
+            dialog.getWindow().setGravity(android.view.Gravity.BOTTOM);
             dialog.getWindow().setLayout(
                     ViewGroup.LayoutParams.MATCH_PARENT,
                     ViewGroup.LayoutParams.WRAP_CONTENT
@@ -4269,10 +4155,13 @@ public class PartidaFragment extends Fragment {
 
     private void registrarVoto(int rondaVotacion, String idVotacion, String uid, String voto) {
         final String partida = idPartidaActual;
+        final com.example.basta_game.utils.CoordinadorRevision reloj=coordinadorRevision;
+        final long conexion=com.example.basta_game.utils.ConexionJuego.version();
         salaRef.runTransaction(new Transaction.Handler() {
             @NonNull @Override public Transaction.Result doTransaction(@NonNull MutableData sala) {
+                if(reloj==null || !reloj.disponible() || !com.example.basta_game.utils.ConexionJuego.vigente(conexion)) return Transaction.abort();
                 if (sala.getValue() == null) return Transaction.success(sala);
-                return com.example.basta_game.utils.VotacionRevision.registrar(sala,partida,rondaVotacion,idVotacion,uid,voto)
+                return com.example.basta_game.utils.VotacionRevision.registrar(sala,partida,rondaVotacion,idVotacion,uid,voto,reloj.ahora())
                         ? Transaction.success(sala) : Transaction.abort();
             }
             @Override public void onComplete(DatabaseError error, boolean committed, DataSnapshot sala) {
@@ -4281,46 +4170,13 @@ public class PartidaFragment extends Fragment {
             }
         }, false);
     }
-    private void revisarSiTodosVotaronYResolver(int rondaVotacion, DataSnapshot snapshotVotacion) {
-        if (!esAnfitrion) {
-            return;
-        }
-
-        if (resolviendoVotacion) {
-            return;
-        }
-
-        Boolean resuelta = snapshotVotacion.child("resuelta").getValue(Boolean.class);
-
-        if (resuelta != null && resuelta) {
-            return;
-        }
-
-        DatabaseReference jugadoresRef = FirebaseDatabase.getInstance()
-                .getReference("salas")
-                .child(idSala)
-                .child("jugadores");
-
-        jugadoresRef.addListenerForSingleValueEvent(new ValueEventListener() {
-            @Override
-            public void onDataChange(@NonNull DataSnapshot snapshotJugadores) {
-                long cantidadJugadores = snapshotJugadores.getChildrenCount();
-                long cantidadVotos = 0;
-                for (DataSnapshot jugador : snapshotJugadores.getChildren()) {
-                    if (snapshotVotacion.child("votos").hasChild(jugador.getKey())) cantidadVotos++;
-                }
-
-                if (cantidadJugadores > 0 && cantidadVotos >= cantidadJugadores) {
-                    resolviendoVotacion = true;
-                    resolverVotacion(rondaVotacion, snapshotVotacion);
-                }
-            }
-
-            @Override
-            public void onCancelled(@NonNull DatabaseError error) { }
-        });
+    private void revisarSiTodosVotaronYResolver(int rondaVotacion,DataSnapshot voto) {
+        if(resolviendoVotacion || coordinadorRevision==null) return;
+        DataSnapshot actual=coordinadorRevision.votoParaCerrar(voto.child("idVotacion").getValue(String.class));
+        if(actual==null) return;
+        resolviendoVotacion=true;
+        resolverVotacion(rondaVotacion,actual);
     }
-
     private void resolverVotacion(int rondaVotacion, DataSnapshot snapshotVotacion) {
         int votosSi = 0;
         int votosNo = 0;
@@ -4338,19 +4194,9 @@ public class PartidaFragment extends Fragment {
             }
         }
 
-        String resultado;
+        String resultado=com.example.basta_game.utils.ResultadoVotos.resolver(votosSi,votosNo);
 
-        if (votosAbs >= votosSi && votosAbs >= votosNo) {
-            resultado = "abstencion";
-        } else if (votosSi == votosNo) {
-            resultado = "abstencion";
-        } else if (votosSi > votosNo) {
-            resultado = "si";
-        } else {
-            resultado = "no";
-        }
-
-        if ("abstencion".equals(resultado)) {
+        if ("abstencion".equals(resultado) || "empate".equals(resultado)) {
             cerrarVotacionSinConsumir(rondaVotacion, snapshotVotacion, resultado);
             return;
         }
@@ -4365,6 +4211,7 @@ public class PartidaFragment extends Fragment {
             cerrarVotacionSinConsumir(rondaVotacion, snapshotVotacion, "error");
             return;
         }
+
 
         if (correctaFinal) {
             calcularPuntosPorRespuestaVotada(rondaVotacion, categoria, respuesta, puntosCalculados -> {
@@ -4606,7 +4453,7 @@ public class PartidaFragment extends Fragment {
 
         actualizaciones.put(
                 "historialVotaciones/ronda_" + rondaVotacion + "/" + idVotacion + "/motivo",
-                "Ganó abstención o hubo empate"
+                "Sin votos decisivos; se conserva la validacion previa"
         );
 
         actualizaciones.put(
@@ -4649,11 +4496,14 @@ public class PartidaFragment extends Fragment {
         final String id = voto.child("idVotacion").getValue(String.class);
         if (!VerificacionesAuth.VerificarInicioSesion(auth)) { resolviendoVotacion = false; return; }
         final String host = auth.getCurrentUser().getUid();
+        final com.example.basta_game.utils.CoordinadorRevision reloj=coordinadorRevision;
+        final long conexion=com.example.basta_game.utils.ConexionJuego.version();
         salaRef.runTransaction(new Transaction.Handler() {
             @NonNull @Override public Transaction.Result doTransaction(@NonNull MutableData sala) {
+                if(reloj==null || !reloj.disponible() || !com.example.basta_game.utils.ConexionJuego.vigente(conexion)) return Transaction.abort();
                 if (sala.getValue() == null) return Transaction.success(sala);
                 return com.example.basta_game.utils.VotacionRevision.resolver(sala,partida,ronda,id,host,
-                        voto.child("votos").getValue(),cambios) ? Transaction.success(sala) : Transaction.abort();
+                        voto.child("votos").getValue(),cambios,reloj.ahora()) ? Transaction.success(sala) : Transaction.abort();
             }
             @Override public void onComplete(DatabaseError error, boolean committed, DataSnapshot sala) {
                 resolviendoVotacion = false;
@@ -4672,55 +4522,20 @@ public class PartidaFragment extends Fragment {
     }
 
     private void cerrarRondaComoHost() {
-        if (!esAnfitrion) {
-            return;
-        }
-
-        if (cierreRondaSolicitado) {
-            return;
-        }
-
-        cierreRondaSolicitado = true;
-
-        final int rondaCerrada = rondaActual;
-
-        DatabaseReference rondaProcesadaRef = FirebaseDatabase.getInstance()
-                .getReference("salas")
-                .child(idSala)
-                .child("rondasProcesadas")
-                .child("ronda_" + rondaCerrada);
-
-        rondaProcesadaRef.runTransaction(new Transaction.Handler() {
-            @NonNull
-            @Override
-            public Transaction.Result doTransaction(@NonNull MutableData currentData) {
-                Boolean yaProcesada = currentData.getValue(Boolean.class);
-
-                if (yaProcesada != null && yaProcesada) {
-                    return Transaction.abort();
-                }
-
-                currentData.setValue(true);
-                return Transaction.success(currentData);
+        if(cierreRondaSolicitado || auth.getCurrentUser()==null || !com.example.basta_game.utils.ConexionJuego.disponible()) return;
+        cierreRondaSolicitado=true;final int ronda=rondaActual;final String partida=idPartidaActual,uid=auth.getCurrentUser().getUid();
+        salaRef.runTransaction(new Transaction.Handler() {
+            @Override public Transaction.Result doTransaction(MutableData sala) {
+                if(!com.example.basta_game.utils.ConexionJuego.disponible()) return Transaction.abort();
+                if(sala.getValue()==null) return Transaction.success(sala);
+                return com.example.basta_game.utils.CierreRevision.aplicar(sala,partida,ronda,uid) ? Transaction.success(sala) : Transaction.abort();
             }
-
-            @Override
-            public void onComplete(DatabaseError error, boolean committed, DataSnapshot currentData) {
-                if (error != null) {
-                    Log.d("RONDA", "Error cerrando ronda: " + error.getMessage());
-                    return;
-                }
-
-                if (committed) {
-                    Log.d("RONDA", "Ronda " + rondaCerrada + " cerrada por el host");
-                    esperarValidacionesCompletasYPrepararResumen(rondaCerrada);
-                } else {
-                    Log.d("RONDA", "La ronda ya había sido procesada");
-                }
+            @Override public void onComplete(DatabaseError e,boolean ok,DataSnapshot s) {
+                cierreRondaSolicitado=false;
+                if(e!=null) NotificationHelper.showGlobal("No se pudo confirmar el resumen. Reintentaremos al conectar",NotificationHelper.WARNING);
             }
-        });
+        },false);
     }
-
     private void esperarValidacionesCompletasYPrepararResumen(int rondaCerrada) {
         DatabaseReference validacionesRef = FirebaseDatabase.getInstance()
                 .getReference("salas")
@@ -5104,7 +4919,8 @@ public class PartidaFragment extends Fragment {
 
                         if (titulo != null && mensaje != null && esExito != null) {
                             // Actualizamos la llamada para pasarle los UIDs
-                            mostrarDialogoAnimadoFlujo(titulo, mensaje, esExito, uidAtacante, uidVictima);
+                            if("RULETA".equals(uidAtacante)) mostrarCuentaRuleta(titulo,mensaje,esExito,uidAtacante,uidVictima,leerLong(snapshot.child("timestamp"),0),idUso);
+                            else mostrarDialogoAnimadoFlujo(titulo, mensaje, esExito, uidAtacante, uidVictima);
                         }
                     }
 
@@ -5114,6 +4930,7 @@ public class PartidaFragment extends Fragment {
         // --------------------------------------------------------------------
 
         dialog.show();
+        com.example.basta_game.utils.NotificationHelper.acompanar(dialog);
 
         if (dialog.getWindow() != null) {
             dialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
@@ -5124,6 +4941,36 @@ public class PartidaFragment extends Fragment {
         }
     }
 
+    private Dialog dialogRuletaActual;
+    private void mostrarCuentaRuleta(String titulo,String mensaje,boolean exito,String atacante,String victima,long desde,String uso) {
+        if(!isAdded() || requireContext().getSharedPreferences("ruletaVista",0).getBoolean(idSala+uso,false)) return;
+        obtenerHoraServidor(ahora -> {
+            if(!isAdded() || getView()==null) return;
+            if(dialogRuletaActual!=null) dialogRuletaActual.dismiss();
+            Dialog d=new Dialog(requireContext());View v=LayoutInflater.from(requireContext()).inflate(R.layout.dialogo_resultado_flujo,null);
+            d.setContentView(v);d.setCancelable(false);dialogRuletaActual=d;
+            TextView t=v.findViewById(R.id.txtTituloResultado),m=v.findViewById(R.id.txtMensajeResultado);
+            View cerrar=v.findViewById(R.id.btnCerrarResultado);cerrar.setVisibility(View.GONE);
+            v.findViewById(R.id.lottieConfeti).setVisibility(View.GONE);
+            ImageView icono=v.findViewById(R.id.imgIconoResultado);icono.setImageResource(R.drawable.ic_comodin_ruletacaotica);
+            Handler h=new Handler(Looper.getMainLooper());long base=android.os.SystemClock.elapsedRealtime();
+            Runnable tick=new Runnable() {public void run() {
+                if(!isAdded() || getView()==null || !d.isShowing()) return;
+                long restante=desde+5000-(ahora+android.os.SystemClock.elapsedRealtime()-base);
+                if(restante<=0) {
+                    requireContext().getSharedPreferences("ruletaVista",0).edit().putBoolean(idSala+uso,true).apply();
+                    d.dismiss();mostrarDialogoAnimadoFlujo(titulo,mensaje,exito,atacante,victima);return;
+                }
+                t.setTextSize(20);t.setSingleLine(false);t.setEllipsize(null);t.setText("¡RULETA CAÓTICA!\n"+((restante+999)/1000));m.setText("Eligiendo un efecto al azar...");
+                icono.animate().rotationBy(180).setDuration(450).start();h.postDelayed(this,500);
+            }};
+            d.setOnDismissListener(x -> {h.removeCallbacksAndMessages(null);icono.animate().cancel();if(dialogRuletaActual==d)dialogRuletaActual=null;});
+            d.show();
+            if(d.getWindow()!=null) d.getWindow().setLayout(getResources().getDisplayMetrics().widthPixels-dp(24),android.view.ViewGroup.LayoutParams.WRAP_CONTENT);
+            androidx.core.widget.TextViewCompat.setAutoSizeTextTypeUniformWithConfiguration(t,14,20,1,android.util.TypedValue.COMPLEX_UNIT_SP);
+            com.example.basta_game.utils.NotificationHelper.acompanar(d);h.post(tick);
+        });
+    }
     private void mostrarDialogoAnimadoFlujo(String titulo, String mensaje, boolean esExito, String uidAtacante, String uidVictima) {
         if (!isAdded()) return;
 
@@ -5187,6 +5034,7 @@ public class PartidaFragment extends Fragment {
         });
 
         dialog.show();
+        com.example.basta_game.utils.NotificationHelper.acompanar(dialog);
 
         if (dialog.getWindow() != null) {
             dialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
@@ -5338,6 +5186,7 @@ public class PartidaFragment extends Fragment {
                 DataSnapshot jugadores = sala.child("jugadores");
                 if (jugadores.getChildrenCount() <= 1 || cierrePorAbandonoMostrado) return;
                 for (DataSnapshot jugador : jugadores.getChildren()) {
+                    if(Boolean.FALSE.equals(jugador.child("estaConectado").getValue())) continue;
                     if (!Boolean.TRUE.equals(sala.child("revisionLista/ronda_" + rondaCerrada)
                             .child(jugador.getKey()).getValue(Boolean.class))) return;
                 }
@@ -5643,6 +5492,7 @@ public class PartidaFragment extends Fragment {
 
 
     private void guardarMiHistorialUsuarioFinal(int rondaFinal) {
+        if (!isAdded() || yaVolvioAlLobby || (getActivity() instanceof SalaActivity && ((SalaActivity)getActivity()).haSalidoDeSala())) return;
         if (miHistorialFinalGuardado || recompensaEnProceso) {
             return;
         }
@@ -5663,6 +5513,10 @@ public class PartidaFragment extends Fragment {
         salaRef.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshotSala) {
+                if(!isAdded() || getView()==null || yaVolvioAlLobby ||
+                        (getActivity() instanceof SalaActivity && ((SalaActivity)getActivity()).haSalidoDeSala())) {
+                    recompensaEnProceso=false; return;
+                }
                 try {
                     if (!idPartidaActual.equals(snapshotSala.child("idPartida").getValue(String.class)) ||
                             leerEntero(snapshotSala.child("rondaActual"), 0) != rondaFinalSegura ||
@@ -5671,6 +5525,10 @@ public class PartidaFragment extends Fragment {
                         return;
                     }
                     DataSnapshot snapshotJugadores = snapshotSala.child("jugadores");
+                    if(snapshotJugadores.getChildrenCount()==1 && snapshotJugadores.hasChild(miUid) && !avisoCierrePorAbandono) {
+                        avisoCierrePorAbandono=true;
+                        NotificationHelper.showGlobal("Los demas participantes salieron. La partida termino con tus puntos confirmados",NotificationHelper.INFO);
+                    }
                     DataSnapshot snapshotPuntajesRondas = snapshotSala.child("puntajesRondas");
 
                     ArrayList<RegistroJugadorHistorial> tabla = new ArrayList<>();
@@ -6394,6 +6252,8 @@ public class PartidaFragment extends Fragment {
                 dialogMinijuegoActual.getWindow().setLayout(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
             }
             dialogMinijuegoActual.show();
+            if(dialogMinijuegoActual.findViewById(R.id.txtModoEspectador)!=null) dialogMinijuegoActual.findViewById(R.id.txtModoEspectador).setVisibility("espectador".equals(miRol) ? View.VISIBLE : View.GONE);
+        com.example.basta_game.utils.NotificationHelper.acompanar(dialogMinijuegoActual);
 
             TextView txtNombreA = dialogMinijuegoActual.findViewById(R.id.txtNombreA_TER);
             TextView txtNombreV = dialogMinijuegoActual.findViewById(R.id.txtNombreV_TER);
@@ -6710,6 +6570,8 @@ public class PartidaFragment extends Fragment {
                 dialogMinijuegoActual.getWindow().setLayout(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
             }
             dialogMinijuegoActual.show();
+            if(dialogMinijuegoActual.findViewById(R.id.txtModoEspectador)!=null) dialogMinijuegoActual.findViewById(R.id.txtModoEspectador).setVisibility("espectador".equals(miRol) ? View.VISIBLE : View.GONE);
+        com.example.basta_game.utils.NotificationHelper.acompanar(dialogMinijuegoActual);
 
             // Seteamos Nombres
             TextView txtNombreA = dialogMinijuegoActual.findViewById(R.id.txtNombreA_Tiro);

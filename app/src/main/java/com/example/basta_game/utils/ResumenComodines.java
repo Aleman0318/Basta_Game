@@ -16,6 +16,18 @@ public final class ResumenComodines {
         return valor instanceof String && !((String) valor).trim().isEmpty() ? (String) valor : defecto;
     }
 
+    private static String relatoDoble(String nombre,String id,String estado,Map<String,Object> datos) {
+        String frase="duplicado".equals(estado)
+                ? (Math.floorMod(id.hashCode(),2)==0 ? " aposto y la fortuna sonrio. " : " arriesgo sus puntos y duplico la apuesta. ")
+                : (Math.floorMod(id.hashCode(),2)==0 ? " aposto todo, pero la suerte se fue. " : " arriesgo sus puntos y la apuesta fallo. ");
+        Object base=datos.get("puntosBase"), fin=datos.get("puntosFinales");
+        if(base instanceof Number && fin instanceof Number) {
+            long cambio=((Number)fin).longValue()-((Number)base).longValue();
+            return nombre+frase+(cambio<0 ? "Perdió "+(-cambio)+" puntos." : cambio>0 ? "Ganó "+cambio+" puntos." : "Sus puntos no cambiaron.")+" ("+base+" -> "+fin+")";
+        }
+        return nombre+frase+("duplicado".equals(estado) ? "Duplico los puntos de la ronda." : "Castigo registrado; importe no disponible.");
+    }
+
     public static List<EventoComodin> crear(Map<String,Object> sala, int ronda, boolean finalPartida) {
         List<EventoComodin> lista = new ArrayList<>();
         for (int numero = finalPartida ? 1 : ronda; numero <= ronda; numero++) {
@@ -32,9 +44,7 @@ public final class ResumenComodines {
                     String estado = texto(doble.get("resultado"), "");
                     if ("duplicado".equals(estado) || "castigo".equals(estado)) {
                         lista.add(new EventoComodin(prefijo + nombre + " · Doble o Nada",
-                                doble.get("puntosBase") instanceof Number && doble.get("puntosFinales") instanceof Number
-                                        ? "Puntos: " + doble.get("puntosBase") + " → " + doble.get("puntosFinales")
-                                        : "duplicado".equals(estado) ? "Duplicó los puntos de la ronda" : "Castigo registrado; importe aplicado no disponible",
+                                relatoDoble(nombre,id+numero,estado,doble),
                                 R.drawable.ic_comodin_dobleonada, "duplicado".equals(estado)));
                     } else lista.add(new EventoComodin(prefijo + nombre + " · Doble o Nada",
                             "Uso registrado; resultado no disponible", R.drawable.ic_comodin_dobleonada));
@@ -45,7 +55,7 @@ public final class ResumenComodines {
                             R.drawable.ic_comodin_cambiodeflujo, !castigo));
                 } else if ("ruleta_caotica".equals(resultado.get("tipo"))) {
                     lista.add(new EventoComodin(prefijo + texto(resultado.get("nombreAtacante"), "Un jugador") + " · Ruleta Caótica",
-                            "Efecto registrado: " + texto(resultado.get("efecto"), "no disponible"), R.drawable.ic_comodin_ruletacaotica));
+                            texto(resultado.get("mensaje"),"Efecto registrado: " + texto(resultado.get("efecto"), "no disponible")), R.drawable.ic_comodin_ruletacaotica));
                 }
             }
             for (String id : new TreeSet<>(usos.keySet())) {
@@ -62,7 +72,7 @@ public final class ResumenComodines {
                     titulo = "Congelador"; icono = R.drawable.ic_comodin_congelar;
                     Object duracion = uso.get("duracionMs");
                     if (!(duracion instanceof Number) && id.equals(congelador.get("idUso"))) duracion = congelador.get("duracionMs");
-                    descripcion = "Bloqueó el botón BASTA" + (duracion instanceof Number
+                    descripcion = nombre + (Math.floorMod(id.hashCode(),2)==0 ? " puso la ronda sobre hielo: bloqueo BASTA" : " activo Congelador y freno el boton BASTA") + (duracion instanceof Number
                             ? "; duración registrada: " + ((Number) duracion).longValue() / 1000.0 + " s"
                             : "; duración no registrada para este uso");
                 } else if ("doble_o_nada".equals(tipo)) {

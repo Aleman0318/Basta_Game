@@ -1,140 +1,139 @@
 package com.example.basta_game.utils;
 
-import android.graphics.Color;
+import android.app.Activity;
+import android.app.Application;
+import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
-import android.view.View;
-import android.widget.ImageView;
-import android.widget.TextView;
-
+import android.os.SystemClock;
+import android.graphics.Color;
+import android.view.*;
+import android.widget.*;
+import androidx.core.view.ViewCompat;
+import androidx.core.view.WindowInsetsCompat;
 import com.example.basta_game.R;
 import com.google.android.material.card.MaterialCardView;
-
-import java.util.ArrayDeque;
-import java.util.WeakHashMap;
+import java.lang.ref.WeakReference;
 
 public class NotificationHelper {
-
-    public static final int SUCCESS = 1;
-    public static final int ERROR = 2;
-    public static final int WARNING = 3;
-    public static final int INFO = 4;
-
-    private static final long DURACION_ENTRADA_MS = 220;
-    private static final long DURACION_VISIBLE_MS = 3000;
-    private static final long DURACION_SALIDA_MS = 220;
-
-    private static final WeakHashMap<View, EstadoNotificacion> estados = new WeakHashMap<>();
-
-    private static class MensajeNotificacion {
-        String message;
-        int type;
-
-        MensajeNotificacion(String message, int type) {
-            this.message = message;
-            this.type = type;
-        }
+    public static final int SUCCESS=1, ERROR=2, WARNING=3, INFO=4;
+    private static final Handler handler=new Handler(Looper.getMainLooper());
+    private static final ColaAvisos avisos=new ColaAvisos();
+    private static ResumenCompras compras=new ResumenCompras();
+    private static WeakReference<Activity> actividad=new WeakReference<>(null);
+    private static MaterialCardView card;
+    private static final java.util.List<WeakReference<android.app.Dialog>> dialogos=new java.util.ArrayList<>();
+    public static void acompanar(android.app.Dialog dialogo) {
+        ConexionJuego.superponer();
+        if(dialogo==null || dialogo.getWindow()==null) return;
+        dialogos.add(new WeakReference<>(dialogo));
+        dialogo.getWindow().getDecorView().addOnAttachStateChangeListener(new View.OnAttachStateChangeListener() {
+            @Override public void onViewAttachedToWindow(View v) { handler.post(actualizar); }
+            @Override public void onViewDetachedFromWindow(View v) { handler.post(actualizar); }
+        });
+        render();
     }
-
-    private static class EstadoNotificacion {
-        ArrayDeque<MensajeNotificacion> cola = new ArrayDeque<>();
-        boolean mostrando = false;
-        Handler handler = new Handler(Looper.getMainLooper());
-        Runnable runnableSalida;
-    }
-
-    public static void show(View notificationView, String message, int type) {
-        if (notificationView == null) {
-            return;
+    private static ViewGroup hostVisible(Activity a) {
+        for(int i=dialogos.size()-1;i>=0;i--) {
+            android.app.Dialog d=dialogos.get(i).get();
+            if(d==null || !d.isShowing()) { dialogos.remove(i); continue; }
+            android.content.Context c=d.getContext();
+            while(c instanceof android.content.ContextWrapper && !(c instanceof Activity)) c=((android.content.ContextWrapper)c).getBaseContext();
+            if(c==a && d.getWindow()!=null) return d.getWindow().getDecorView().findViewById(android.R.id.content);
         }
+        return a.findViewById(android.R.id.content);
+    }
+    private static ColaAvisos.Aviso dibujado;
+    private static String uidCompras;
+    private static long ultimaCompra=Long.MIN_VALUE;
+    private static long ultimoSonidoTienda=Long.MIN_VALUE;
+    private static final Runnable actualizar=NotificationHelper::render;
 
-        notificationView.post(() -> {
-            EstadoNotificacion estado = estados.get(notificationView);
-
-            if (estado == null) {
-                estado = new EstadoNotificacion();
-                estados.put(notificationView, estado);
+    public static void inicializar(Application app) {
+        app.registerActivityLifecycleCallbacks(new Application.ActivityLifecycleCallbacks() {
+            @Override public void onActivityResumed(Activity a) {
+                if(actividad.get()!=a) quitarHost();
+                actividad=new WeakReference<>(a); render();
             }
-
-            estado.cola.offer(new MensajeNotificacion(message, type));
-
-            if (!estado.mostrando) {
-                mostrarSiguiente(notificationView, estado);
+            @Override public void onActivityPaused(Activity a) {
+                if(actividad.get()==a) { quitarHost(); actividad.clear(); }
             }
+            @Override public void onActivityDestroyed(Activity a) {
+                if(actividad.get()==a) { quitarHost(); actividad.clear(); }
+            }
+            @Override public void onActivityCreated(Activity a,Bundle b) { }
+            @Override public void onActivityStarted(Activity a) { }
+            @Override public void onActivityStopped(Activity a) { }
+            @Override public void onActivitySaveInstanceState(Activity a,Bundle b) { }
         });
     }
-
-    private static void mostrarSiguiente(View notificationView, EstadoNotificacion estado) {
-        if (notificationView == null) {
-            estado.mostrando = false;
-            return;
-        }
-
-        MensajeNotificacion siguiente = estado.cola.poll();
-
-        if (siguiente == null) {
-            estado.mostrando = false;
-            return;
-        }
-
-        estado.mostrando = true;
-
-        if (estado.runnableSalida != null) {
-            estado.handler.removeCallbacks(estado.runnableSalida);
-            estado.runnableSalida = null;
-        }
-
-        MaterialCardView card = (MaterialCardView) notificationView;
-
-        card.animate().cancel();
-        card.clearAnimation();
-
-        aplicarDatosNotificacion(card, siguiente.message, siguiente.type);
-
-        card.bringToFront();
-        card.setTranslationZ(50f);
-
-        card.setAlpha(0f);
-        card.setTranslationY(-25f);
-        card.setVisibility(View.VISIBLE);
-
-        card.animate()
-                .alpha(1f)
-                .translationY(0f)
-                .setDuration(DURACION_ENTRADA_MS)
-                .withEndAction(() -> {
-                    estado.runnableSalida = () -> ocultarActual(card, estado);
-                    estado.handler.postDelayed(estado.runnableSalida, DURACION_VISIBLE_MS);
-                })
-                .start();
+    public static void show(View origen,String mensaje,int tipo) { showGlobal(mensaje,tipo); }
+    public static void showGlobal(String mensaje,int tipo) { enviar(null,mensaje,tipo); }
+    public static void avisoTienda(String mensaje,int tipo) {
+        handler.post(() -> { enviar(null,mensaje,tipo); sonarTienda(); });
     }
-
-    private static void ocultarActual(MaterialCardView card, EstadoNotificacion estado) {
-        if (card == null) {
-            estado.mostrando = false;
-            return;
+    private static void sonarTienda() {
+        long ahora=SystemClock.elapsedRealtime();
+        if(ultimoSonidoTienda==Long.MIN_VALUE || ahora-ultimoSonidoTienda>=4000) {
+            ultimoSonidoTienda=ahora; Sounds.playNotificaciones();
         }
-
-        card.animate().cancel();
-        card.clearAnimation();
-
-        card.animate()
-                .alpha(0f)
-                .translationY(-25f)
-                .setDuration(DURACION_SALIDA_MS)
-                .withEndAction(() -> {
-                    card.setVisibility(View.GONE);
-                    card.setAlpha(1f);
-                    card.setTranslationY(0f);
-
-                    estado.mostrando = false;
-                    estado.runnableSalida = null;
-
-                    if (!estado.cola.isEmpty()) {
-                        mostrarSiguiente(card, estado);
-                    }
-                })
-                .start();
+    }
+    public static void compra(String uid,String nombre) {
+        handler.post(() -> {
+            long ahora=SystemClock.elapsedRealtime();
+            boolean nuevo= !uid.equals(uidCompras) || ultimaCompra==Long.MIN_VALUE || ahora-ultimaCompra>4000;
+            if(!uid.equals(uidCompras)) { compras=new ResumenCompras(); uidCompras=uid; }
+            ultimaCompra=ahora;
+            enviar("compras:"+uid,compras.agregar(nombre,ahora),SUCCESS);
+            if(nuevo) sonarTienda();
+        });
+    }
+    private static void enviar(String clave,String mensaje,int tipo) {
+        if(mensaje==null || mensaje.trim().isEmpty()) return;
+        handler.post(() -> { avisos.agregar(clave,mensaje,tipo,SystemClock.elapsedRealtime()); render(); });
+    }
+    private static void quitarHost() {
+        if(card!=null) {
+            card.animate().cancel();
+            if(card.getParent() instanceof ViewGroup) ((ViewGroup)card.getParent()).removeView(card);
+        }
+        card=null; dibujado=null;
+    }
+    private static void render() {
+        handler.removeCallbacks(actualizar);
+        long ahora=SystemClock.elapsedRealtime();
+        ColaAvisos.Aviso aviso=avisos.actual(ahora);
+        if(aviso==null) {
+            if(card!=null) card.animate().alpha(0).translationY(-25).setDuration(220).withEndAction(() -> {
+                if(card!=null && avisos.actual(SystemClock.elapsedRealtime())==null) quitarHost();
+            }).start();
+            dibujado=null; return;
+        }
+        Activity a=actividad.get();
+        if(a!=null && !a.isFinishing() && !a.isDestroyed()) {
+            ViewGroup root=hostVisible(a);
+            if(root!=null) {
+                if(card!=null && card.getParent()!=root) quitarHost();
+                if(card==null) {
+                    card=(MaterialCardView)LayoutInflater.from(a).inflate(R.layout.component_notification_card,root,false);
+                    int margen=Math.round(16*a.getResources().getDisplayMetrics().density);
+                    FrameLayout.LayoutParams params=new FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,ViewGroup.LayoutParams.WRAP_CONTENT,Gravity.TOP);
+                    int arriba=0;
+                    WindowInsetsCompat insets=ViewCompat.getRootWindowInsets(root);
+                    if(insets!=null) arriba=insets.getInsets(WindowInsetsCompat.Type.systemBars()).top;
+                    params.setMargins(margen,arriba+margen,margen,0); root.addView(card,params);
+                    card.setTranslationZ(100); card.setElevation(100);
+                }
+                card.animate().cancel(); aplicarDatosNotificacion(card,aviso.texto,aviso.tipo);
+                TextView mensaje=card.findViewById(R.id.txtNotificationMessage);
+                if(mensaje!=null) mensaje.setMaxLines(aviso.clave!=null && aviso.clave.startsWith("compras:") ? 12 : 4);
+                card.bringToFront(); card.setVisibility(View.VISIBLE);
+                if(dibujado==null) { card.setAlpha(0); card.setTranslationY(-25); }
+                card.animate().alpha(1).translationY(0).setDuration(220).start();
+                dibujado=aviso;
+            }
+        }
+        handler.postDelayed(actualizar,Math.max(1,avisos.restante(ahora)));
     }
 
     private static void aplicarDatosNotificacion(MaterialCardView card, String message, int type) {

@@ -1,0 +1,8 @@
+
+com.example.basta_game.Mision16InterfazTest:...
+
+Time: 2.839
+
+OK (3 tests)
+
+

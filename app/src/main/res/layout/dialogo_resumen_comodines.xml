@@ -31,7 +31,7 @@
                 android:gravity="center"
                 android:text="RESUMEN DE COMODINES"
                 android:textColor="@color/colorPrimary"
-                android:textSize="24sp" />
+                android:textSize="28sp" />
 
             <TextView
                 android:layout_width="match_parent"
@@ -40,9 +40,9 @@
                 android:layout_marginBottom="16dp"
                 android:fontFamily="@font/manrope_regular"
                 android:gravity="center"
-                android:text="Esto pasó en la ronda mientras respondían..."
+                android:text="¡Así se sacudió la partida!"
                 android:textColor="@color/colorContenidoInputs"
-                android:textSize="13sp"
+                android:textSize="14sp"
                 android:textStyle="bold" />
 
             <androidx.recyclerview.widget.RecyclerView

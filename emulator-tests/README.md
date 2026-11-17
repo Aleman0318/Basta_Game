@@ -98,3 +98,28 @@ de ronda adquirido antes de un cierre incompleto. No se valida un cliente web.
 Referencias oficiales: [conexion a RTDB Emulator](https://firebase.google.com/docs/emulator-suite/connect_rtdb),
 [Admin Java SDK](https://firebase.google.com/docs/admin/setup),
 [override de autenticacion](https://firebase.google.com/docs/database/admin/start).
+
+
+## Mision 7
+
+Suite local: 14 casos. Se agregan compras concurrentes (monedas y gemas,
+conservando inventario y recibos) y el reloj compartido de revision: preparacion,
+inicio ServerValue.TIMESTAMP, 5 segundos reales, rechazo de votos tardios,
+empate y dos cierres simultaneos con un unico commit. Se usan RelojRevision,
+VotacionRevision y CompraComodin reales. Las restricciones y el diagnostico de
+presencia anteriores siguen vigentes. El contador visual Android no se prueba aqui.
+
+## Mision 9
+
+16 casos de integracion superados en demo-basta-concurrency: se agregan colision
+real de reservas de codigo (un unico propietario y rechazo de liberar otra sala)
+y BASTA concurrente (bandera/UID/timestamp servidor atomicos y deadline +10000).
+Se conservan compras concurrentes del mismo nodo de usuario, recompensas y host.
+Comando acotado: firebase emulators:exec --project demo-basta-concurrency --only
+database --config firebase.json .\verificar-m9.cmd. El CMD usa un trabajador,
+no parallel/no daemon, Gradle Xmx1280m y tests 256m. JVM de RTDB limitada a 512m
+mediante JAVA_TOOL_OPTIONS en la invocacion local. No se inicia Android Emulator.
+Las reglas siguen siendo fixture, sin Auth real ni permisos de produccion.
+Las duraciones de votacion para 5/6 elegibles se verifican en unitarias; este
+conjunto conserva el caso de 5 segundos reales de reloj, no una prueba fisica
+con seis telefonos. El diagnostico legacy presenceLimit sigue separado.

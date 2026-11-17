@@ -37,10 +37,12 @@ public class TiendaFragment extends Fragment {
     private TextView txtMonedasTienda, txtGemasTienda;
     private RecyclerView rvComodinesTienda;
     private View notificationTienda;
+    private android.app.Dialog dialogoCompra;
 
     private FirebaseAuth auth;
     private DatabaseReference usuarioRef;
     private ValueEventListener listenerUsuario;
+    private com.example.basta_game.utils.ComprasViewModel compras;
 
     // AHORA USAMOS EL ADAPTER PADRE
     private CategoriaTiendaAdapter adapter;
@@ -65,6 +67,17 @@ public class TiendaFragment extends Fragment {
         prepararFirebaseUsuario();
 
         return view;
+    }
+
+    @Override public void onViewCreated(@NonNull View view, Bundle state) {
+        super.onViewCreated(view,state);
+        compras=new androidx.lifecycle.ViewModelProvider(requireActivity()).get(com.example.basta_game.utils.ComprasViewModel.class);
+        compras.enCurso.observe(getViewLifecycleOwner(), ocupado -> {
+            if(adapter!=null) adapter.compraEnCurso(Boolean.TRUE.equals(ocupado));
+        });
+        compras.confirmado.observe(getViewLifecycleOwner(), datos -> {
+            if(datos!=null && auth.getCurrentUser()!=null && auth.getCurrentUser().getUid().equals(datos.getKey())) pintarUsuario(datos);
+        });
     }
 
     @Override
@@ -227,74 +240,37 @@ public class TiendaFragment extends Fragment {
     }
 
     private void escucharUsuario() {
-        if (usuarioRef == null) return;
-
-        listenerUsuario = usuarioRef.addValueEventListener(new ValueEventListener() {
-            @Override
-            public void onDataChange(@NonNull DataSnapshot snapshot) {
-                int monedas = leerEntero(snapshot.child("monedas"), 0);
-                int gemas = leerEntero(snapshot.child("gemas"), 0);
-
-                txtMonedasTienda.setText(String.valueOf(monedas));
-                txtGemasTienda.setText(String.valueOf(gemas));
-
-                Map<String, Integer> cantidades = new HashMap<>();
-                DataSnapshot inventarioSnap = snapshot.child("inventarioComodines");
-
-                for (DataSnapshot comodinSnap : inventarioSnap.getChildren()) {
-                    String id = comodinSnap.getKey();
-                    int cantidad = leerEntero(comodinSnap.child("cantidad"), 0);
-                    if (id != null) cantidades.put(id, cantidad);
-                }
-                if (adapter != null) adapter.actualizarInventario(cantidades);
+        if(usuarioRef==null) return;
+        listenerUsuario=usuarioRef.addValueEventListener(new ValueEventListener() {
+            @Override public void onDataChange(@NonNull DataSnapshot snapshot) {
+                if(getView()!=null) pintarUsuario(snapshot);
             }
-
-            @Override
-            public void onCancelled(@NonNull DatabaseError error) { }
+            @Override public void onCancelled(@NonNull DatabaseError error) {
+                NotificationHelper.avisoTienda("No se pudo actualizar el inventario",NotificationHelper.WARNING);
+            }
         });
     }
-
+    private void pintarUsuario(DataSnapshot snapshot) {
+        txtMonedasTienda.setText(String.valueOf(leerEntero(snapshot.child("monedas"),0)));
+        txtGemasTienda.setText(String.valueOf(leerEntero(snapshot.child("gemas"),0)));
+        Map<String,Integer> cantidades=new HashMap<>();
+        for(DataSnapshot item:snapshot.child("inventarioComodines").getChildren())
+            if(item.getKey()!=null) cantidades.put(item.getKey(),leerEntero(item.child("cantidad"),0));
+        if(adapter!=null) adapter.actualizarInventario(cantidades);
+    }
     private void comprarComodin(ComodinTienda comodin) {
-        if (usuarioRef == null || comodin == null) return;
-
-        usuarioRef.runTransaction(new Transaction.Handler() {
-            @NonNull
-            @Override
-            public Transaction.Result doTransaction(@NonNull MutableData currentData) {
-                String campoSaldo = comodin.getTipoMoneda().equalsIgnoreCase("gemas") ? "gemas" : "monedas";
-                int saldoActual = leerEnteroMutable(currentData.child(campoSaldo), 0);
-
-                if (saldoActual < comodin.getPrecio()) return Transaction.abort();
-
-                int cantidadActual = leerEnteroMutable(currentData.child("inventarioComodines").child(comodin.getId()).child("cantidad"), 0);
-
-                currentData.child(campoSaldo).setValue(saldoActual - comodin.getPrecio());
-                currentData.child("inventarioComodines").child(comodin.getId()).child("cantidad").setValue(cantidadActual + 1);
-                currentData.child("inventarioComodines").child(comodin.getId()).child("nombre").setValue(comodin.getNombre());
-                currentData.child("inventarioComodines").child(comodin.getId()).child("tipoMoneda").setValue(comodin.getTipoMoneda());
-
-                return Transaction.success(currentData);
-            }
-
-            @Override
-            public void onComplete(DatabaseError error, boolean committed, DataSnapshot currentData) {
-                if (error != null) {
-                    NotificationHelper.show(notificationTienda, "Error al comprar comodín", NotificationHelper.ERROR);
-                    Sounds.playNotificaciones();
-                    return;
-                }
-                if (committed) {
-                    NotificationHelper.show(notificationTienda, "Compraste " + comodin.getNombre(), NotificationHelper.SUCCESS);
-                    Sounds.playNotificaciones();
-                } else {
-                    String moneda = comodin.getTipoMoneda().equalsIgnoreCase("gemas") ? "gemas" : "monedas";
-                    NotificationHelper.show(notificationTienda, "No tienes suficientes " + moneda, NotificationHelper.WARNING);
-                    Sounds.playNotificaciones();
-                }
-            }
-        });
+        if(compras==null || com.example.basta_game.utils.ComprasViewModel.confirmacionAbierta ||
+                Boolean.TRUE.equals(compras.enCurso.getValue())) return;
+        com.example.basta_game.utils.ComprasViewModel.confirmacionAbierta=true;
+        String moneda="gemas".equals(comodin.getTipoMoneda()) ? "gemas" : "monedas";
+        android.app.Dialog dialogo=com.example.basta_game.utils.CustomDialogHelper.show(requireContext(),
+                "Confirmar compra","¿Quieres comprar "+comodin.getNombre()+" por "+comodin.getPrecio()+" "+moneda+"?",true,
+                new com.example.basta_game.utils.CustomDialogHelper.DialogButton("Cancelar",android.graphics.Color.GRAY,android.graphics.Color.WHITE,true,null),
+                new com.example.basta_game.utils.CustomDialogHelper.DialogButton("Comprar",android.graphics.Color.rgb(11,76,227),android.graphics.Color.WHITE,true,
+                        () -> compras.comprar(usuarioRef,comodin)));
+        dialogoCompra=dialogo;
+        dialogo.setOnDismissListener(d -> {dialogoCompra=null;com.example.basta_game.utils.ComprasViewModel.confirmacionAbierta=false;});
     }
-
     private int leerEntero(DataSnapshot snapshot, int valorDefault) {
         Object valor = snapshot.getValue();
         if (valor instanceof Number) return ((Number) valor).intValue();
@@ -315,6 +291,7 @@ public class TiendaFragment extends Fragment {
 
     @Override
     public void onDestroyView() {
+        if(dialogoCompra!=null) dialogoCompra.dismiss();
         super.onDestroyView();
         if (usuarioRef != null && listenerUsuario != null) {
             usuarioRef.removeEventListener(listenerUsuario);

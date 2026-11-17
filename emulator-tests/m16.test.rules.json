@@ -1,0 +1,6 @@
+{
+  "rules": {
+    "usuarios": {"$uid": {".read": "auth != null && auth.uid == $uid", ".write": "auth != null && auth.uid == $uid"}},
+    "salas": {"$sala": {".read": "auth != null", ".write": "auth != null"}}
+  }
+}

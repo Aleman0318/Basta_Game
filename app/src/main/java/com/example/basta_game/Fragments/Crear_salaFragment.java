@@ -13,8 +13,8 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.appcompat.widget.AppCompatButton;
 import androidx.fragment.app.Fragment;
-import androidx.recyclerview.widget.GridLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
+
+
 
 import com.example.basta_game.Adapters.CategoriaAdapter;
 import com.example.basta_game.R;
@@ -47,7 +47,7 @@ public class Crear_salaFragment extends Fragment {
     private final ArrayList<String> categoriasActivas = new ArrayList<>();
     private final ArrayList<Categoria> listaCategoriasBase = new ArrayList<>();
 
-    private RecyclerView rvCategorias;
+    private com.example.basta_game.utils.ListaContenido rvCategorias;
     private SeekBar sbTiempo;
 
     private TextView tvTiempoActual;
@@ -93,6 +93,28 @@ public class Crear_salaFragment extends Fragment {
         configurarBotonRegresar();
     }
 
+    private java.util.Map<String,Object> crearAnfitrionPendiente(String uid,String nombre,String foto) {
+        java.util.Map<String,Object> j=new java.util.HashMap<>();
+        j.put("uid",uid);j.put("nombre",nombre);j.put("urlAvatar",foto);j.put("puntajePartida",0);
+        j.put("esHost",true);j.put("estaListo",false);j.put("estaConectado",false);
+        j.put("desconectadoDesde",com.google.firebase.database.ServerValue.TIMESTAMP);return j;
+    }
+    private void ajustarDistribucion(View vista) {
+        if(!(vista instanceof android.view.ViewGroup)) return;
+        android.view.ViewGroup grupo=(android.view.ViewGroup)vista;
+        boolean estrecho=getResources().getConfiguration().screenWidthDp<300 || (getResources().getConfiguration().screenWidthDp<360 && getResources().getConfiguration().fontScale>1.8f);
+        if(estrecho && grupo instanceof android.widget.LinearLayout && grupo.getChildCount()==2 &&
+                grupo.getChildAt(0) instanceof com.google.android.material.card.MaterialCardView &&
+                grupo.getChildAt(1) instanceof com.google.android.material.card.MaterialCardView) {
+            ((android.widget.LinearLayout)grupo).setOrientation(android.widget.LinearLayout.VERTICAL);
+            for(int j=0;j<2;j++) {
+                android.widget.LinearLayout.LayoutParams lp=(android.widget.LinearLayout.LayoutParams)grupo.getChildAt(j).getLayoutParams();
+                lp.width=android.view.ViewGroup.LayoutParams.MATCH_PARENT;lp.weight=0;
+                lp.topMargin=Math.round(8*getResources().getDisplayMetrics().density);grupo.getChildAt(j).setLayoutParams(lp);
+            }
+        }
+        for(int j=0;j<grupo.getChildCount();j++) ajustarDistribucion(grupo.getChildAt(j));
+    }
     private void inicializarVistas(View view) {
         rvCategorias = view.findViewById(R.id.rvCategorias);
 
@@ -111,12 +133,13 @@ public class Crear_salaFragment extends Fragment {
         btnRegresar = view.findViewById(R.id.btnRegresar);
 
         notificationCrearSala = view.findViewById(R.id.notificationCrearSala);
+        ajustarDistribucion(view);
 
         Animations.animacionAparicion(btnCrearSalaFinal);
     }
 
     private void configurarCategorias() {
-        rvCategorias.setLayoutManager(new GridLayoutManager(getContext(), 2));
+        rvCategorias.setColumnas(getResources().getConfiguration().screenWidthDp<360 || getResources().getConfiguration().fontScale>1.25f ? 1 : 2);
 
         listaCategoriasBase.clear();
 
@@ -143,7 +166,9 @@ public class Crear_salaFragment extends Fragment {
             }
         });
 
+
         rvCategorias.setAdapter(adaptador);
+        rvCategorias.post(() -> rvCategorias.requestLayout());
     }
 
     private void actualizarCategoriasActivasEnOrden() {
@@ -211,7 +236,7 @@ public class Crear_salaFragment extends Fragment {
     }
 
     private void sumarRonda() {
-        if (contadorRondas < 26) {
+        if (contadorRondas < 27) {
             contadorRondas++;
             tvCantRondas.setText(String.valueOf(contadorRondas));
         }
@@ -267,6 +292,7 @@ public class Crear_salaFragment extends Fragment {
     }
 
     private void crearSala() {
+        if(!com.example.basta_game.utils.ConexionJuego.disponible()) return;
 
         Log.d("DEBUG_SALA", "Entrando a funcion sala");
 
@@ -280,6 +306,8 @@ public class Crear_salaFragment extends Fragment {
 
             Log.d("DEBUG_SALA", "Sesion validada con metodo verificarsesion");
 
+            if(!com.example.basta_game.utils.CargaBoton.iniciar(btnCrearSalaFinal))return;
+        final Object operacion=com.example.basta_game.utils.CargaBoton.token(btnCrearSalaFinal);
             String usuarioUID = auth.getCurrentUser().getUid();
 
             DatabaseReference db = FirebaseDatabase
@@ -291,6 +319,7 @@ public class Crear_salaFragment extends Fragment {
                 @Override
                 public void onDataChange(@NonNull DataSnapshot snapshot) {
 
+                    if(!isAdded() || getView()==null || !com.example.basta_game.utils.CargaBoton.activa(btnCrearSalaFinal,operacion))return;
                     Usuario user = snapshot.getValue(Usuario.class);
 
                     if (user == null || !com.example.basta_game.utils.IdentidadJugador.nombreValido(user.getNombre())) {
@@ -300,6 +329,7 @@ public class Crear_salaFragment extends Fragment {
                                 NotificationHelper.ERROR
                         );
                         Sounds.playNotificaciones();
+                        com.example.basta_game.utils.CargaBoton.terminar(btnCrearSalaFinal,operacion);
                         return;
                     }
 
@@ -349,95 +379,27 @@ public class Crear_salaFragment extends Fragment {
                             categoriasSeleccionadas
                     );
 
-                    salaConID.setValue(sala).addOnCompleteListener(taskSala -> {
-                        if (taskSala.isSuccessful()) {
-
-                            Log.d("DEBUG_SALA", "Sala creada correctamente");
-
-                            JugadorSala jugador = new JugadorSala(
-                                    usuarioUID,
-                                    nombreUsuario,
-                                    0,
-                                    false,
-                                    true,
-                                    true,
-                                    urlAvatar
-                            );
-
-                            salaConID.child("jugadores")
-                                    .child(usuarioUID)
-                                    .setValue(jugador)
-                                    .addOnCompleteListener(task -> {
-
-                                        if (task.isSuccessful()) {
-
-
-
-                                            Log.d("DEBUG_SALA", "Jugador creado correctamente");
-
-                                            CodigoSalaSearch codigo = new CodigoSalaSearch(
-                                                    codigoSala,
-                                                    idSalaString,
-                                                    true
-                                            );
-
-                                            DatabaseReference nodoCodigoSala = FirebaseDatabase
-                                                    .getInstance()
-                                                    .getReference("codigosSalas");
-
-                                            nodoCodigoSala.child(codigoSala)
-                                                    .setValue(codigo)
-                                                    .addOnCompleteListener(taskCodigo -> {
-
-                                                        if (taskCodigo.isSuccessful()) {
-
-                                                            Log.d("DEBUG_SALA", "codigo almacenado en realtime correctamente");
-                                                            Log.d("JUGADOR_SALA", "jugador sala cargado correctamente en la realtime");
-
-                                                            abrirLobbyComoAnfitrion(categoriasSeleccionadas);
-
-                                                        } else {
-
-                                                            Log.d("JUGADOR_SALA", "no se pudo crear el nodo codigo sala");
-
-                                                            NotificationHelper.show(
-                                                                    notificationCrearSala,
-                                                                    "¡No se pudo guardar el código de la sala!",
-                                                                    NotificationHelper.ERROR
-                                                            );
-                                                            Sounds.playNotificaciones();
-                                                        }
-                                                    });
-
-                                        } else {
-
-                                            Log.d("JUGADOR_SALA", "no se pudo cargar el jugador a la realtime");
-
-                                            NotificationHelper.show(
-                                                    notificationCrearSala,
-                                                    "¡No se pudo agregar el jugador!",
-                                                    NotificationHelper.ERROR
-                                            );
-                                            Sounds.playNotificaciones();
-                                        }
-                                    });
-
-                        } else {
-
-                            Log.d("DEBUG_SALA", "no se pudo crear la sala");
-
-                            NotificationHelper.show(
-                                    notificationCrearSala,
-                                    "¡No se pudo crear la sala!",
-                                    NotificationHelper.ERROR
-                            );
-                            Sounds.playNotificaciones();
-                        }
-                    });
+                    java.util.Map<String,Object> datos=new java.util.HashMap<>();
+                    datos.put("idSala",idSalaString);datos.put("codigoSala",codigoSala);
+                    datos.put("hostUID",usuarioUID);datos.put("hostNombre",nombreUsuario);
+                    datos.put("estadoPartida",estadoSala);datos.put("letraActual",letraElegida);
+                    datos.put("rondaActual",rondaActual);datos.put("cantidadRondas",rondasMaximas);
+                    datos.put("fechaCreacion",com.google.firebase.database.ServerValue.TIMESTAMP);
+                    datos.put("maxJugadores",jugadoresMaximos);datos.put("tiempoRonda",tiempoRonda);
+                    datos.put("categoriasActivas",categoriasSeleccionadas);
+                    datos.put("jugadores",java.util.Collections.singletonMap(usuarioUID,crearAnfitrionPendiente(usuarioUID,nombreUsuario,urlAvatar)));
+                    btnCrearSalaFinal.setEnabled(false);
+                    com.example.basta_game.utils.CreacionSala.crear(FirebaseDatabase.getInstance().getReference("codigosSalas").child(codigoSala),
+                            salaConID,datos,ok -> {
+                                if(!isAdded() || getView()==null) return;
+                                if(!com.example.basta_game.utils.CargaBoton.terminar(btnCrearSalaFinal,operacion))return;
+                                if(ok) abrirLobbyComoAnfitrion(categoriasSeleccionadas);
+                                else NotificationHelper.show(notificationCrearSala,"No se pudo reservar o crear la sala. Reintenta con otro codigo",NotificationHelper.ERROR);
+                            });
                 }
-
                 @Override
                 public void onCancelled(@NonNull DatabaseError error) {
+                    com.example.basta_game.utils.CargaBoton.terminar(btnCrearSalaFinal,operacion);
                     Log.d("DEBUG_SALA", "Error leyendo usuario: " + error.getMessage());
 
                     NotificationHelper.show(

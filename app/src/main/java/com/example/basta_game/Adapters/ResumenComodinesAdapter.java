@@ -38,7 +38,10 @@ public class ResumenComodinesAdapter extends RecyclerView.Adapter<ResumenComodin
         EventoComodin evento = listaEventos.get(position);
 
         holder.txtTitulo.setText(evento.getTitulo());
-        holder.txtDescripcion.setText(evento.getDescripcion());
+        android.text.SpannableString relato=new android.text.SpannableString(evento.getDescripcion());
+        java.util.regex.Matcher cifras=java.util.regex.Pattern.compile("\\d+(?:[.,]\\d+)? (?:puntos|s\\b)").matcher(relato);
+        while(cifras.find()) relato.setSpan(new android.text.style.StyleSpan(android.graphics.Typeface.BOLD),cifras.start(),cifras.end(),0);
+        holder.txtDescripcion.setText(relato);
         holder.imgIcono.setImageResource(evento.getIconoResId());
 
         // Coloreamos los bordes dependiendo si fue un beneficio o un castigo

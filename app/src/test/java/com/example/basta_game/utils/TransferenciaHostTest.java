@@ -147,13 +147,13 @@ public class TransferenciaHostTest {
         } finally { executor.shutdownNow(); }
     }
 
-    @Test public void salidaRetiraVotosYListosPeroConservaPuntos() {
+    @Test public void salidaRetiraListosPeroConservaVotosEmitidosYPuntos() {
         MutableData sala = sala("h", "b", "c");
         sala.child("votacionActiva/ronda_2/votos/h").setValue("si");
         sala.child("revisionLista/ronda_2/h").setValue(true);
         sala.child("entradaPartida/ronda_2/h/dentro").setValue(true);
         TransferenciaHost.abandonar(sala, "h");
-        assertNull(sala.child("votacionActiva/ronda_2/votos/h").getValue());
+        assertEquals("si",sala.child("votacionActiva/ronda_2/votos/h").getValue());
         assertNull(sala.child("revisionLista/ronda_2/h").getValue());
         assertNull(sala.child("entradaPartida/ronda_2/h").getValue());
         assertEquals(50L, sala.child("puntajesRondas/ronda_1/b").getValue());

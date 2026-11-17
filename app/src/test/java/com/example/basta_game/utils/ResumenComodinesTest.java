@@ -5,6 +5,16 @@ import org.junit.Test;
 import static org.junit.Assert.*;
 
 public class ResumenComodinesTest {
+    @Test public void narracionDeCastigoUsaSoloLaPerdidaRegistrada() {
+        Map<String,Object> doble=new HashMap<>();doble.put("resultado","castigo");doble.put("puntosBase",40);doble.put("puntosFinales",25);
+        Map<String,Object> sala=new HashMap<>();
+        sala.put("jugadores",Collections.singletonMap("u",Collections.singletonMap("nombre","Alemango")));
+        sala.put("comodinesResultados",Collections.singletonMap("ronda_1",Collections.singletonMap("u",Collections.singletonMap("doble_o_nada",doble))));
+        String descripcion=ResumenComodines.crear(sala,1,true).get(0).getDescripcion();
+        assertTrue(descripcion.contains("Alemango"));assertTrue(descripcion.contains("Perdió 15 puntos"));assertTrue(descripcion.contains("40 -> 25"));
+        doble.remove("puntosBase");
+        assertFalse(ResumenComodines.crear(sala,1,true).get(0).getDescripcion().contains("15"));
+    }
     @Test public void sinRegistrosNoInventaUsos() {
         assertTrue(ResumenComodines.crear(Collections.emptyMap(),3,true).isEmpty());
     }

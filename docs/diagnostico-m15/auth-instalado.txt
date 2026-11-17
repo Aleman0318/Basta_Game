@@ -1,0 +1,8 @@
+
+com.example.basta_game.AuthFlujoTest:.
+
+Time: 8.863
+
+OK (1 test)
+
+

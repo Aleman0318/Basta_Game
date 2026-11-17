@@ -1,0 +1,1 @@
+ancho=29; padding=0,0; texto=27; anchoTexto=21.0; alto=48

@@ -23,83 +23,20 @@ public class ComodinMarcaDeLaMuerte extends BaseComodin {
         this.nombreVictima = nombreVictima;
     }
 
-    @Override
-    public void activar(String nombreJugador, ComodinCallback callback) {
-        descontarInventario(ID_COMODIN, callback, () -> {
-
-            // --- LÓGICA ALEATORIA CON PROBABILIDADES PONDERADAS (6 PARTES) ---
-            // [0, 1, 2] = Tres en Raya (50%)
-            // [3, 4]    = Piedra, Papel o Tijera (33.3%)
-            // [5]       = Duelo de Reflejos / Tiroteo (16.7%)
-            String[] ruletaPonderada = {
-                    "tres_en_raya", "tres_en_raya", "tres_en_raya",
-                    "piedra_papel_tijera", "piedra_papel_tijera",
-                    "duelo_reflejos"
-            };
-
-            String juegoElegido = ruletaPonderada[new Random().nextInt(ruletaPonderada.length)];
-
-            HashMap<String, Object> updates = new HashMap<>();
-
-            // --- FASE B: LA CREACIÓN DE LA ARENA ---
-            HashMap<String, Object> minijuegoData = new HashMap<>();
-            minijuegoData.put("activo", true);
-            minijuegoData.put("tipoJuego", juegoElegido);
-            minijuegoData.put("uidAtacante", miUid);
-            minijuegoData.put("uidVictima", uidVictima);
-
-            // Nombres para los espectadores
-            minijuegoData.put("nombreAtacante", nombreJugador);
-            minijuegoData.put("nombreVictima", nombreVictima);
-
-            // ESTADO INICIAL: "anuncio"
-            minijuegoData.put("estado", "anuncio");
-            minijuegoData.put("ganadorUid", "");
-
-            // --- INICIALIZACIÓN DINÁMICA SEGÚN EL MINIJUEGO ---
-            HashMap<String, Object> datosJuegoMap = new HashMap<>();
-            datosJuegoMap.put("turnoDe", miUid); // El Atacante siempre da el primer golpe por defecto
-
-            if (juegoElegido.equals("piedra_papel_tijera")) {
-                datosJuegoMap.put("eleccionA", "");
-                datosJuegoMap.put("eleccionV", "");
-                datosJuegoMap.put("puntosA", 0);
-                datosJuegoMap.put("puntosV", 0);
+    @Override public void activar(String nombreJugador,ComodinCallback callback) {
+        final int semilla=new Random().nextInt(6), delay=new Random().nextInt(3000);
+        final String uso="marca_"+salaRef.push().getKey();
+        descontarInventario(ID_COMODIN,callback,() -> salaRef.runTransaction(new com.google.firebase.database.Transaction.Handler() {
+            @Override public com.google.firebase.database.Transaction.Result doTransaction(com.google.firebase.database.MutableData sala) {
+                if(sala.getValue()==null) return com.google.firebase.database.Transaction.success(sala);
+                return com.example.basta_game.utils.SeleccionMinijuego.publicar(sala,rondaActual,miUid,uidVictima,nombreJugador,nombreVictima,semilla,delay,uso)
+                        ? com.google.firebase.database.Transaction.success(sala) : com.google.firebase.database.Transaction.abort();
             }
-            else if (juegoElegido.equals("tres_en_raya")) {
-                // Creamos las 9 casillas (c0 a c8) vacías para el tablero
-                for (int i = 0; i < 9; i++) {
-                    datosJuegoMap.put("c" + i, "");
-                }
-                datosJuegoMap.put("histA", "");
-                datosJuegoMap.put("histV", "");
+            @Override public void onComplete(com.google.firebase.database.DatabaseError e,boolean ok,com.google.firebase.database.DataSnapshot sala) {
+                if(e==null && ok) callback.onSuccess("SILENCIO");else callback.onError("No se pudo publicar el duelo: revisa si ya hay otro activo");
             }
-            else if (juegoElegido.equals("duelo_reflejos")) {
-                datosJuegoMap.put("reaccionA", 0L); // Tiempo en ms
-                datosJuegoMap.put("reaccionV", 0L); // Tiempo en ms
-
-                // Generamos el tiempo de espera aleatorio (entre 2 y 5 segundos) UNA sola vez para ambos
-                datosJuegoMap.put("delayTiroteo", 2000L + new Random().nextInt(3000));
-            }
-
-            minijuegoData.put("datosJuego", datosJuegoMap);
-            updates.put("minijuegoActual", minijuegoData);
-            String uso = "comodinesUsados/ronda_" + rondaActual + "/marca_" + miUid + "_" + System.currentTimeMillis();
-            updates.put(uso + "/tipo", ID_COMODIN);
-            updates.put(uso + "/uid", miUid);
-            updates.put(uso + "/nombreJugador", nombreJugador);
-            updates.put(uso + "/timestamp", com.google.firebase.database.ServerValue.TIMESTAMP);
-
-            salaRef.updateChildren(updates).addOnCompleteListener(task -> {
-                if(task.isSuccessful()){
-                    callback.onSuccess("SILENCIO");
-                } else {
-                    callback.onError("Error al invocar la arena de combate.");
-                }
-            });
-        });
+        },false));
     }
-
     /**
      * Da formato bonito al nombre del juego para el texto de notificación
      */

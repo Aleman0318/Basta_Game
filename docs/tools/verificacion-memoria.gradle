@@ -1,0 +1,7 @@
+// Local recovery checks: keep the test JVM small and run one fork at a time.
+allprojects {
+    tasks.withType(Test).configureEach {
+        maxParallelForks = 1
+        maxHeapSize = '256m'
+    }
+}

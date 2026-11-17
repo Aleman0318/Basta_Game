@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.example.basta_game.emulator.ConcurrenciaEmulatorTest" tests="34" skipped="0" failures="0" errors="0" timestamp="2026-11-17T06:07:12.115Z" hostname="LAPTOP-333LN552" time="11.457">
+  <properties/>
+  <testcase name="dosSolicitudesDeRespuestasDiferentesSoloAbrenUnDialogo" classname="com.example.basta_game.emulator.ConcurrenciaEmulatorTest" time="0.977"/>
+  <testcase name="dosClientesNoRepitenUnaRuletaConfirmada" classname="com.example.basta_game.emulator.ConcurrenciaEmulatorTest" time="0.074"/>
+  <testcase name="reglaLocalDenegadaNoPublicaHistorialMarcaNiMonedas" classname="com.example.basta_game.emulator.ConcurrenciaEmulatorTest" time="0.045"/>
+  <testcase name="conflictoRealReejecutaYConservaOtraEscritura" classname="com.example.basta_game.emulator.ConcurrenciaEmulatorTest" time="0.058"/>
+  <testcase name="saltarinesConcurrentesMismoUsoNoDuplicanTransferencia" classname="com.example.basta_game.emulator.ConcurrenciaEmulatorTest" time="0.06"/>
+  <testcase name="categoriaAutomaticaConcurrenteTieneUnSoloPlazoFinal" classname="com.example.basta_game.emulator.ConcurrenciaEmulatorTest" time="0.092"/>
+  <testcase name="presenciaM16AbandonoDuranteRecreacionRetiraSusDosSesiones" classname="com.example.basta_game.emulator.ConcurrenciaEmulatorTest" time="0.055"/>
+  <testcase name="colisionRealDeCodigoSoloReservaUnaSalaYNoLiberaOtra" classname="com.example.basta_game.emulator.ConcurrenciaEmulatorTest" time="0.066"/>
+  <testcase name="salidaDuranteEsperaPermiteAvanzarYResumenNoReabreFinal" classname="com.example.basta_game.emulator.ConcurrenciaEmulatorTest" time="0.098"/>
+  <testcase name="dosPublicacionesDeDueloCompartenUnaSeleccionSinRepetir" classname="com.example.basta_game.emulator.ConcurrenciaEmulatorTest" time="0.058"/>
+  <testcase name="comprasConcurrentesDeAmbasMonedasNoPierdenInventario" classname="com.example.basta_game.emulator.ConcurrenciaEmulatorTest" time="0.061"/>
+  <testcase name="bastaConcurrentePublicaUnaMarcaServidorYDiezSegundos" classname="com.example.basta_game.emulator.ConcurrenciaEmulatorTest" time="0.035"/>
+  <testcase name="presenciaM16ReconexionCompiteConExpiracionSinBorrarSesionValida" classname="com.example.basta_game.emulator.ConcurrenciaEmulatorTest" time="0.042"/>
+  <testcase name="segundaPartidaAvanzaUnaVezConDosYTresJugadores" classname="com.example.basta_game.emulator.ConcurrenciaEmulatorTest" time="0.089"/>
+  <testcase name="expulsionConcurrenteConEntradaNoPermiteReaparicion" classname="com.example.basta_game.emulator.ConcurrenciaEmulatorTest" time="0.044"/>
+  <testcase name="presenciaM16OnDisconnectRealYLimite90Segundos" classname="com.example.basta_game.emulator.ConcurrenciaEmulatorTest" time="0.147"/>
+  <testcase name="ultimaPlazaSoloAdmiteUnUIDYReconexionNoDuplicaCupo" classname="com.example.basta_game.emulator.ConcurrenciaEmulatorTest" time="0.038"/>
+  <testcase name="onDisconnectRealRegistraAusenciaYNoDevuelveCorona" classname="com.example.basta_game.emulator.ConcurrenciaEmulatorTest" time="0.035"/>
+  <testcase name="operacionPendienteOfflineNoDuplicaAlReconectar" classname="com.example.basta_game.emulator.ConcurrenciaEmulatorTest" time="0.042"/>
+  <testcase name="admisionCasosABCD" classname="com.example.basta_game.emulator.ConcurrenciaEmulatorTest" time="0.058"/>
+  <testcase name="cierreM16DosClientesRetrasoYListenerRecreado" classname="com.example.basta_game.emulator.ConcurrenciaEmulatorTest" time="0.046"/>
+  <testcase name="cierreM16ConcurrenteSinHostYConRespuestasAusentes" classname="com.example.basta_game.emulator.ConcurrenciaEmulatorTest" time="0.045"/>
+  <testcase name="plazoCompartidoNoDependeDelClienteQueLee" classname="com.example.basta_game.emulator.ConcurrenciaEmulatorTest" time="0.014"/>
+  <testcase name="presenciaM16EntradaConcurrenteConAbandonoNoRecreaJugador" classname="com.example.basta_game.emulator.ConcurrenciaEmulatorTest" time="0.029"/>
+  <testcase name="presenciaM16UltimoJugadorCierraUnaVezSinBonos" classname="com.example.basta_game.emulator.ConcurrenciaEmulatorTest" time="0.028"/>
+  <testcase name="votacionConcurrenteVotoUnicoYCierreIdempotente" classname="com.example.basta_game.emulator.ConcurrenciaEmulatorTest" time="0.099"/>
+  <testcase name="reentradaDeIdentidadNoBorraEstadoConcurrente" classname="com.example.basta_game.emulator.ConcurrenciaEmulatorTest" time="0.035"/>
+  <testcase name="dosAbandonosConcurrentesConservanSalaYPuntos" classname="com.example.basta_game.emulator.ConcurrenciaEmulatorTest" time="0.037"/>
+  <testcase name="hostAusenteDosClientesPublicanResumenUnaVezYContinuan" classname="com.example.basta_game.emulator.ConcurrenciaEmulatorTest" time="0.089"/>
+  <testcase name="eleccionConcurrenteDejaUnaSolaCorona" classname="com.example.basta_game.emulator.ConcurrenciaEmulatorTest" time="0.035"/>
+  <testcase name="presenciaM16SalidaReconciliadaEsUnicaYConservaOtraPartida" classname="com.example.basta_game.emulator.ConcurrenciaEmulatorTest" time="0.047"/>
+  <testcase name="expirarSeleccionYCrearVotoConcurrentesSonExcluyentes" classname="com.example.basta_game.emulator.ConcurrenciaEmulatorTest" time="0.03"/>
+  <testcase name="dosClientesNoPaganDosVecesYReentradaNoPaga" classname="com.example.basta_game.emulator.ConcurrenciaEmulatorTest" time="0.04"/>
+  <testcase name="relojCompartidoCincoSegundosRealesYCierreConcurrenteConEmpate" classname="com.example.basta_game.emulator.ConcurrenciaEmulatorTest" time="8.703"/>
+  <system-out><![CDATA[nonempty server transaction attempts=2
+reward attempts a=2 b=3
+]]></system-out>
+  <system-err><![CDATA[SLF4J(W): No SLF4J providers were found.
+SLF4J(W): Defaulting to no-operation (NOP) logger implementation
+SLF4J(W): See https://www.slf4j.org/codes.html#noProviders for further details.
+]]></system-err>
+</testsuite>

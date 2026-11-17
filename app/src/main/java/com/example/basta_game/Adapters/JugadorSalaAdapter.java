@@ -21,6 +21,12 @@ import java.util.List;
 public class JugadorSalaAdapter extends RecyclerView.Adapter<JugadorSalaAdapter.ViewHolder> {
 
     private List<JugadorSala> listaJugadores;
+    private boolean puedeExpulsar;
+    private String miUid;
+    private java.util.function.Consumer<String> expulsar;
+    public void configurarExpulsion(boolean host,String uid,java.util.function.Consumer<String> accion) {
+        puedeExpulsar=host; miUid=uid; expulsar=accion;
+    }
 
     public JugadorSalaAdapter(List<JugadorSala> listaJugadores) {
         this.listaJugadores = listaJugadores;
@@ -39,6 +45,9 @@ public class JugadorSalaAdapter extends RecyclerView.Adapter<JugadorSalaAdapter.
     public void onBindViewHolder(@NonNull JugadorSalaAdapter.ViewHolder holder, int position) {
         JugadorSala jugador = listaJugadores.get(position);
 
+        boolean accion=puedeExpulsar && jugador.getUid()!=null && !jugador.getUid().equals(miUid);
+        holder.itemView.setOnLongClickListener(accion ? v -> {expulsar.accept(jugador.getUid());return true;} : null);
+        holder.itemView.setLongClickable(accion);
         holder.tvNombre.setText(com.example.basta_game.utils.IdentidadJugador.nombreValido(jugador.getNombre())
                 ? jugador.getNombre() : "Cargando perfil...");
 
@@ -46,20 +55,20 @@ public class JugadorSalaAdapter extends RecyclerView.Adapter<JugadorSalaAdapter.
                 .load(jugador.getUrlAvatar())
                 .placeholder(R.drawable.outline_person_24)
                 .error(R.drawable.outline_person_24)
-                .into(holder.imgAvatar);
+                .override(192,192).into(holder.imgAvatar);
 
         if (!jugador.isEstaConectado()) {
-            aplicarEstadoDesconectado(holder);
+            aplicarEstadoDesconectado(holder,accion);
         } else {
             if (jugador.isEstaListo()) {
-                aplicarEstadoListo(holder);
+                aplicarEstadoListo(holder,accion);
             } else {
                 aplicarEstadoEsperando(holder);
             }
         }
     }
 
-    private void aplicarEstadoListo(ViewHolder holder) {
+    private void aplicarEstadoListo(ViewHolder holder,boolean accion) {
         holder.cardJugadorLobby.setCardBackgroundColor(
                 ColorStateList.valueOf(Color.parseColor("#F6FFF6"))
         );
@@ -117,7 +126,7 @@ public class JugadorSalaAdapter extends RecyclerView.Adapter<JugadorSalaAdapter.
         holder.tvSubtitulo.setTextColor(Color.parseColor("#7596A7"));
     }
 
-    private void aplicarEstadoDesconectado(ViewHolder holder) {
+    private void aplicarEstadoDesconectado(ViewHolder holder,boolean accion) {
         holder.cardJugadorLobby.setCardBackgroundColor(
                 ColorStateList.valueOf(Color.parseColor("#F8FAFC"))
         );
@@ -142,7 +151,7 @@ public class JugadorSalaAdapter extends RecyclerView.Adapter<JugadorSalaAdapter.
         holder.tvEstadoJugador.setText("Reconectando...");
         holder.tvEstadoJugador.setTextColor(Color.parseColor("#64748B"));
 
-        holder.tvSubtitulo.setText("Conservando su lugar");
+        holder.tvSubtitulo.setText("Reservando su lugar mientras se reconecta");
         holder.tvSubtitulo.setTextColor(Color.parseColor("#94A3B8"));
     }
 

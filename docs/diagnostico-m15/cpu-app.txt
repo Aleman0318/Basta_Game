@@ -1,0 +1,6 @@
+Tasks: 1 total,   0 running,   1 sleeping,   0 stopped,   0 zombie
+  Mem:  4005308K total,  3341568K used,   663740K free,    24228K buffers
+ Swap:  3003976K total,   578820K used,  2425156K free,  1841560K cached
+600%cpu   0%user   0%nice  12%sys 588%idle   0%iow   0%irq   0%sirq   0%host
+  PID USER         PR  NI VIRT  RES  SHR S[%CPU] %MEM     TIME+ ARGS
+ 3947 u0_a235      10 -10  16G 208M 124M S  0.0   5.3   0:31.93 com.example.basta_game

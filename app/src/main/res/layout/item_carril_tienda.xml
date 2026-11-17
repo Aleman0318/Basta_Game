@@ -6,7 +6,7 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:orientation="vertical"
-    android:layout_marginBottom="32dp">
+    android:layout_marginBottom="16dp">
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
@@ -48,8 +48,8 @@
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/rvCarrilHorizontal"
         android:layout_width="match_parent"
-        android:layout_height="270dp"
-        android:minHeight="230dp"
+        android:layout_height="wrap_content"
+        android:minHeight="0dp"
         android:layout_marginTop="5dp"
         android:clipToPadding="false"
         android:paddingHorizontal="8dp"

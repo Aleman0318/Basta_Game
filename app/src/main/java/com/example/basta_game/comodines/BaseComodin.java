@@ -33,7 +33,10 @@ public abstract class BaseComodin {
 
     // SOLUCIÓN BUG 1: Usamos SingleValueEvent para evitar que la caché vacía aborte la operación.
     protected void descontarInventario(String idComodin, ComodinCallback callback, Runnable onDescontadoExito) {
+        if(!com.example.basta_game.utils.ConexionJuego.disponible()){callback.onError("Necesitas conexion para usar comodines");return;}
+        final long conexion=com.example.basta_game.utils.ConexionJuego.version();
         salaRef.get().addOnSuccessListener(sala -> {
+            if(!com.example.basta_game.utils.ConexionJuego.vigente(conexion)){callback.onError("La conexion cambio; vuelve a intentarlo");return;}
             Object actual = sala.child("rondaActual").getValue();
             Object maximo = sala.child("cantidadRondas").getValue();
             if (!sala.child("jugadores").hasChild(miUid) || !(actual instanceof Number) ||
@@ -50,11 +53,13 @@ public abstract class BaseComodin {
     }
 
     private void descontarInventarioVerificado(String idComodin, ComodinCallback callback, Runnable onDescontadoExito) {
+        final long conexion=com.example.basta_game.utils.ConexionJuego.version();
         DatabaseReference cantidadRef = usuarioRef.child("inventarioComodines").child(idComodin).child("cantidad");
 
         cantidadRef.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
+                if(!com.example.basta_game.utils.ConexionJuego.vigente(conexion)){callback.onError("La conexion cambio; vuelve a intentarlo");return;}
                 Integer cantidadActual = snapshot.getValue(Integer.class);
 
                 if (cantidadActual != null && cantidadActual > 0) {

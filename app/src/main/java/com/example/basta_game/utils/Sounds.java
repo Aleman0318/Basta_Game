@@ -13,6 +13,9 @@ public class Sounds {
     public static int perdedorSound;
     public static int notificacionesSound;
     public static int loadingPartidaSound;
+    private static int loadingStream;
+    public static void detenerTodo(){detenerLoadingPartida();if(soundPool!=null)soundPool.autoPause();}
+    public static void detenerLoadingPartida(){if(soundPool!=null && loadingStream!=0) soundPool.stop(loadingStream);loadingStream=0;}
     public static int conteoFinalSound;
     public static int bastaSound;
     public static int conteoCombate;
@@ -66,7 +69,7 @@ public class Sounds {
     }
     public static void playLoadingPartida(){
         if (soundPool != null){
-            soundPool.play(loadingPartidaSound, 1f, 1f, 1, 0,1f);
+            detenerLoadingPartida();loadingStream=soundPool.play(loadingPartidaSound, 1f, 1f, 1, 0,1f);
         }
     }
     public static void conteoFinalPlay(){

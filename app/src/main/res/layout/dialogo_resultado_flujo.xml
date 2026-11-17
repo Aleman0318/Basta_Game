@@ -45,7 +45,7 @@
             </FrameLayout>
 
             <TextView
-                android:id="@+id/txtTituloResultado"
+                android:id="@+id/txtTituloResultado" android:singleLine="false" android:ellipsize="none" android:breakStrategy="simple"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:fontFamily="@font/lilitaone_regular"

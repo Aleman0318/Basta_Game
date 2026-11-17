@@ -71,13 +71,18 @@ public class Unirse_salaFragment extends Fragment {
         btnUnirseSalaFinal.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                if(!com.example.basta_game.utils.ConexionJuego.disponible()) return;
+                final long conexion=com.example.basta_game.utils.ConexionJuego.version();
                 if(auth != null && VerificacionesAuth.VerificarInicioSesion(auth)){
+                    if(!com.example.basta_game.utils.CargaBoton.iniciar(btnUnirseSalaFinal))return;
+        final Object operacion=com.example.basta_game.utils.CargaBoton.token(btnUnirseSalaFinal);
                     String codigoSalaIngresado = etCodigoSala.getText().toString();
 
                     DatabaseReference nodoSalas = FirebaseDatabase.getInstance().getReference("codigosSalas");
                     nodoSalas.addListenerForSingleValueEvent(new ValueEventListener() {
                         @Override
                         public void onDataChange(@NonNull DataSnapshot snapshot) {
+                            if(!isAdded() || getView()==null || !com.example.basta_game.utils.CargaBoton.activa(btnUnirseSalaFinal,operacion))return;
                             String codigoSalaUsuario = etCodigoSala.getText().toString();
                             boolean encontrado = false;
                             for (DataSnapshot hijo: snapshot.getChildren()) {
@@ -91,6 +96,7 @@ public class Unirse_salaFragment extends Fragment {
                             }
 
                             if(!encontrado){
+                                com.example.basta_game.utils.CargaBoton.terminar(btnUnirseSalaFinal,operacion);
                                 NotificationHelper.show(
                                         unirseSalaNotification,
                                         "No se encontro la sala requerida",
@@ -102,12 +108,15 @@ public class Unirse_salaFragment extends Fragment {
                                 nodoSala.addListenerForSingleValueEvent(new ValueEventListener() {
                                     @Override
                                     public void onDataChange(@NonNull DataSnapshot snapshot) {
+                            if(!isAdded() || getView()==null || !com.example.basta_game.utils.CargaBoton.activa(btnUnirseSalaFinal,operacion))return;
                                         Sala sala = snapshot.getValue(Sala.class);
+                                        if(sala==null){com.example.basta_game.utils.CargaBoton.terminar(btnUnirseSalaFinal,operacion);NotificationHelper.showGlobal("La sala ya no está disponible",NotificationHelper.WARNING);return;}
 
                                         DatabaseReference nodoJugadoresSala = FirebaseDatabase.getInstance().getReference("salas").child(codigoElegidoFiltrado.getIdSala()).child("jugadores");
                                         nodoJugadoresSala.addListenerForSingleValueEvent(new ValueEventListener() {
                                             @Override
                                             public void onDataChange(@NonNull DataSnapshot snapshot) {
+                            if(!isAdded() || getView()==null || !com.example.basta_game.utils.CargaBoton.activa(btnUnirseSalaFinal,operacion))return;
                                                 ArrayList<JugadorSala> jugadoresEnSala = new ArrayList<>();
 
                                                 for (DataSnapshot jugadorSnapshot : snapshot.getChildren()) {
@@ -125,22 +134,27 @@ public class Unirse_salaFragment extends Fragment {
                                                     nodoUsuarios.addListenerForSingleValueEvent(new ValueEventListener() {
                                                         @Override
                                                         public void onDataChange(@NonNull DataSnapshot snapshot) {
+                            if(!isAdded() || getView()==null || !com.example.basta_game.utils.CargaBoton.activa(btnUnirseSalaFinal,operacion))return;
                                                             Usuario user = snapshot.getValue(Usuario.class);
                                                             if (!isAdded() || getView() == null) return;
                                                             if (user == null || !IdentidadJugador.nombreValido(user.getNombre())) {
+                                                                com.example.basta_game.utils.CargaBoton.terminar(btnUnirseSalaFinal,operacion);
                                                                 NotificationHelper.show(unirseSalaNotification,
                                                                         "Cargando perfil. No se pudo confirmar tu identidad; reintenta al conectar",
                                                                         NotificationHelper.WARNING);
                                                                 return;
                                                             }
                                                             letraElegida = sala.getLetraActual();
-                                                            DatabaseReference nodoJugadorSala = FirebaseDatabase.getInstance().getReference("salas").child(codigoElegidoFiltrado.getIdSala()).child("jugadores").child(uidUsuario);
+                                                            DatabaseReference nodoJugadorSala = FirebaseDatabase.getInstance().getReference("salas").child(codigoElegidoFiltrado.getIdSala());
                                                             nodoJugadorSala.runTransaction(new Transaction.Handler() {
                                                                 @NonNull @Override public Transaction.Result doTransaction(@NonNull MutableData jugador) {
-                                                                    return IdentidadJugador.aplicar(jugador, uidUsuario, user.getNombre(), user.getFotoPerfilUrl())
+                                                                    if(!com.example.basta_game.utils.ConexionJuego.vigente(conexion)) return Transaction.abort();
+                                                                    if(jugador.getValue()==null) return Transaction.success(jugador);
+                                                                    return com.example.basta_game.utils.IngresoSala.ingresar(jugador, uidUsuario, user.getNombre(), user.getFotoPerfilUrl(),com.example.basta_game.utils.ConexionJuego.ahoraServidor(),90000)
                                                                             ? Transaction.success(jugador) : Transaction.abort();
                                                                 }
                                                                 @Override public void onComplete(DatabaseError error, boolean committed, DataSnapshot jugador) {
+                                                                if(!com.example.basta_game.utils.CargaBoton.terminar(btnUnirseSalaFinal,operacion))return;
                                                                 if(error == null && committed && isAdded()){
 
 
@@ -161,6 +175,7 @@ public class Unirse_salaFragment extends Fragment {
 
                                                                     intent.putExtra("DATOS_SALA", bundle);
 
+                                                                    com.example.basta_game.utils.CargaBoton.terminar(btnUnirseSalaFinal,operacion);
                                                                     startActivity(intent);
                                                                 } else if (isAdded()) {
                                                                     NotificationHelper.show(unirseSalaNotification,
@@ -173,10 +188,12 @@ public class Unirse_salaFragment extends Fragment {
 
                                                         @Override
                                                         public void onCancelled(@NonNull DatabaseError error) {
+                            if(com.example.basta_game.utils.CargaBoton.terminar(btnUnirseSalaFinal,operacion))NotificationHelper.showGlobal("No se pudo consultar la sala. Revisa tu conexión o sesión",NotificationHelper.ERROR);
 
                                                         }
                                                     });
                                                 } else {
+                                                    com.example.basta_game.utils.CargaBoton.terminar(btnUnirseSalaFinal,operacion);
                                                     NotificationHelper.show(
                                                             unirseSalaNotification,
                                                             "La sala está llena",
@@ -188,6 +205,7 @@ public class Unirse_salaFragment extends Fragment {
 
                                             @Override
                                             public void onCancelled(@NonNull DatabaseError error) {
+                            if(com.example.basta_game.utils.CargaBoton.terminar(btnUnirseSalaFinal,operacion))NotificationHelper.showGlobal("No se pudo consultar la sala. Revisa tu conexión o sesión",NotificationHelper.ERROR);
 
                                             }
                                         });
@@ -195,6 +213,7 @@ public class Unirse_salaFragment extends Fragment {
 
                                     @Override
                                     public void onCancelled(@NonNull DatabaseError error) {
+                            if(com.example.basta_game.utils.CargaBoton.terminar(btnUnirseSalaFinal,operacion))NotificationHelper.showGlobal("No se pudo consultar la sala. Revisa tu conexión o sesión",NotificationHelper.ERROR);
 
                                     }
                                 });
@@ -204,6 +223,7 @@ public class Unirse_salaFragment extends Fragment {
 
                         @Override
                         public void onCancelled(@NonNull DatabaseError error) {
+                            if(com.example.basta_game.utils.CargaBoton.terminar(btnUnirseSalaFinal,operacion))NotificationHelper.showGlobal("No se pudo consultar la sala. Revisa tu conexión o sesión",NotificationHelper.ERROR);
 
                         }
                     });

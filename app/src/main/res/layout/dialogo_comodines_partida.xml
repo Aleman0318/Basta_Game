@@ -1,123 +1,19 @@
 <?xml version="1.0" encoding="utf-8"?>
-<com.google.android.material.card.MaterialCardView
-    xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:layout_marginHorizontal="18dp"
-    app:cardBackgroundColor="#FFFDF4"
-    app:cardCornerRadius="28dp"
-    app:cardElevation="12dp"
-    app:strokeColor="#20294A"
-    app:strokeWidth="2dp">
-
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:orientation="vertical">
-
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="58dp"
-            android:background="#304EDB"
-            android:gravity="center_vertical"
-            android:orientation="horizontal"
-            android:paddingHorizontal="16dp">
-
-            <ImageView
-                android:layout_width="34dp"
-                android:layout_height="34dp"
-                android:contentDescription="Comodines"
-                android:scaleType="fitCenter"
-                android:src="@drawable/ic_comodines" />
-
-            <TextView
-                android:layout_width="0dp"
-                android:layout_height="match_parent"
-                android:layout_marginStart="10dp"
-                android:layout_weight="1"
-                android:fontFamily="@font/lilitaone_regular"
-                android:text="COMODINES"
-                android:textColor="@android:color/white"
-                android:textSize="24sp" />
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="30dp"
-                android:background="#FFF0A3"
-                android:fontFamily="@font/lilitaone_regular"
-                android:gravity="center"
-                android:paddingHorizontal="10dp"
-                android:text="FASES"
-                android:textColor="#8E5C00"
-                android:textSize="12sp" />
-
-        </LinearLayout>
-
-        <View
-            android:layout_width="match_parent"
-            android:layout_height="5dp"
-            android:background="#FFD15C" />
-
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="0dp"
-            android:layout_weight="1"
-            android:orientation="vertical"
-            android:paddingStart="16dp"
-            android:paddingTop="14dp"
-            android:paddingEnd="16dp"
-            android:paddingBottom="16dp">
-
-            <TextView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:fontFamily="@font/manrope_regular"
-                android:text="Partida: mientras respondes. Resultados: en puntuaciones, solo si queda otra ronda."
-                android:textColor="#5E5777"
-                android:textSize="13sp"
-                android:textStyle="bold" />
-
-            <TextView
-                android:id="@+id/txtComodinesVaciosPartida"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="14dp"
-                android:background="@drawable/bg_chip_blanco_gris"
-                android:fontFamily="@font/manrope_regular"
-                android:gravity="center"
-                android:paddingHorizontal="12dp"
-                android:paddingVertical="12dp"
-                android:text="Cargando tus comodines..."
-                android:textColor="#5E5777"
-                android:textSize="13sp"
-                android:textStyle="bold" />
-
-            <androidx.recyclerview.widget.RecyclerView
-                android:id="@+id/rvComodinesPartida"
-                android:layout_width="match_parent"
-                android:layout_height="0dp"
-                android:layout_weight="1"
-                android:layout_marginTop="12dp"
-                android:clipToPadding="false"
-                android:nestedScrollingEnabled="true"
-                android:overScrollMode="never" />
-
-            <com.google.android.material.button.MaterialButton
-                android:id="@+id/btnCerrarComodinesPartida"
-                android:layout_width="match_parent"
-                android:layout_height="50dp"
-                android:layout_marginTop="14dp"
-                android:fontFamily="@font/lilitaone_regular"
-                android:text="Cerrar"
-                android:textAllCaps="false"
-                android:textColor="@android:color/white"
-                android:textSize="18sp"
-                app:backgroundTint="#20294A"
-                app:cornerRadius="16dp" />
-
-        </LinearLayout>
-
+<com.google.android.material.card.MaterialCardView xmlns:android="http://schemas.android.com/apk/res/android" xmlns:app="http://schemas.android.com/apk/res-auto" android:layout_width="match_parent" android:layout_height="match_parent" android:layout_marginHorizontal="10dp" app:cardBackgroundColor="#FFF9EC" app:cardCornerRadius="28dp" app:cardElevation="12dp" app:strokeColor="#20294A" app:strokeWidth="2dp">
+  <LinearLayout android:layout_width="match_parent" android:layout_height="match_parent" android:orientation="vertical">
+    <FrameLayout android:layout_width="match_parent" android:layout_height="58dp" android:background="@drawable/bg_comodin_banner" android:gravity="center_vertical" android:paddingHorizontal="16dp">
+      <TextView android:layout_width="match_parent" android:layout_height="match_parent" android:layout_marginStart="0dp" android:fontFamily="@font/lilitaone_regular" android:text="COMODINES" android:textColor="@android:color/white" android:textSize="24sp" android:gravity="center" />
+      <ImageView android:layout_width="34dp" android:layout_height="34dp" android:contentDescription="Comodines" android:scaleType="fitCenter" android:src="@drawable/ic_comodines" android:layout_gravity="start|center_vertical" />
+    </FrameLayout>
+    <View android:layout_width="match_parent" android:layout_height="5dp" android:background="#FFD15C" />
+    <LinearLayout android:layout_width="match_parent" android:layout_height="0dp" android:layout_weight="1" android:orientation="vertical" android:paddingStart="16dp" android:paddingTop="14dp" android:paddingEnd="16dp" android:paddingBottom="16dp">
+      <TextView android:layout_width="match_parent" android:layout_height="wrap_content" android:fontFamily="@font/manrope_regular" android:text="¡Elige tu ventaja! Algunos poderes se usan mientras escribes y otros entre rondas." android:textColor="#5E5777" android:textSize="14sp" android:textStyle="bold" />
+      <LinearLayout android:id="@+id/estadoVacioComodines" android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical" android:gravity="center" android:padding="24dp">
+        <ImageView android:layout_width="72dp" android:layout_height="72dp" android:src="@drawable/ic_carrito_oscuro" android:tint="#15234B" android:contentDescription="Tu mochila de poderes" />
+        <TextView android:id="@+id/txtComodinesVaciosPartida" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="14dp" android:fontFamily="@font/manrope_regular" android:gravity="center" android:paddingHorizontal="12dp" android:paddingVertical="12dp" android:text="Cargando tus comodines..." android:textColor="#5E5777" android:textSize="15sp" android:textStyle="bold" />
+      </LinearLayout>
+      <androidx.recyclerview.widget.RecyclerView android:id="@+id/rvComodinesPartida" android:layout_width="match_parent" android:layout_height="0dp" android:layout_weight="1" android:layout_marginTop="12dp" android:clipToPadding="false" android:nestedScrollingEnabled="true" android:overScrollMode="never" />
+      <androidx.appcompat.widget.AppCompatButton android:id="@+id/btnCerrarComodinesPartida" android:layout_width="match_parent" android:layout_height="58dp" android:layout_marginTop="14dp" android:fontFamily="@font/lilitaone_regular" android:text="Cerrar" android:textAllCaps="false" android:textColor="@android:color/white" android:textSize="22sp" android:background="@drawable/bg_comodin_cerrar" />
     </LinearLayout>
-
+  </LinearLayout>
 </com.google.android.material.card.MaterialCardView>

@@ -1,0 +1,1 @@
+bytesBitmap=7924224; API=37; heapMax=201326592

@@ -1,146 +1,29 @@
-<?xml version="1.0" encoding="utf-8"?>
-<com.google.android.material.card.MaterialCardView
-    xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:layout_margin="16dp"
-    app:cardBackgroundColor="#FCFDFF"
-    app:cardCornerRadius="28dp"
-    app:cardElevation="10dp"
-    app:strokeColor="#D6E0FF"
-    app:strokeWidth="2dp">
-
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="vertical"
-        android:gravity="center"
-        android:padding="24dp">
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:fontFamily="@font/lilitaone_regular"
-            android:text="¡DUELO DE REFLEJOS!"
-            android:textColor="#E65100"
-            android:textSize="26sp"
-            android:layout_marginBottom="16dp"/>
-
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="4dp"
-            android:layout_marginBottom="12dp"
-            android:fontFamily="@font/manrope_regular"
-            android:gravity="center"
-            android:text="Espera la señal. ¡Toca el revólver en cuanto se ponga VERDE! Si tocas antes, pierdes."
-            android:textColor="#5E5777"
-            android:textSize="13sp" />
-
-        <!-- CABECERA: AVATARES Y TIEMPOS -->
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:gravity="center"
-            android:layout_marginBottom="24dp">
-
-            <LinearLayout
-                android:layout_width="0dp"
-                android:layout_weight="1"
-                android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:gravity="center">
-                <TextView
-                    android:id="@+id/txtNombreA_Tiro"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:fontFamily="@font/lilitaone_regular"
-                    android:textColor="#304EDB"
-                    android:text="Atacante"/>
-                <TextView
-                    android:id="@+id/txtReaccionA"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:fontFamily="@font/manrope_regular"
-                    android:textStyle="bold"
-                    android:textColor="#5E6C84"
-                    android:text="Esperando..."/>
-            </LinearLayout>
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:fontFamily="@font/lilitaone_regular"
-                android:text="VS"
-                android:textColor="#E65100"
-                android:textSize="18sp"
-                android:layout_marginHorizontal="12dp"/>
-
-            <LinearLayout
-                android:layout_width="0dp"
-                android:layout_weight="1"
-                android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:gravity="center">
-                <TextView
-                    android:id="@+id/txtNombreV_Tiro"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:fontFamily="@font/lilitaone_regular"
-                    android:textColor="#E53935"
-                    android:text="Víctima"/>
-                <TextView
-                    android:id="@+id/txtReaccionV"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:fontFamily="@font/manrope_regular"
-                    android:textStyle="bold"
-                    android:textColor="#5E6C84"
-                    android:text="Esperando..."/>
-            </LinearLayout>
-        </LinearLayout>
-
-        <!-- ÁREA GIGANTE DE DISPARO CON EL REVÓLVER -->
-        <com.google.android.material.card.MaterialCardView
-            android:id="@+id/btnAreaDisparo"
-            android:layout_width="match_parent"
-            android:layout_height="250dp"
-            app:cardBackgroundColor="#FFB300"
-            app:cardCornerRadius="20dp"
-            app:cardElevation="8dp">
-
-            <FrameLayout
-                android:layout_width="match_parent"
-                android:layout_height="match_parent">
-
-                <!-- EL REVÓLVER ASOMÁNDOSE DESDE ABAJO -->
-                <ImageView
-                    android:layout_width="160dp"
-                    android:layout_height="160dp"
-                    android:layout_gravity="center_horizontal|bottom"
-                    android:scaleType="fitCenter"
-                    android:src="@drawable/ic_revolver"
-                    android:layout_marginBottom="-10dp"/>
-
-                <!-- TEXTO FLOTANDO ARRIBA DEL ARMA -->
-                <TextView
-                    android:id="@+id/txtEstadoTiroteo"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_gravity="center_horizontal|top"
-                    android:layout_marginTop="32dp"
-                    android:fontFamily="@font/lilitaone_regular"
-                    android:text="¡PREPÁRATE!"
-                    android:textColor="#FFFFFF"
-                    android:textSize="32sp"
-                    android:shadowColor="#40000000"
-                    android:shadowDx="2"
-                    android:shadowDy="2"
-                    android:shadowRadius="4"/>
-
-            </FrameLayout>
-        </com.google.android.material.card.MaterialCardView>
+﻿<?xml version="1.0" encoding="utf-8"?>
+<com.google.android.material.card.MaterialCardView xmlns:android="http://schemas.android.com/apk/res/android" xmlns:app="http://schemas.android.com/apk/res-auto" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_margin="16dp" app:cardBackgroundColor="#FCFDFF" app:cardCornerRadius="28dp" app:cardElevation="10dp" app:strokeColor="#D6E0FF" app:strokeWidth="2dp">
+  <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical" android:gravity="center" android:padding="24dp">
+    <TextView android:visibility="gone" android:textColor="#0B4CE3" android:id="@+id/txtModoEspectador" android:text="MODO ESPECTADOR" android:gravity="center" android:textStyle="bold" android:textSize="18sp" android:padding="8dp" android:layout_height="wrap_content" android:layout_width="match_parent" android:fontFamily="@font/lilitaone_regular" />
+    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:fontFamily="@font/lilitaone_regular" android:text="¡DUELO DE REFLEJOS!" android:textColor="#E65100" android:textSize="26sp" android:layout_marginBottom="16dp" />
+    <TextView android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="4dp" android:layout_marginBottom="12dp" android:fontFamily="@font/manrope_regular" android:gravity="center" android:text="Espera la señal. ¡Toca el revólver en cuanto se ponga VERDE! Si tocas antes, pierdes." android:textColor="#5E5777" android:textSize="13sp" />
+    <!-- CABECERA: AVATARES Y TIEMPOS -->
+    <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="horizontal" android:gravity="center" android:layout_marginBottom="24dp">
+      <LinearLayout android:layout_width="0dp" android:layout_weight="1" android:layout_height="wrap_content" android:orientation="vertical" android:gravity="center">
+        <TextView android:id="@+id/txtNombreA_Tiro" android:layout_width="wrap_content" android:layout_height="wrap_content" android:fontFamily="@font/lilitaone_regular" android:textColor="#304EDB" android:text="Atacante" />
+        <TextView android:id="@+id/txtReaccionA" android:layout_width="wrap_content" android:layout_height="wrap_content" android:fontFamily="@font/manrope_regular" android:textStyle="bold" android:textColor="#5E6C84" android:text="Esperando..." />
+      </LinearLayout>
+      <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:fontFamily="@font/lilitaone_regular" android:text="VS" android:textColor="#E65100" android:textSize="18sp" android:layout_marginHorizontal="12dp" />
+      <LinearLayout android:layout_width="0dp" android:layout_weight="1" android:layout_height="wrap_content" android:orientation="vertical" android:gravity="center">
+        <TextView android:id="@+id/txtNombreV_Tiro" android:layout_width="wrap_content" android:layout_height="wrap_content" android:fontFamily="@font/lilitaone_regular" android:textColor="#E53935" android:text="Víctima" />
+        <TextView android:id="@+id/txtReaccionV" android:layout_width="wrap_content" android:layout_height="wrap_content" android:fontFamily="@font/manrope_regular" android:textStyle="bold" android:textColor="#5E6C84" android:text="Esperando..." />
+      </LinearLayout>
     </LinearLayout>
+    <!-- ÁREA GIGANTE DE DISPARO CON EL REVÓLVER -->
+    <com.google.android.material.card.MaterialCardView android:id="@+id/btnAreaDisparo" android:layout_width="match_parent" android:layout_height="250dp" app:cardBackgroundColor="#FFB300" app:cardCornerRadius="20dp" app:cardElevation="8dp">
+      <FrameLayout android:layout_width="match_parent" android:layout_height="match_parent">
+        <!-- EL REVÓLVER ASOMÁNDOSE DESDE ABAJO -->
+        <ImageView android:layout_width="160dp" android:layout_height="160dp" android:layout_gravity="center_horizontal|bottom" android:scaleType="fitCenter" android:src="@drawable/ic_revolver" android:layout_marginBottom="-10dp" />
+        <!-- TEXTO FLOTANDO ARRIBA DEL ARMA -->
+        <TextView android:id="@+id/txtEstadoTiroteo" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_gravity="center_horizontal|top" android:layout_marginTop="32dp" android:fontFamily="@font/lilitaone_regular" android:text="¡PREPÁRATE!" android:textColor="#FFFFFF" android:textSize="32sp" android:shadowColor="#40000000" android:shadowDx="2" android:shadowDy="2" android:shadowRadius="4" />
+      </FrameLayout>
+    </com.google.android.material.card.MaterialCardView>
+  </LinearLayout>
 </com.google.android.material.card.MaterialCardView>

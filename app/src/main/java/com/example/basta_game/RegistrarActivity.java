@@ -97,8 +97,12 @@ public class RegistrarActivity extends AppCompatActivity {
                     }
                     if(auth!=null){
                         //creamos el usuario
-                        auth.createUserWithEmailAndPassword(emailUser, passUser)
+                        if(!com.example.basta_game.utils.CargaBoton.iniciar(btnRegistrar))return;
+        final Object operacion=com.example.basta_game.utils.CargaBoton.token(btnRegistrar);
+                        android.util.Log.d("AuthFlujo","Solicitando autenticación");
+                    auth.createUserWithEmailAndPassword(emailUser, passUser)
                                 .addOnCompleteListener(task -> {
+                                    android.util.Log.d("AuthFlujo","Registro Auth finalizó: exito="+task.isSuccessful());
                                     if(task.isSuccessful()){
                                         String uid = auth.getCurrentUser().getUid();
 
@@ -126,21 +130,24 @@ public class RegistrarActivity extends AppCompatActivity {
 
                                         usuarioRef.child(uid).setValue(user)
                                                 .addOnCompleteListener(taskGuardar->{
-                                                    if(taskGuardar.isSuccessful()){
+                                                    com.example.basta_game.utils.CargaBoton.terminar(btnRegistrar,operacion); boolean vigente=!isFinishing() && !isDestroyed();
+                                                    if(taskGuardar.isSuccessful() && vigente && !isDestroyed()){
                                                         Log.d("REGISTRO_FIREBASE","usuario añadido correctamente a realtime");
                                                         Intent intent = new Intent(RegistrarActivity.this, HomeActivity.class);
                                                         startActivity(intent);
                                                                                                             }
                                                     else {
                                                         Log.d("REGISTRO_FIREBASE","ocurrio un error al guardar el perfil el realtime");
+                                                        if(vigente)NotificationHelper.show(notificationRegister,taskGuardar.getException()!=null ? taskGuardar.getException().getLocalizedMessage() : "No se pudo guardar tu perfil",NotificationHelper.ERROR);
                                                     }
                                                 });
 
                                     }
                                     else {
+                                        com.example.basta_game.utils.CargaBoton.terminar(btnRegistrar,operacion);
                                         NotificationHelper.show(
                                                 notificationRegister,
-                                                "¡Ocurrio un error al registrar el usuario!",
+                                                task.getException()!=null ? task.getException().getLocalizedMessage() : "No se pudo registrar la cuenta",
                                                 NotificationHelper.ERROR
                                         );
                                         Sounds.playNotificaciones();

@@ -1,129 +1,52 @@
 <?xml version="1.0" encoding="utf-8"?>
-<com.google.android.material.card.MaterialCardView
-    xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:id="@+id/cardComodinPartidaItem"
-    android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:layout_marginVertical="6dp"
-    app:cardBackgroundColor="#FFFDF4"
-    app:cardCornerRadius="20dp"
-    app:cardElevation="3dp"
-    app:strokeColor="#20294A"
-    app:strokeWidth="1.5dp">
-
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:gravity="center_vertical"
-        android:orientation="vertical"
-        android:padding="12dp">
-
-        <TextView android:id="@+id/txtGrupoComodin" android:layout_width="match_parent"
-            android:layout_height="wrap_content" android:layout_marginBottom="8dp"
-            android:fontFamily="@font/lilitaone_regular" android:textColor="@color/colorPrimary"
-            android:textSize="16sp" />
-        <com.google.android.material.card.MaterialCardView
-            android:layout_width="62dp"
-            android:layout_height="62dp"
-            app:cardBackgroundColor="#101A35"
-            app:cardCornerRadius="20dp"
-            app:cardElevation="0dp"
-            app:strokeColor="#20294A"
-            app:strokeWidth="1.2dp">
-
-            <ImageView
-                android:id="@+id/imgIconoComodinPartidaItem"
-                android:layout_width="52dp"
-                android:layout_height="52dp"
-                android:layout_gravity="center"
-                android:contentDescription="Icono de comodín"
-                android:scaleType="fitCenter"
-                android:src="@drawable/ic_comodines" />
-
-        </com.google.android.material.card.MaterialCardView>
-
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="12dp"
-
-            android:orientation="vertical">
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:gravity="center_vertical"
-                android:orientation="vertical">
-
-                <TextView
-                    android:id="@+id/txtNombreComodinPartidaItem"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-
-                    android:ellipsize="end"
-                    android:fontFamily="@font/lilitaone_regular"
-                    android:maxLines="1"
-                    android:text="Comodín"
-                    android:textColor="#302A49"
-                    android:textSize="21sp" />
-
-                <TextView
-                    android:id="@+id/txtRarezaComodinPartidaItem"
-                    android:layout_width="wrap_content"
-                    android:layout_height="24dp"
-                    android:background="@drawable/bg_chip_blanco_gris"
-                    android:fontFamily="@font/lilitaone_regular"
-                    android:gravity="center"
-                    android:paddingHorizontal="8dp"
-                    android:text="Rareza"
-                    android:textColor="#5E5777"
-                    android:textSize="10sp" />
-
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android" xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical" android:paddingBottom="12dp">
+    <TextView android:id="@+id/txtGrupoComodin" android:layout_width="match_parent" android:layout_height="wrap_content"
+        android:minHeight="52dp" android:padding="10dp" android:layout_marginTop="12dp" android:layout_marginBottom="12dp"
+        android:gravity="center" android:fontFamily="@font/lilitaone_regular" android:textSize="20sp"
+        android:textColor="#FFFFFF" android:shadowColor="#101443" android:shadowDy="2" android:shadowRadius="2"
+        android:background="@drawable/bg_comodin_banner" />
+    <com.google.android.material.card.MaterialCardView android:id="@+id/cardComodinPartidaItem"
+        android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_margin="3dp"
+        app:cardCornerRadius="22dp" app:cardElevation="5dp" app:strokeColor="#101443" app:strokeWidth="2dp" app:cardBackgroundColor="#FFFDF6">
+        <androidx.constraintlayout.widget.ConstraintLayout android:id="@+id/cuerpoComodin"
+            android:layout_width="match_parent" android:layout_height="wrap_content" android:padding="12dp">
+            <ImageView android:id="@+id/imgIconoComodinPartidaItem" android:layout_width="76dp" android:layout_height="84dp"
+                android:contentDescription="Icono del comodin" android:scaleType="fitCenter" android:src="@drawable/ic_comodines"
+                app:layout_constraintStart_toStartOf="parent" app:layout_constraintTop_toTopOf="@id/detalleComodin"
+                app:layout_constraintBottom_toBottomOf="@id/detalleComodin" />
+            <LinearLayout android:id="@+id/detalleComodin" android:layout_width="0dp" android:layout_height="wrap_content"
+                android:layout_marginStart="12dp" android:orientation="vertical"
+                app:layout_constraintTop_toTopOf="parent" app:layout_constraintStart_toEndOf="@id/imgIconoComodinPartidaItem" app:layout_constraintEnd_toEndOf="parent">
+                <TextView android:id="@+id/txtNombreComodinPartidaItem" android:layout_width="match_parent" android:layout_height="wrap_content"
+                    android:fontFamily="@font/lilitaone_regular" android:textColor="#190D42" android:textSize="23sp" />
+                <TextView android:id="@+id/txtRarezaComodinPartidaItem" android:layout_width="wrap_content" android:layout_height="wrap_content"
+                    android:layout_marginTop="4dp" android:paddingHorizontal="10dp" android:paddingVertical="3dp"
+                    android:fontFamily="@font/lilitaone_regular" android:textColor="#190D42" android:textSize="14sp" />
+                <TextView android:id="@+id/txtDescripcionComodinPartidaItem" android:layout_width="match_parent" android:layout_height="wrap_content"
+                    android:layout_marginTop="6dp" android:fontFamily="@font/manrope_regular" android:textColor="#24164B" android:textSize="14sp" />
+                <TextView android:id="@+id/txtDisponibilidadComodin" android:layout_width="match_parent" android:layout_height="wrap_content"
+                    android:layout_marginTop="6dp" android:fontFamily="@font/manrope_regular" android:textColor="#453975" android:textSize="12sp" android:textStyle="bold" />
             </LinearLayout>
-
-            <TextView
-                android:id="@+id/txtDescripcionComodinPartidaItem"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="2dp"
-                android:ellipsize="end"
-                android:fontFamily="@font/manrope_regular"
-                android:maxLines="2"
-                android:text="Descripción del comodín."
-                android:textColor="#5E5777"
-                android:textSize="11sp"
-                android:textStyle="bold" />
-
-            <TextView
-                android:id="@+id/txtCantidadComodinPartidaItem"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="6dp"
-                android:background="@drawable/bg_chip_blanco_azul"
-                android:fontFamily="@font/lilitaone_regular"
-                android:paddingHorizontal="12dp"
-                android:paddingVertical="3dp"
-                android:text="Tienes: 0"
-                android:textColor="@color/colorPrimary"
-                android:textSize="12sp" />
-
-        </LinearLayout>
-
-        <com.google.android.material.button.MaterialButton
-            android:id="@+id/btnUsarComodinPartidaItem"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:minHeight="48dp"
-            android:layout_marginStart="8dp"
-            android:fontFamily="@font/lilitaone_regular"
-            android:text="USAR"
-            android:textAllCaps="false"
-            android:textColor="@android:color/white"
-            android:textSize="14sp"
-            app:backgroundTint="#304EDB"
-            app:cornerRadius="14dp" />
-
-    </LinearLayout>
-
-</com.google.android.material.card.MaterialCardView>
+            <androidx.constraintlayout.widget.Barrier android:id="@+id/finDetalleComodin" android:layout_width="wrap_content" android:layout_height="wrap_content"
+                app:barrierDirection="bottom" app:constraint_referenced_ids="detalleComodin,imgIconoComodinPartidaItem" />
+            <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content" android:layout_marginTop="10dp"
+                android:orientation="horizontal" android:gravity="center_vertical"
+                app:layout_constraintTop_toBottomOf="@id/finDetalleComodin" app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toEndOf="parent" app:layout_constraintBottom_toBottomOf="parent">
+                <com.google.android.material.card.MaterialCardView style="@style/Widget.Basta.Inventario" android:layout_width="wrap_content" android:layout_height="32dp">
+<LinearLayout android:layout_width="wrap_content" android:layout_height="match_parent" android:gravity="center_vertical" android:paddingHorizontal="8dp">
+<ImageView android:layout_width="16dp" android:layout_height="16dp" android:src="@drawable/ic_monedas" android:contentDescription="Inventario"/>
+<TextView android:id="@+id/txtCantidadComodinPartidaItem" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginStart="4dp" android:fontFamily="@font/manrope_regular" android:textStyle="bold" android:textSize="13sp" android:textColor="@color/colorPrimary"/>
+</LinearLayout></com.google.android.material.card.MaterialCardView>
+<Space android:layout_width="0dp" android:layout_height="1dp" android:layout_weight="1"/>
+                <androidx.appcompat.widget.AppCompatButton android:id="@+id/btnUsarComodinPartidaItem"
+                    android:layout_width="120dp" android:layout_height="wrap_content" android:minHeight="56dp" android:minWidth="0dp"
+                    android:paddingHorizontal="8dp" android:paddingTop="8dp" android:paddingBottom="13dp"
+                    android:background="@drawable/bg_comodin_accion" android:fontFamily="@font/lilitaone_regular"
+                    android:text="USAR" android:textColor="#FFFFFF" android:textSize="17sp"
+                    android:shadowColor="#101443" android:shadowDy="2" android:shadowRadius="2" />
+            </LinearLayout>
+        </androidx.constraintlayout.widget.ConstraintLayout>
+    </com.google.android.material.card.MaterialCardView>
+</LinearLayout>

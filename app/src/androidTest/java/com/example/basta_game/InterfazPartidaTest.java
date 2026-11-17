@@ -21,6 +21,59 @@ import static org.junit.Assert.*;
 /** Local views only: no Activity navigation, Auth or Database calls. IME still needs a device check. */
 @RunWith(AndroidJUnit4.class)
 public class InterfazPartidaTest {
+    @Test public void compraPendienteBloqueaToquesYRebindMuestraInventarioConfirmado() {
+        InstrumentationRegistry.getInstrumentation().runOnMainSync(() -> {
+            Context c=contexto();
+            java.util.concurrent.atomic.AtomicBoolean ocupado=new java.util.concurrent.atomic.AtomicBoolean(true);
+            com.example.basta_game.models.ComodinTienda item=new com.example.basta_game.models.ComodinTienda(
+                    "congelar","Congelador","Bloquea BASTA","Control","ataque",R.drawable.ic_siluetas,10,"monedas","");
+            com.example.basta_game.Adapters.ComodinTiendaAdapter adapter=new com.example.basta_game.Adapters.ComodinTiendaAdapter(
+                    Collections.singletonList(item),v -> fail("No debe comprar mientras esta ocupado"),ocupado::get);
+            RecyclerView parent=new RecyclerView(c);
+            com.example.basta_game.Adapters.ComodinTiendaAdapter.ViewHolder holder=adapter.createViewHolder(parent,0);
+            adapter.bindViewHolder(holder,0);
+            View boton=holder.itemView.findViewById(R.id.btnComprarComodinItem);
+            assertFalse(boton.isEnabled()); boton.performClick();
+            ocupado.set(false); adapter.actualizarInventario(Collections.singletonMap("congelar",7));
+            adapter.bindViewHolder(holder,0);
+            assertTrue(boton.isEnabled());
+            assertEquals("TIENES: 7",((TextView)holder.itemView.findViewById(R.id.txtCantidadInventarioItem)).getText().toString());
+        });
+    }
+
+    @Test public void hojaTieneScrollInternoYBastaPermaneceFueraDeLaLista() {
+        InstrumentationRegistry.getInstrumentation().runOnMainSync(() -> {
+            Context c=contexto();
+            for(int ancho:new int[]{320,800}) {
+                View pantalla=android.view.LayoutInflater.from(c).inflate(R.layout.fragment_partida,new FrameLayout(c),false);
+                RecyclerView lista=pantalla.findViewById(R.id.rvCategoriasJuego);
+                CategoriaPartidaAdapter.configurarScrollInterno(lista);
+                Map<String,String> respuestas=new HashMap<>();
+                java.util.List<Categoria> categorias=new ArrayList<>();
+                for(int i=0;i<20;i++) categorias.add(new Categoria("Categoria "+i,R.drawable.ic_siluetas));
+                lista.setAdapter(new CategoriaPartidaAdapter(categorias,respuestas));
+                int w=Math.round(ancho*c.getResources().getDisplayMetrics().density);
+                int h=Math.round(640*c.getResources().getDisplayMetrics().density);
+                pantalla.measure(View.MeasureSpec.makeMeasureSpec(w,View.MeasureSpec.EXACTLY),View.MeasureSpec.makeMeasureSpec(h,View.MeasureSpec.EXACTLY));
+                pantalla.layout(0,0,w,h);
+                View basta=pantalla.findViewById(R.id.btnBasta);
+                android.graphics.Rect antes=new android.graphics.Rect();basta.getDrawingRect(antes);
+                ((android.view.ViewGroup)pantalla).offsetDescendantRectToMyCoords(basta,antes);
+                assertTrue(lista.getLayoutManager().canScrollVertically());
+                assertFalse(lista.isVerticalScrollBarEnabled());assertTrue(lista.getHeight()>0);
+                lista.scrollToPosition(19); lista.measure(View.MeasureSpec.makeMeasureSpec(lista.getWidth(),View.MeasureSpec.EXACTLY),View.MeasureSpec.makeMeasureSpec(lista.getHeight(),View.MeasureSpec.EXACTLY));
+                lista.layout(lista.getLeft(),lista.getTop(),lista.getRight(),lista.getBottom());
+                RecyclerView.ViewHolder holder=lista.findViewHolderForAdapterPosition(19);
+                assertNotNull(holder);
+                EditText campo=holder.itemView.findViewById(R.id.etRespuestaCategoriaPartida);
+                campo.requestFocus();campo.setText("Armadillo");
+                assertEquals("Armadillo",respuestas.get("Categoria 19"));
+                android.graphics.Rect despues=new android.graphics.Rect();basta.getDrawingRect(despues);
+                ((android.view.ViewGroup)pantalla).offsetDescendantRectToMyCoords(basta,despues);
+                assertEquals(antes,despues);assertTrue(lista.getPreserveFocusAfterLayout());
+            }
+        });
+    }
     private Context contexto() {
         Context app = InstrumentationRegistry.getInstrumentation().getTargetContext();
         return new ContextThemeWrapper(app, app.getApplicationInfo().theme);

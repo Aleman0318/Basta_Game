@@ -24,6 +24,12 @@ import java.util.List;
 import java.util.Map;
 
 public class CategoriaPartidaAdapter extends RecyclerView.Adapter<CategoriaPartidaAdapter.ViewHolder> {
+    public static void configurarScrollInterno(RecyclerView lista) {
+        lista.setLayoutManager(new androidx.recyclerview.widget.LinearLayoutManager(lista.getContext()));
+        lista.setNestedScrollingEnabled(false);
+        lista.setPreserveFocusAfterLayout(true);
+        lista.setItemAnimator(null);
+    }
 
     public interface OnCampoRespuestaFocusListener {
         void onCampoRespuestaFocus(View campo);

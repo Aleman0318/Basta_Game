@@ -6,6 +6,23 @@ import java.util.Objects;
 public final class TransferenciaHost {
     private TransferenciaHost() { }
 
+    public static boolean abandonarSesion(MutableData sala,String uid,String partida,String sesion){
+        return abandonarSesion(sala,uid,partida,sesion,java.util.Collections.singleton(sesion));
+    }
+    public static boolean abandonarSesion(MutableData sala,String uid,String partida,String sesion,java.util.Collection<String> conocidas){
+        return abandonarSesion(sala,uid,partida,sesion,conocidas,java.util.Collections.singleton(sesion));
+    }
+    public static boolean abandonarSesion(MutableData sala,String uid,String partida,String sesion,java.util.Collection<String> conocidas,java.util.Collection<String> propias){
+        boolean pertenece=false;
+        for(String propia:propias) if(sala.child("sesiones").child(uid).hasChild(propia)) pertenece=true;
+        if(!pertenece)return false;
+        String actual=sala.child("idPartida").getValue(String.class);
+        if(!java.util.Objects.equals(partida,actual==null?"":actual))return false;
+        // An unknown session may be a newer membership, even when currently disconnected.
+        for(MutableData otra:sala.child("sesiones").child(uid).getChildren())if(!propias.contains(otra.getKey()) &&
+                (!conocidas.contains(otra.getKey()) || Boolean.TRUE.equals(otra.child("conectada").getValue())))return false;
+        return abandonar(sala,uid);
+    }
     public static boolean abandonar(MutableData sala, String uid) {
         if (uid == null || !sala.child("jugadores").hasChild(uid)) return false;
         retirar(sala, uid);
@@ -14,7 +31,7 @@ public final class TransferenciaHost {
     }
 
     public static boolean expirar(MutableData sala, long ahoraServidor, long graciaMs) {
-        boolean cambio = false;
+        boolean cambio = PresenciaSala.actualizar(sala);
         for (MutableData jugador : sala.child("jugadores").getChildren()) {
             Object desde = jugador.child("desconectadoDesde").getValue();
             if (Boolean.FALSE.equals(jugador.child("estaConectado").getValue()) && desde instanceof Number &&
@@ -29,11 +46,9 @@ public final class TransferenciaHost {
 
     private static void retirar(MutableData sala, String uid) {
         sala.child("jugadores").child(uid).setValue(null);
+        sala.child("sesiones").child(uid).setValue(null);
         for (String lista : new String[]{"entradaPartida", "revisionLista"}) {
             for (MutableData ronda : sala.child(lista).getChildren()) ronda.child(uid).setValue(null);
-        }
-        for (MutableData votacion : sala.child("votacionActiva").getChildren()) {
-            votacion.child("votos").child(uid).setValue(null);
         }
         MutableData duelo = sala.child("minijuegoActual");
         if (Boolean.TRUE.equals(duelo.child("activo").getValue()) &&
@@ -57,13 +72,14 @@ public final class TransferenciaHost {
             return true;
         }
         String host = sala.child("hostUID").getValue(String.class);
-        // La presencia temporal no revoca una corona cuyo titular sigue en la sala.
-        if (host == null || !jugadores.hasChild(host)) {
+        if (host == null || !jugadores.hasChild(host) || !PresenciaSala.conectada(sala,host)) {
+            String anterior=host;
             host = null;
             for (MutableData jugador : jugadores.getChildren()) {
                 if (Boolean.TRUE.equals(jugador.child("estaConectado").getValue()) &&
                         (host == null || jugador.getKey().compareTo(host) < 0)) host = jugador.getKey();
             }
+            if(host==null && anterior!=null && jugadores.hasChild(anterior)) host=anterior;
         }
         for (MutableData jugador : jugadores.getChildren()) {
             jugador.child("esHost").setValue(jugador.getKey().equals(host));

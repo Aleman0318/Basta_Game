@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<selector xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:state_enabled="false"><layer-list>
+        <item android:top="5dp"><shape><solid android:color="#353C70"/><corners android:radius="20dp"/></shape></item>
+        <item android:bottom="5dp"><shape><gradient android:startColor="#A9AFE1" android:endColor="#737DB8" android:angle="270"/>
+            <stroke android:width="2dp" android:color="#333D74"/><corners android:radius="20dp"/></shape></item>
+    </layer-list></item>
+    <item><layer-list>
+        <item android:top="5dp"><shape><solid android:color="#101443"/><corners android:radius="20dp"/></shape></item>
+        <item android:bottom="5dp"><shape><gradient android:startColor="#2865FF" android:endColor="#0834E8" android:angle="270"/>
+            <stroke android:width="2dp" android:color="#101443"/><corners android:radius="20dp"/></shape></item>
+    </layer-list></item>
+</selector>

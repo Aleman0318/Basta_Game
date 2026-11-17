@@ -1,0 +1,11 @@
+2026-11-14 12:41:26,965 [61180851]   WARN - #git4idea.config.GitDownloadAndInstall - Failed to check Git latest version
+2026-11-15 18:20:19,230 [32285683]   WARN - #git4idea.config.GitDownloadAndInstall - Failed to check Git latest version
+2026-11-16 08:51:32,657 [ 411840]   INFO - #c.i.u.n.s.ConfirmingTrustManager - Going to ask user about certificate for: OID.2.5.4.41=SSLA-Self-Signed-Certificate, issuer: OID.2.5.4.41=SSLA-Self-Signed-Certificate
+2026-11-16 08:51:32,687 [ 411870]   INFO - #c.i.n.s.CertificateWarningDialog - Certificate validation message: null
+2026-11-16 08:51:38,079 [ 417262]   INFO - #c.i.u.n.s.ConfirmingTrustManager - Going to ask user about certificate for: OID.2.5.4.41=SSLA-Self-Signed-Certificate, issuer: OID.2.5.4.41=SSLA-Self-Signed-Certificate
+2026-11-16 08:51:38,093 [ 417276]   INFO - #c.i.n.s.CertificateWarningDialog - Certificate validation message: null
+2026-11-16 08:51:39,339 [ 418522]   INFO - #c.i.u.n.s.ConfirmingTrustManager - Going to ask user about certificate for: OID.2.5.4.41=SSLA-Self-Signed-Certificate, issuer: OID.2.5.4.41=SSLA-Self-Signed-Certificate
+2026-11-16 08:51:39,339 [ 418522]   INFO - #c.i.n.s.CertificateWarningDialog - Certificate validation message: null
+2026-11-16 08:52:52,636 [ 491819]   WARN - #git4idea.config.GitDownloadAndInstall - Failed to check Git latest version
+2026-11-16 09:34:34,946 [2994129]   WARN - #git4idea.config.GitDownloadAndInstall - Failed to check Git latest version
+2026-11-16 09:38:14,525 [3213708]   WARN - #git4idea.config.GitDownloadAndInstall - Suppressed a frequent exception logged for the 2nd time: (certificate_unknown) PKIX path building failed: sun.security.provider.certpath.SunCertPathBuilderException: unable to find valid certification path to requested target

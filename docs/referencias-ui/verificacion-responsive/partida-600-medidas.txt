@@ -1,0 +1,1 @@
+hoja=394px; pantalla=600x900; densidad=160; fuente=1.0

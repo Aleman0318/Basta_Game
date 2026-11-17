@@ -1,6 +1,10 @@
 plugins {
     alias(libs.plugins.android.application)
-    alias(libs.plugins.google.gms.google.services)
+    alias(libs.plugins.google.gms.google.services) apply false
+}
+
+if (!project.hasProperty('layoutsAislados') && !project.hasProperty('authAislado')) {
+    apply plugin: 'com.google.gms.google-services'
 }
 
 android {
@@ -12,13 +16,17 @@ android {
     }
 
     defaultConfig {
-        applicationId "com.example.basta_game"
+        applicationId project.hasProperty('authAislado') ? "com.example.basta_game.authtest" : project.hasProperty('layoutsAislados') ? "com.example.basta_game.responsive" : "com.example.basta_game"
         minSdk 24
         targetSdk 36
         versionCode 1
         versionName "1.0"
 
-        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+        testInstrumentationRunner project.hasProperty('authAislado') ? "com.example.basta_game.AuthRunner" : project.hasProperty('layoutsAislados') ? "com.example.basta_game.LayoutsRunner" : "androidx.test.runner.AndroidJUnitRunner"
+    }
+
+    if (project.hasProperty('layoutsAislados')) {
+        sourceSets.debug.manifest.srcFile 'src/layoutsAislados/AndroidManifest.xml'
     }
 
     buildTypes {

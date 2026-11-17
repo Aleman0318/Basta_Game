@@ -36,7 +36,7 @@ public class JugadorPartidaAdapter extends RecyclerView.Adapter<JugadorPartidaAd
                 .load(jugador.getUrlPerfil())
                 .placeholder(R.drawable.outline_person_24)
                 .error(R.drawable.outline_person_24)
-                .into(holder.imgAvatar);
+                .override(192,192).into(holder.imgAvatar);
 
         if(jugador.isEsHost()){
             holder.imgCoronaHost.setVisibility(View.VISIBLE);

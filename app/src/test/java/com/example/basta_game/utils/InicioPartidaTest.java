@@ -8,11 +8,32 @@ import org.junit.Test;
 import static org.junit.Assert.*;
 
 public class InicioPartidaTest {
+    @Test public void cambioDeHostConservaOrdenDeLetrasYPartidaNuevaLoReemplaza() {
+        MutableData s=sala(); Map<String,Object> inicio=cambios();
+        java.util.List<String> plan=LetraSala.nuevaPartida();inicio.put("letrasPartida",plan);
+        assertTrue(InicioPartida.aplicar(s,"p","host",inicio));
+        assertEquals(plan.get(0),s.child("letraActual").getValue());
+        assertEquals(10000L,s.child("preparacionInicialMs").getValue());
+        s.child("hostUID").setValue("otro");s.child("fase").setValue("revision_puntuaciones");
+        s.child("revisionLista/ronda_1/host").setValue(true);s.child("revisionLista/ronda_1/otro").setValue(true);
+        Map<String,Object> siguiente=cambios();siguiente.put("rondaActual",2);siguiente.put("letraActual","Z");
+        assertTrue(InicioPartida.avanzar(s,"otro","p",1,siguiente));
+        assertEquals(plan.get(1),s.child("letraActual").getValue());
+        s.child("estadoPartida").setValue("En espera");
+        s.child("jugadores/host/estaListo").setValue(true);s.child("jugadores/otro/estaListo").setValue(true);
+        java.util.List<String> nuevo=new java.util.ArrayList<>(plan);java.util.Collections.rotate(nuevo,1);
+        inicio.put("letrasPartida",nuevo);
+        assertTrue(InicioPartida.aplicar(s,"p2","otro",inicio));
+        assertEquals(nuevo.get(0),s.child("letraActual").getValue());
+    }
     private MutableData sala() {
         MutableData datos = MutableDataLocal.desde(new HashMap<>());
         datos.child("estadoPartida").setValue("En espera");
         datos.child("hostUID").setValue("host");
         datos.child("jugadores/host/estaListo").setValue(true);
+        datos.child("jugadores/host/estaConectado").setValue(true);
+        datos.child("jugadores/otro/estaListo").setValue(true);
+        datos.child("jugadores/otro/estaConectado").setValue(true);
         datos.child("jugadores/host/nombre").setValue("Anfitrion");
         datos.child("tiempoRonda").setValue(60);
         return datos;
@@ -51,6 +72,7 @@ public class InicioPartidaTest {
         assertTrue(InicioPartida.aplicar(sala, "partida1", "host", cambios()));
         sala.child("estadoPartida").setValue("Esperando jugadores");
         sala.child("jugadores/host/estaListo").setValue(true);
+        sala.child("jugadores/otro/estaListo").setValue(true);
         assertTrue(InicioPartida.aplicar(sala, "partida2", "host", cambios()));
         assertEquals("partida2", sala.child("idPartida").getValue());
         assertEquals(60L, sala.child("tiempoRonda").getValue());
@@ -76,11 +98,43 @@ public class InicioPartidaTest {
 
     private MutableData revision() {
         MutableData sala = sala();
+        sala.child("jugadores/otro").setValue(null);
         sala.child("idPartida").setValue("actual");
         sala.child("fase").setValue("revision_puntuaciones");
         sala.child("rondaActual").setValue(1);
         sala.child("revisionLista/ronda_1/host").setValue(true);
         return sala;
+    }
+
+    @Test public void inicioRequiereDosConectadosYPreparados() {
+        MutableData s=sala(); s.child("jugadores/otro/estaConectado").setValue(false);
+        Object antes=s.getValue();
+        assertFalse(InicioPartida.aplicar(s,"p","host",cambios())); assertEquals(antes,s.getValue());
+        s.child("jugadores/otro").setValue(null);
+        assertFalse(InicioPartida.aplicar(s,"p","host",cambios()));
+    }
+
+    @Test public void entradaTardiaNoReiniciaPlazoPublicado() {
+        MutableData s=sala(); assertTrue(InicioPartida.aplicar(s,"p","host",cambios()));
+        s.child("inicioRonda").setValue(1000);
+        assertFalse(InicioPartida.confirmarInicio(s,"p",1,"otro"));
+        assertEquals(1000L,s.child("inicioRonda").getValue());
+        s.child("inicioRondaListoDe").setValue(null);
+        assertTrue(InicioPartida.confirmarInicio(s,"p",1,"otro"));
+        assertEquals(1000L,s.child("inicioRonda").getValue());
+        assertFalse(InicioPartida.confirmarInicio(s,"vieja",1,"otro"));
+    }
+
+    @Test public void expulsarSoloHostEnEsperaYConservaDatos() {
+        MutableData s=sala();s.child("configuracion").setValue("conservar");
+        assertFalse(InicioPartida.expulsarEnEspera(s,"otro","host"));
+        assertFalse(InicioPartida.expulsarEnEspera(s,"host","host"));
+        s.child("estadoPartida").setValue("En juego");
+        assertFalse(InicioPartida.expulsarEnEspera(s,"host","otro"));
+        s.child("estadoPartida").setValue("En espera");
+        assertTrue(InicioPartida.expulsarEnEspera(s,"host","otro"));
+        assertFalse(s.child("jugadores").hasChild("otro"));
+        assertEquals("conservar",s.child("configuracion").getValue());
     }
 
     @Test public void avanceDuplicadoNoReiniciaRondaNiCambiaLetra() {

@@ -1,0 +1,1 @@
+scroll=157; child=457; ventana=300
