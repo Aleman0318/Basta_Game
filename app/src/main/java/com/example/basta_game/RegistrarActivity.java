@@ -13,6 +13,7 @@ import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 import com.example.basta_game.models.Usuario;
 import com.example.basta_game.utils.Sounds;
+import com.example.basta_game.utils.CorreoInstitucional;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DatabaseReference;
 import com.example.basta_game.utils.NotificationHelper;
@@ -59,7 +60,8 @@ public class RegistrarActivity extends AppCompatActivity {
 
                 String emailUser = String.valueOf(etCorreoReg.getText());
                 String passUser = String.valueOf(etPasswordReg.getText());
-                String nombre = String.valueOf(etNombre.getText());
+                String nombre = com.example.basta_game.utils.NombresUnicos.normalizarPresentacion(
+                        String.valueOf(etNombre.getText()));
 
                 if(nombre.isEmpty() || emailUser.isEmpty() || passUser.isEmpty()){
                     NotificationHelper.show(
@@ -87,10 +89,25 @@ public class RegistrarActivity extends AppCompatActivity {
 
                     Log.d("REGISTRO_FIREBASE", "Ignorando filtro de no vacios (tienen datos)");
 
+                    if (!com.example.basta_game.utils.NombresUnicos.valido(nombre)) {
+                        etNombre.setError("Nombre de 2 a 24 caracteres, letras o números");
+                        return;
+                    }
+                    if (!CorreoInstitucional.esValido(emailUser)) {
+                        NotificationHelper.show(notificationRegister,
+                                "Correo inválido. Debes utilizar tu correo institucional @ues.edu.sv",
+                                NotificationHelper.WARNING);
+                        Sounds.playNotificaciones();
+                        return;
+                    }
                     if(auth!=null){
                         //creamos el usuario
-                        auth.createUserWithEmailAndPassword(emailUser, passUser)
+                        if(!com.example.basta_game.utils.CargaBoton.iniciar(btnRegistrar))return;
+        final Object operacion=com.example.basta_game.utils.CargaBoton.token(btnRegistrar);
+                        android.util.Log.d("AuthFlujo","Solicitando autenticación");
+                    auth.createUserWithEmailAndPassword(emailUser, passUser)
                                 .addOnCompleteListener(task -> {
+                                    android.util.Log.d("AuthFlujo","Registro Auth finalizó: exito="+task.isSuccessful());
                                     if(task.isSuccessful()){
                                         String uid = auth.getCurrentUser().getUid();
 
@@ -107,32 +124,62 @@ public class RegistrarActivity extends AppCompatActivity {
                                                 ""
                                         );
 
-                                        NotificationHelper.show(
-                                                notificationRegister,
-                                                "Usuario registrado correctamente",
-                                                NotificationHelper.SUCCESS
-                                        );
-                                        Sounds.playNotificaciones();
-
-                                        DatabaseReference usuarioRef = FirebaseDatabase.getInstance().getReference("usuarios");
-
-                                        usuarioRef.child(uid).setValue(user)
-                                                .addOnCompleteListener(taskGuardar->{
-                                                    if(taskGuardar.isSuccessful()){
-                                                        Log.d("REGISTRO_FIREBASE","usuario añadido correctamente a realtime");
-                                                        Intent intent = new Intent(RegistrarActivity.this, HomeActivity.class);
-                                                        startActivity(intent);
-                                                                                                            }
-                                                    else {
-                                                        Log.d("REGISTRO_FIREBASE","ocurrio un error al guardar el perfil el realtime");
+                                        DatabaseReference nombres = FirebaseDatabase.getInstance()
+                                                .getReference("nombresVisibles")
+                                                .child(com.example.basta_game.utils.NombresUnicos.clave(nombre));
+                                        // Reserva exclusiva: incluso dos registros simultáneos
+                                        // no pueden tomar el mismo nombre ignorando mayúsculas.
+                                        nombres.runTransaction(new com.google.firebase.database.Transaction.Handler() {
+                                            @androidx.annotation.NonNull
+                                            @Override public com.google.firebase.database.Transaction.Result doTransaction(
+                                                    @androidx.annotation.NonNull com.google.firebase.database.MutableData valor) {
+                                                String existente = valor.getValue(String.class);
+                                                if (existente != null && !uid.equals(existente))
+                                                    return com.google.firebase.database.Transaction.abort();
+                                                valor.setValue(uid);
+                                                return com.google.firebase.database.Transaction.success(valor);
+                                            }
+                                            @Override public void onComplete(com.google.firebase.database.DatabaseError error,
+                                                    boolean reservado, com.google.firebase.database.DataSnapshot dato) {
+                                                if (!reservado || error != null) {
+                                                    com.example.basta_game.utils.CargaBoton.terminar(btnRegistrar,operacion);
+                                                    etNombre.setError(error == null ? "Nombre ocupado; elige otro" :
+                                                            "No se pudo reservar el nombre en Firebase");
+                                                    // La cuenta Auth ya se creó. Eliminarla si es posible
+                                                    // para permitir reintentar el registro sin duplicados.
+                                                    if (auth.getCurrentUser() != null && uid.equals(auth.getCurrentUser().getUid())) {
+                                                        auth.getCurrentUser().delete().addOnFailureListener(e -> {
+                                                            if (!isFinishing()) NotificationHelper.show(notificationRegister,
+                                                                    "No se pudo limpiar la cuenta provisional; inicia sesión para recuperarla",
+                                                                    NotificationHelper.WARNING);
+                                                        });
+                                                    }
+                                                    return;
+                                                }
+                                                DatabaseReference usuarioRef = FirebaseDatabase.getInstance().getReference("usuarios");
+                                                usuarioRef.child(uid).setValue(user).addOnCompleteListener(guardado -> {
+                                                    com.example.basta_game.utils.CargaBoton.terminar(btnRegistrar,operacion);
+                                                    if (guardado.isSuccessful() && !isFinishing() && !isDestroyed()) {
+                                                        NotificationHelper.show(notificationRegister,
+                                                                "Usuario registrado correctamente",NotificationHelper.SUCCESS);
+                                                        Sounds.playNotificaciones();
+                                                        startActivity(new Intent(RegistrarActivity.this,HomeActivity.class));
+                                                    } else {
+                                                        com.example.basta_game.utils.NombresUnicos.soltarReservaAnterior(uid,nombre);
+                                                        if (!isFinishing()) NotificationHelper.show(notificationRegister,
+                                                                "No se pudo guardar el perfil. Verifica tu conexión",
+                                                                NotificationHelper.ERROR);
                                                     }
                                                 });
+                                            }
+                                        }, false);
 
                                     }
                                     else {
+                                        com.example.basta_game.utils.CargaBoton.terminar(btnRegistrar,operacion);
                                         NotificationHelper.show(
                                                 notificationRegister,
-                                                "¡Ocurrio un error al registrar el usuario!",
+                                                task.getException()!=null ? task.getException().getLocalizedMessage() : "No se pudo registrar la cuenta",
                                                 NotificationHelper.ERROR
                                         );
                                         Sounds.playNotificaciones();

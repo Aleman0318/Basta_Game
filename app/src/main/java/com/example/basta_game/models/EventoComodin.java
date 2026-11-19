@@ -5,6 +5,14 @@ public class EventoComodin {
     private String descripcion;
     private int iconoResId;
     private boolean esBeneficio; // true si ganó puntos, false si fue castigado
+    private boolean neutral;
+
+    public EventoComodin(String titulo, String descripcion, int iconoResId) {
+        this(titulo, descripcion, iconoResId, false);
+        neutral = true;
+    }
+
+    public boolean isNeutral() { return neutral; }
 
     public EventoComodin(String titulo, String descripcion, int iconoResId, boolean esBeneficio) {
         this.titulo = titulo;

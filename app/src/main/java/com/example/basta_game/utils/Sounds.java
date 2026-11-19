@@ -13,9 +13,14 @@ public class Sounds {
     public static int perdedorSound;
     public static int notificacionesSound;
     public static int loadingPartidaSound;
+    private static int loadingStream;
+    public static void detenerTodo(){detenerLoadingPartida();if(soundPool!=null)soundPool.autoPause();}
+    public static void detenerLoadingPartida(){if(soundPool!=null && loadingStream!=0) soundPool.stop(loadingStream);loadingStream=0;}
     public static int conteoFinalSound;
     public static int bastaSound;
     public static int conteoCombate;
+    public static int disparoSound;
+    private static int parrySound;
 
     private static boolean initialized = false;
 
@@ -43,6 +48,8 @@ public class Sounds {
         conteoFinalSound = soundPool.load(context, R.raw.conteo_final, 1);
         bastaSound = soundPool.load(context, R.raw.bastaaa, 1);
         conteoCombate = soundPool.load(context, R.raw.cuenta_combate, 1);
+        disparoSound = soundPool.load(context, R.raw.disparo, 1);
+        parrySound = soundPool.load(context, R.raw.succes_parry, 1);
 
         initialized = true;
     }
@@ -64,7 +71,7 @@ public class Sounds {
     }
     public static void playLoadingPartida(){
         if (soundPool != null){
-            soundPool.play(loadingPartidaSound, 1f, 1f, 1, 0,1f);
+            detenerLoadingPartida();loadingStream=soundPool.play(loadingPartidaSound, 1f, 1f, 1, 0,1f);
         }
     }
     public static void conteoFinalPlay(){
@@ -83,6 +90,22 @@ public class Sounds {
             soundPool.play(conteoCombate, 1f, 1f, 1, 0, 1f);
         }
     }
+
+    public static void playDisparo() {
+        if (soundPool != null) {
+            soundPool.play(disparoSound, 1f, 1f, 1, 0, 1f);
+        }
+    }
+
+    public static void playParry() {
+        if (soundPool != null && parrySound != 0) {
+            // detenerTodo() pausa todos los streams al abandonar una partida.
+            // Al iniciar otra, PARRY debe sonar también desde la pantalla de puntos.
+            soundPool.autoResume();
+            soundPool.play(parrySound, 1f, 1f, 1, 0, 1f);
+        }
+    }
+
     public static void release() {
         if(soundPool != null){
             soundPool.release();

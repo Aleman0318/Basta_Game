@@ -5,6 +5,8 @@ import java.util.ArrayList;
 public class Sala {
 
     private String idSala;
+    private String idPartida;
+    private boolean publica;
     private String codigoSala;
     private String hostUID;
     private String hostNombre;
@@ -34,6 +36,13 @@ public class Sala {
         this.tiempoRonda = tiempoRonda;
         this.categoriasActivas = categoriasActivas;
     }
+
+    public boolean isPublica() { return publica; }
+    public void setPublica(boolean publica) { this.publica = publica; }
+
+    public String getIdPartida() { return idPartida; }
+
+    public void setIdPartida(String idPartida) { this.idPartida = idPartida; }
 
     public String getIdSala() {
         return idSala;

@@ -14,6 +14,12 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
+import android.widget.ImageButton;
+import android.widget.EditText;
+import android.text.InputFilter;
+import android.text.InputType;
+import android.widget.LinearLayout;
+import androidx.appcompat.app.AlertDialog;
 import android.widget.TextView;
 import androidx.appcompat.widget.AppCompatButton;
 import com.bumptech.glide.Glide;
@@ -54,6 +60,8 @@ public class PerfilFragment extends Fragment {
         ivAvatarActual = view.findViewById(R.id.ivAvatarActual);
         MaterialCardView btnCambiarAvatar = view.findViewById(R.id.btnCambiarAvatar);
         tvUsername = view.findViewById(R.id.tvUsername);
+        ImageButton btnEditarNombre = view.findViewById(R.id.btnEditarNombre);
+        btnEditarNombre.setOnClickListener(v -> mostrarDialogoEditarNombre(btnEditarNombre));
         tvCorreo = view.findViewById(R.id.tvCorreo);
         tvPartidasJugadas = view.findViewById(R.id.tvPartidasJugadas);
         tvPartidasGanadas = view.findViewById(R.id.tvPartidasGanadas);
@@ -73,16 +81,8 @@ public class PerfilFragment extends Fragment {
         btnCerrarSesion.setOnClickListener(v -> {
             Animations.animacionZoom(v);
 
-            FirebaseAuth authObj = FirebaseAuth.getInstance();
-            if (authObj.getCurrentUser() != null) {
-                authObj.signOut();
-            }
-
-            if (getActivity() != null) {
-                Intent intent = new Intent(getActivity(), LoginActivity.class);
-                intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-                startActivity(intent);
-            }
+            if (getActivity() instanceof com.example.basta_game.HomeActivity)
+                ((com.example.basta_game.HomeActivity) getActivity()).confirmarCerrarSesion();
         });
 
 
@@ -132,6 +132,92 @@ public class PerfilFragment extends Fragment {
         });
 
         return view;
+    }
+
+    /** Dialogo personalizado en el estilo del juego. El correo y la clave nunca se modifican. */
+    private void mostrarDialogoEditarNombre(View boton) {
+        if (!isAdded() || FirebaseAuth.getInstance().getCurrentUser() == null) return;
+        String uid = FirebaseAuth.getInstance().getCurrentUser().getUid();
+        Dialog dialog = new Dialog(requireContext());
+        dialog.setContentView(R.layout.dialog_editar_nombre);
+        dialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+        dialog.setCancelable(true);
+        EditText campo = dialog.findViewById(R.id.etNuevoNombrePerfil);
+        TextView error = dialog.findViewById(R.id.tvErrorNombrePerfil);
+        com.google.android.material.button.MaterialButton cancelar = dialog.findViewById(R.id.btnCancelarNombrePerfil);
+        com.google.android.material.button.MaterialButton guardar = dialog.findViewById(R.id.btnGuardarNombrePerfil);
+        campo.setText(tvUsername.getText());
+        campo.setSelection(campo.length());
+        campo.setFilters(new InputFilter[]{new InputFilter.LengthFilter(24)});
+        cancelar.setOnClickListener(v -> dialog.dismiss());
+        guardar.setOnClickListener(v -> {
+            String nombre = com.example.basta_game.utils.NombresUnicos.normalizarPresentacion(
+                    campo.getText().toString());
+            if (!com.example.basta_game.utils.NombresUnicos.valido(nombre)) {
+                error.setText("Usa entre 2 y 24 caracteres, letras, números o espacios");
+                error.setVisibility(View.VISIBLE);
+                return;
+            }
+            guardar.setEnabled(false);
+            error.setVisibility(View.GONE);
+            // Reserva exclusiva por clave normalizada (Roberto == roberto).
+            // Si la ruta aun no tiene reglas autorizadas, el cambio se rechaza, nunca se guarda duplicado.
+            DatabaseReference usuarios = FirebaseDatabase.getInstance().getReference("usuarios");
+            DatabaseReference nuevoIndice = FirebaseDatabase.getInstance()
+                    .getReference("nombresVisibles").child(com.example.basta_game.utils.NombresUnicos.clave(nombre));
+            nuevoIndice.runTransaction(new com.google.firebase.database.Transaction.Handler() {
+                @NonNull @Override public com.google.firebase.database.Transaction.Result doTransaction(
+                        @NonNull com.google.firebase.database.MutableData actual) {
+                    String dueño = actual.getValue(String.class);
+                    if (dueño != null && !uid.equals(dueño)) return com.google.firebase.database.Transaction.abort();
+                    actual.setValue(uid);
+                    return com.google.firebase.database.Transaction.success(actual);
+                }
+                @Override public void onComplete(DatabaseError problema, boolean reservado, DataSnapshot snap) {
+                    if (!isAdded() || !dialog.isShowing()) return;
+                    if (problema != null || !reservado) {
+                        guardar.setEnabled(true);
+                        error.setText(problema == null ? "Este nombre ya está ocupado" :
+                                "No pudimos comprobar el nombre. Revisa tu conexión o las reglas Firebase");
+                        error.setVisibility(View.VISIBLE);
+                        return;
+                    }
+                    usuarios.child(uid).child("nombre").get().addOnCompleteListener(lectura -> {
+                        if (!lectura.isSuccessful() || lectura.getResult() == null) {
+                            guardar.setEnabled(true);
+                            error.setText("No pudimos consultar tu perfil");
+                            error.setVisibility(View.VISIBLE);
+                            // No retiramos una reserva ya perteneciente a este usuario sin comprobar el perfil.
+                            return;
+                        }
+                        String anterior = lectura.getResult().getValue(String.class);
+                        usuarios.child(uid).child("nombre").setValue(nombre).addOnCompleteListener(escritura -> {
+                            if (!isAdded() || !dialog.isShowing()) return;
+                            guardar.setEnabled(true);
+                            if (escritura.isSuccessful()) {
+                                tvUsername.setText(nombre);
+                                if (anterior != null && !com.example.basta_game.utils.NombresUnicos.clave(anterior)
+                                        .equals(com.example.basta_game.utils.NombresUnicos.clave(nombre))) {
+                                    com.example.basta_game.utils.NombresUnicos.soltarReservaAnterior(uid, anterior);
+                                }
+                                dialog.dismiss();
+                                NotificationHelper.show(perfilNotification, "Nombre actualizado", NotificationHelper.SUCCESS);
+                            } else {
+                                error.setText("Error guardando el nombre. Intenta otra vez");
+                                error.setVisibility(View.VISIBLE);
+                                // No borramos reservas en reintentos inciertos de red; se pueden reutilizar por el mismo UID.
+                            }
+                        });
+                    });
+                }
+            }, false);
+        });
+        dialog.show();
+        com.example.basta_game.utils.NotificationHelper.acompanar(dialog);
+        if (dialog.getWindow() != null) {
+            int ancho = (int) (getResources().getDisplayMetrics().widthPixels * .88);
+            dialog.getWindow().setLayout(ancho, ViewGroup.LayoutParams.WRAP_CONTENT);
+        }
     }
 
     private void inicializarOpcionesAvatares() {

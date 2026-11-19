@@ -34,7 +34,7 @@ public  class VerificacionesAuth {
                                  usuarioComprobado = userTemporal;
                                  String nombreUsuarioNotificacion = usuarioComprobado.getNombre();
 
-                                if(!nombreUsuarioNotificacion.isEmpty()){
+                                if(IdentidadJugador.nombreValido(nombreUsuarioNotificacion)){
                                     NotificationHelper.show(
                                             vista,
                                             "¡Bienvenido " + nombreUsuarioNotificacion + "!",

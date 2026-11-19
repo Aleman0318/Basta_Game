@@ -18,6 +18,16 @@ import androidx.core.view.WindowInsetsCompat;
 import androidx.fragment.app.Fragment;
 
 import com.example.basta_game.Fragments.LobbyFragment;
+import com.example.basta_game.Fragments.PartidaFragment;
+import com.example.basta_game.utils.TransferenciaHost;
+import com.example.basta_game.utils.IdentidadJugador;
+import com.example.basta_game.utils.NotificationHelper;
+import com.example.basta_game.utils.Sounds;
+import com.google.firebase.database.MutableData;
+import com.google.firebase.database.Transaction;
+import com.google.android.gms.tasks.Tasks;
+import android.view.View;
+import android.widget.Toast;
 import com.example.basta_game.utils.CustomDialogHelper;
 import com.example.basta_game.utils.VerificacionesAuth;
 import com.google.firebase.auth.FirebaseAuth;
@@ -28,19 +38,17 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ServerValue;
 import com.google.firebase.database.ValueEventListener;
 
-import java.lang.reflect.Field;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Random;
 
 public class SalaActivity extends AppCompatActivity {
 
-    private static final long TIEMPO_GRACIA_DESCONEXION_MS = 10000;
+    private static final long TIEMPO_GRACIA_DESCONEXION_MS = 90000;
 
     private FirebaseAuth auth;
 
     private String idSala = "";
+    private String partidaPresencia;
     private String codigoSala = "";
     private boolean esHost = false;
 
@@ -56,13 +64,36 @@ public class SalaActivity extends AppCompatActivity {
     private final Handler handlerDesconexion = new Handler(Looper.getMainLooper());
     private Runnable tareaExpulsionPorAusencia;
 
-    private boolean salida = false;
-    private boolean expulsadoPorTiempo = false;
+    private volatile boolean salida = false;
+    private volatile boolean conectadoServidor = false;
+    private volatile long offsetServidor = 0L;
+    private volatile boolean offsetDisponible = false;
+    private DatabaseReference conexionRef, offsetRef;
+    private ValueEventListener listenerConexion, listenerOffset;
+    private DataSnapshot ultimosJugadores;
+    private final Map<String, String> nombresJugadores = new HashMap<>();
+    private boolean primeraLista = true;
     private boolean modalSalirMostrado = false;
+    private int ultimaAlturaIme=-1;
+    private DatabaseReference sesionActual;
+    private ValueEventListener listenerSesiones;
+    private ValueEventListener listenerIdPartida;
+    private DataSnapshot estadoSesiones;
+    private final java.util.Set<String> sesionesPropias=new java.util.HashSet<>();
+    private boolean registrandoSesion;
+    private volatile int versionConexion;
+    private boolean verificandoSala;
+    private int fallosRecuperacion;
+    private Runnable tareaReintentoSala;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        if(savedInstanceState!=null) {
+            java.util.ArrayList<String> propias=savedInstanceState.getStringArrayList("sesionesPropias");
+            if(propias!=null) sesionesPropias.addAll(propias);
+            partidaPresencia=savedInstanceState.getString("partidaPresencia");
+        }
 
         EdgeToEdge.enable(this);
 
@@ -75,16 +106,29 @@ public class SalaActivity extends AppCompatActivity {
 
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -> {
             Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
+            Insets teclado = insets.getInsets(WindowInsetsCompat.Type.ime());
+            boolean cambioTeclado=ultimaAlturaIme!=teclado.bottom;
+            ultimaAlturaIme=teclado.bottom;
 
-            // No usamos el alto del teclado como padding del contenedor principal.
-            // Si se suma el IME aquí, el fragment puede quedar raro y el scroll manual se vuelve incómodo.
-            // Con adjustResize + el ScrollView del fragment, la pantalla se comporta tipo WhatsApp.
+            // Edge-to-edge needs IME insets to expose the scroll viewport above the keyboard.
             v.setPadding(
                     systemBars.left,
                     systemBars.top,
                     systemBars.right,
-                    systemBars.bottom
+                    Math.max(systemBars.bottom, teclado.bottom)
             );
+
+            View chrome=findViewById(R.id.chromePartida);
+            if(chrome!=null) chrome.setVisibility(teclado.bottom>0 ? View.GONE : View.VISIBLE);
+            View campo = getCurrentFocus();
+            if (cambioTeclado && teclado.bottom > 0 && campo instanceof android.widget.EditText) {
+                campo.post(() -> {
+                    if (!campo.hasFocus() || !campo.isAttachedToWindow()) return;
+                    int margen = Math.round(12 * getResources().getDisplayMetrics().density);
+                    campo.requestRectangleOnScreen(new android.graphics.Rect(0, -margen,
+                            campo.getWidth(), campo.getHeight() + margen), false);
+                });
+            }
 
             return insets;
         });
@@ -99,15 +143,20 @@ public class SalaActivity extends AppCompatActivity {
             idSala = bundle.getString("IDSALA", "");
             codigoSala = bundle.getString("CODIGO_SALA", "");
             esHost = bundle.getBoolean("ES_ANFITRION", false);
+            if(partidaPresencia==null) partidaPresencia=bundle.getString("ID_PARTIDA");
 
             configurarReferenciasFirebase();
-            mostrarLobby(crearBundleActualizado());
+            if (getSupportFragmentManager().findFragmentById(R.id.sala_fragment_container) == null) {
+                mostrarLobby(crearBundleActualizado());
+            }
             configurarBotonAtrasTelefono();
             escucharMiNodoJugador();
             escucharJugadoresParaLimpieza();
-            marcarJugadorConectado();
+            escucharConexion();
         }
     }
+
+    public boolean haSalidoDeSala() { return salida; }
 
     private void configurarReferenciasFirebase() {
         if (idSala == null || idSala.trim().isEmpty()) {
@@ -194,60 +243,75 @@ public class SalaActivity extends AppCompatActivity {
     }
 
     @Override
-    protected void onPause() {
-        super.onPause();
-
-        if (salida || isFinishing() || isChangingConfigurations()) {
-            return;
-        }
-
-        Log.d("SALA_ACTIVITY", "onPause: usuario salió temporalmente");
-
-        marcarJugadorDesconectadoTemporalmente();
-        iniciarTiempoDeGracia();
-    }
-
-    @Override
     protected void onResume() {
         super.onResume();
-
-        if (expulsadoPorTiempo) {
-            irHome(true, false);
-            return;
-        }
-
-        if (salida) {
-            return;
-        }
-
-        Log.d("SALA_ACTIVITY", "onResume: usuario volvió");
-
-        cancelarTiempoDeGracia();
-        verificarSiSigueEnSalaYReconectar();
+        if (!salida && conectadoServidor) verificarSiSigueEnSalaYReconectar();
     }
 
-    private void iniciarTiempoDeGracia() {
-        cancelarTiempoDeGracia();
-
-        tareaExpulsionPorAusencia = () -> {
-            if (salida || isFinishing()) {
-                return;
+    private void escucharConexion() {
+        conexionRef = FirebaseDatabase.getInstance().getReference(".info/connected");
+        offsetRef = FirebaseDatabase.getInstance().getReference(".info/serverTimeOffset");
+        listenerOffset = offsetRef.addValueEventListener(new ValueEventListener() {
+            @Override public void onDataChange(@NonNull DataSnapshot snapshot) {
+                Long offset = snapshot.getValue(Long.class);
+                offsetDisponible = offset != null;
+                offsetServidor = offset == null ? 0L : offset;
+                programarLimpieza();
+                // No registrar sesiones antes de tener reloj: antes se abortaban y reintentaban en bucle.
+                if (offsetDisponible && conectadoServidor && !salida) verificarSiSigueEnSalaYReconectar();
             }
+            @Override public void onCancelled(@NonNull DatabaseError error) {
+                Log.e("PRESENCIA", error.getMessage());
+            }
+        });
+        listenerSesiones=salaRef.child("sesiones").addValueEventListener(new ValueEventListener() {
+            @Override public void onDataChange(DataSnapshot datos) { estadoSesiones=datos; sincronizarPresencia(); }
+            @Override public void onCancelled(DatabaseError e) { Log.w("PRESENCIA","No se pudieron leer sesiones",e.toException()); }
+        });
+        listenerIdPartida=salaRef.child("idPartida").addValueEventListener(new ValueEventListener() {
+            @Override public void onDataChange(DataSnapshot datos) { partidaPresencia=datos.getValue(String.class); }
+            @Override public void onCancelled(DatabaseError error) { Log.w("PRESENCIA","No se pudo leer la partida",error.toException()); }
+        });
+        listenerConexion = conexionRef.addValueEventListener(new ValueEventListener() {
+            @Override public void onDataChange(@NonNull DataSnapshot snapshot) {
+                boolean nueva=Boolean.TRUE.equals(snapshot.getValue(Boolean.class));
+                boolean anterior = conectadoServidor;
+                conectadoServidor = nueva;
+                if (nueva != anterior) {
+                    versionConexion++;
+                    registrandoSesion=false;
+                    verificandoSala=false;
+                    detenerReintentoRecuperacion();
+                    // Al volver Internet, cerrar la sesión anterior ANTES de registrar la nueva.
+                    if (nueva) cerrarSesionActual();
+                }
+                if (conectadoServidor && !salida) {
+                    verificarSiSigueEnSalaYReconectar();
+                }
+                programarLimpieza();
+            }
+            @Override public void onCancelled(@NonNull DatabaseError error) {
+                conectadoServidor = false;
+                cancelarTiempoDeGracia();
+            }
+        });
+    }
 
-            Log.d("SALA_ACTIVITY", "Pasaron 10 segundos. Expulsando jugador por ausencia.");
-
-            expulsadoPorTiempo = true;
-            salida = true;
-
-            abandonarSalaEnFirebase(() -> {
-                Log.d("SALA_ACTIVITY", "Jugador expulsado por ausencia");
-            });
-        };
-
-        handlerDesconexion.postDelayed(
-                tareaExpulsionPorAusencia,
-                TIEMPO_GRACIA_DESCONEXION_MS
-        );
+    private void programarLimpieza() {
+        cancelarTiempoDeGracia();
+        if (salida || !conectadoServidor || !offsetDisponible || ultimosJugadores == null) return;
+        long ahora = System.currentTimeMillis() + offsetServidor;
+        long proxima = Long.MAX_VALUE;
+        for (DataSnapshot jugador : ultimosJugadores.getChildren()) {
+            Long desde = jugador.child("desconectadoDesde").getValue(Long.class);
+            if (Boolean.FALSE.equals(jugador.child("estaConectado").getValue(Boolean.class)) && desde != null) {
+                proxima = Math.min(proxima, Math.max(1L, desde + TIEMPO_GRACIA_DESCONEXION_MS - ahora));
+            }
+        }
+        if (proxima != Long.MAX_VALUE) {
+            tareaExpulsionPorAusencia = () -> actualizarSala(null, true, null);
+            handlerDesconexion.postDelayed(tareaExpulsionPorAusencia, proxima);
+        }
     }
 
     private void cancelarTiempoDeGracia() {
@@ -257,56 +321,153 @@ public class SalaActivity extends AppCompatActivity {
         }
     }
 
-    private void marcarJugadorConectado() {
-        if (!usuarioValido() || nodoJugadorSala == null) {
-            return;
-        }
-
-        HashMap<String, Object> actualizaciones = new HashMap<>();
-        actualizaciones.put("estaConectado", true);
-        actualizaciones.put("desconectadoDesde", null);
-
-        nodoJugadorSala.updateChildren(actualizaciones)
-                .addOnSuccessListener(unused -> Log.d("SALA_ACTIVITY", "Jugador conectado"));
+    public void reintentarConexionSala() {
+        detenerReintentoRecuperacion();
+        verificarSiSigueEnSalaYReconectar();
     }
 
-    private void marcarJugadorDesconectadoTemporalmente() {
-        if (!usuarioValido() || nodoJugadorSala == null) {
-            return;
+    private void detenerReintentoRecuperacion() {
+        if (tareaReintentoSala != null) {
+            handlerDesconexion.removeCallbacks(tareaReintentoSala);
+            tareaReintentoSala = null;
         }
+    }
 
-        HashMap<String, Object> actualizaciones = new HashMap<>();
-        actualizaciones.put("estaConectado", false);
-        actualizaciones.put("desconectadoDesde", ServerValue.TIMESTAMP);
-
-        nodoJugadorSala.updateChildren(actualizaciones)
-                .addOnSuccessListener(unused -> Log.d("SALA_ACTIVITY", "Jugador desconectado temporalmente"));
+    private void reintentarRecuperacionDespues() {
+        if (salida || !conectadoServidor || isDestroyed()) return;
+        detenerReintentoRecuperacion();
+        long espera = Math.min(8000L, 1500L * (1L << Math.min(3, fallosRecuperacion++)));
+        Log.i("RECUPERACION", "Reintento de sala programado en " + espera + " ms");
+        tareaReintentoSala = () -> {
+            tareaReintentoSala = null;
+            verificarSiSigueEnSalaYReconectar();
+        };
+        handlerDesconexion.postDelayed(tareaReintentoSala, espera);
     }
 
     private void verificarSiSigueEnSalaYReconectar() {
-        if (!usuarioValido() || nodoJugadorSala == null) {
-            irHome(true, false);
+        if (salida || !conectadoServidor || !offsetDisponible || !usuarioValido() ||
+                nodoJugadorSala == null || verificandoSala || registrandoSesion) return;
+        if (sesionActual != null) {
+            com.example.basta_game.utils.ConexionJuego.salaSincronizada(this);
             return;
         }
+        verificandoSala = true;
+        String uid = auth.getCurrentUser().getUid();
+        final int recuperacion = versionConexion;
+        salaRef.get().addOnCompleteListener(tarea -> {
+            if (recuperacion != versionConexion) return; // Una conexión posterior ya es dueña de la recuperación.
+            verificandoSala = false;
+            if (salida || !conectadoServidor || isDestroyed()) return;
+            if (!tarea.isSuccessful()) {
+                Log.w("RECUPERACION", "Lectura de sala pendiente", tarea.getException());
+                com.example.basta_game.utils.ConexionJuego.errorSala(this,
+                        tarea.getException() != null ? tarea.getException() : new Exception("Lectura temporalmente no disponible"));
+                reintentarRecuperacionDespues();
+                return;
+            }
+            DataSnapshot sala = tarea.getResult();
+            DataSnapshot jugador = sala.child("jugadores").child(uid);
+            if (!jugador.exists() ||
+                    !com.example.basta_game.utils.IngresoSala.reservaVigente(
+                            jugador.child("estaConectado").getValue(),
+                            jugador.child("desconectadoDesde").getValue(),
+                            sala.child("sesiones").child(uid).getValue(),
+                            System.currentTimeMillis() + offsetServidor, TIEMPO_GRACIA_DESCONEXION_MS) ||
+                    Boolean.TRUE.equals(sala.child("expulsados").child(uid).getValue())) {
+                Log.w("RECUPERACION", "Membresía inexistente o reserva agotada; verificar expulsión");
+                comprobarSalidaDeSala();
+                return;
+            }
+            fallosRecuperacion = 0;
+            partidaPresencia = sala.child("idPartida").getValue(String.class);
+            actualizarHostLocal(Boolean.TRUE.equals(jugador.child("esHost").getValue()));
+            recuperarIdentidadSiIncompleta(jugador);
+            registrarSesion(); // El estado global pasa a disponible al CONFIRMAR esta sesión.
+        });
+    }
 
-        nodoJugadorSala.addListenerForSingleValueEvent(new ValueEventListener() {
-            @Override
-            public void onDataChange(@NonNull DataSnapshot snapshot) {
-                if (!snapshot.exists()) {
-                    irHome(true, false);
+    private void avisarSesionConfirmada() {
+        fallosRecuperacion = 0;
+        detenerReintentoRecuperacion();
+        Fragment f = getSupportFragmentManager().findFragmentById(R.id.sala_fragment_container);
+        if (f instanceof PartidaFragment) ((PartidaFragment) f).recuperarEstadoConectado();
+        com.example.basta_game.utils.ConexionJuego.salaSincronizada(this);
+    }
+
+    private void sincronizarPresencia() {
+        if(salida || !conectadoServidor) return;
+        salaRef.runTransaction(new Transaction.Handler() {
+            @Override public Transaction.Result doTransaction(MutableData datos) {
+                if(datos.getValue()==null) return Transaction.success(datos);
+                boolean cambio=com.example.basta_game.utils.PresenciaSala.actualizar(datos);
+                cambio=TransferenciaHost.reconciliar(datos) || cambio;
+                return cambio ? Transaction.success(datos) : Transaction.abort();
+            }
+            @Override public void onComplete(DatabaseError e,boolean committed,DataSnapshot datos) {
+                if(e!=null) Log.w("PRESENCIA","No se pudo confirmar presencia",e.toException());
+            }
+        },false);
+    }
+    private void cerrarSesionActual() {
+        if(sesionActual==null) return;
+        DatabaseReference antigua=sesionActual; sesionActual=null;
+        // Do not queue a fresh disconnect timestamp that would extend the grace on reconnection.
+        if(!conectadoServidor) return;
+        java.util.Map<String,Object> cambios=new HashMap<>();
+        cambios.put("conectada",false); cambios.put("desconectadoDesde",ServerValue.TIMESTAMP);
+        antigua.updateChildren(cambios).addOnFailureListener(e -> Log.w("PRESENCIA","Cierre de sesion pendiente",e));
+    }
+    private void registrarSesion() {
+        if(sesionActual!=null || registrandoSesion || salida || !conectadoServidor || !offsetDisponible || isDestroyed()) return;
+        registrandoSesion=true;
+        final int version=versionConexion;
+        final DatabaseReference nueva=salaRef.child("sesiones").child(auth.getCurrentUser().getUid()).push();
+        sesionesPropias.add(nueva.getKey());
+        // Cancel only this connection's old player-level hook before switching protocols.
+        nodoJugadorSala.onDisconnect().cancel().addOnCompleteListener(cancelacion -> {
+            if(!cancelacion.isSuccessful() || version!=versionConexion || salida || isDestroyed() || !conectadoServidor) {
+                if(version==versionConexion) {registrandoSesion=false;reintentarRecuperacionDespues();}
+                return;
+            }
+            HashMap<String,Object> desconexion=new HashMap<>();
+            desconexion.put("conectada",false); desconexion.put("desconectadoDesde",ServerValue.TIMESTAMP);
+            nueva.onDisconnect().updateChildren(desconexion).addOnCompleteListener(registro -> {
+                if(!registro.isSuccessful() || version!=versionConexion || salida || isDestroyed() || !conectadoServidor) {
+                    if(version==versionConexion) {registrandoSesion=false;reintentarRecuperacionDespues();}
                     return;
                 }
-
-                marcarJugadorConectado();
-
-                Boolean hostFirebase = snapshot.child("esHost").getValue(Boolean.class);
-                actualizarHostLocal(Boolean.TRUE.equals(hostFirebase));
-            }
-
-            @Override
-            public void onCancelled(@NonNull DatabaseError error) {
-                Log.d("SALA_ACTIVITY", "Error reconectando: " + error.getMessage());
-            }
+                final String uid=auth.getCurrentUser().getUid();
+                salaRef.runTransaction(new Transaction.Handler() {
+                    @Override public Transaction.Result doTransaction(MutableData datos) {
+                        if(version!=versionConexion || salida || isDestroyed() || !conectadoServidor || !offsetDisponible) return Transaction.abort();
+                        if(datos.getValue()==null) return Transaction.success(datos);
+                        MutableData jugador=datos.child("jugadores").child(uid);
+                        if(!jugador.hasChildren() || Boolean.TRUE.equals(datos.child("expulsados").child(uid).getValue()) ||
+                                !com.example.basta_game.utils.IngresoSala.reservaVigente(jugador.child("estaConectado").getValue(),
+                                jugador.child("desconectadoDesde").getValue(),datos.child("sesiones").child(uid).getValue(),
+                                System.currentTimeMillis()+offsetServidor,TIEMPO_GRACIA_DESCONEXION_MS)) return Transaction.abort();
+                        datos.child("sesiones").child(uid).child(nueva.getKey()).child("conectada").setValue(true);
+                        com.example.basta_game.utils.PresenciaSala.actualizar(datos);
+                        TransferenciaHost.reconciliar(datos);
+                        return Transaction.success(datos);
+                    }
+                    @Override public void onComplete(DatabaseError error,boolean ok,DataSnapshot datos) {
+                        if(version!=versionConexion || salida || isDestroyed()) return;
+                        registrandoSesion=false;
+                        if(error!=null) Log.w("PRESENCIA","No se pudo anunciar sesion",error.toException());
+                        if(error==null && ok && datos!=null &&
+                                Boolean.TRUE.equals(datos.child("sesiones").child(uid).child(nueva.getKey()).child("conectada").getValue())) {
+                            sesionActual=nueva;
+                            avisarSesionConfirmada();
+                        } else {
+                            // Un intento fallido no debe dejar un onDisconnect huérfano ni crear reintentos en bucle.
+                            nueva.onDisconnect().cancel();
+                            reintentarRecuperacionDespues();
+                        }
+                    }
+                },false);
+            });
         });
     }
 
@@ -323,8 +484,9 @@ public class SalaActivity extends AppCompatActivity {
                 }
 
                 if (!snapshot.exists()) {
+                    if (!conectadoServidor) return;
                     Log.d("SALA_ACTIVITY", "Mi nodo jugador desapareció");
-                    irHome(true, false);
+                    comprobarSalidaDeSala();
                     return;
                 }
 
@@ -339,425 +501,190 @@ public class SalaActivity extends AppCompatActivity {
         });
     }
 
-    private void escucharJugadoresParaLimpieza() {
-        if (jugadoresRef == null) {
-            return;
+    private void recuperarIdentidadSiIncompleta(DataSnapshot jugador) {
+        if (IdentidadJugador.nombreValido(jugador.child("nombre").getValue(String.class)) &&
+                jugador.child("urlAvatar").getValue(String.class) != null) return;
+        if (!usuarioValido()) return;
+        final String uid = auth.getCurrentUser().getUid();
+        if (!IdentidadJugador.nombreValido(jugador.child("nombre").getValue(String.class))) {
+            notificarSalida("Cargando perfil...");
         }
+        FirebaseDatabase.getInstance().getReference("usuarios").child(uid)
+                .addListenerForSingleValueEvent(new ValueEventListener() {
+                    @Override public void onDataChange(@NonNull DataSnapshot perfil) {
+                        if (salida || !usuarioValido() || !uid.equals(auth.getCurrentUser().getUid())) return;
+                        String nombre = perfil.child("nombre").getValue(String.class);
+                        String foto = perfil.child("fotoPerfilUrl").getValue(String.class);
+                        if (!IdentidadJugador.nombreValido(nombre)) {
+                            notificarSalida("Perfil pendiente. Reintenta al recuperar la conexion");
+                            return;
+                        }
+                        nodoJugadorSala.runTransaction(new Transaction.Handler() {
+                            @NonNull @Override public Transaction.Result doTransaction(@NonNull MutableData actual) {
+                                // An expired membership must never be recreated by a late profile callback.
+                                if (actual.getValue() == null) return Transaction.success(actual);
+                                IdentidadJugador.aplicar(actual, uid, nombre, foto);
+                                return Transaction.success(actual);
+                            }
+                            @Override public void onComplete(DatabaseError error, boolean committed, DataSnapshot actual) {
+                                if (error != null) Log.e("PERFIL_SALA", error.getMessage());
+                            }
+                        }, false);
+                    }
+                    @Override public void onCancelled(@NonNull DatabaseError error) {
+                        if (!salida) notificarSalida("No se pudo cargar el perfil. Revisa tu conexion");
+                    }
+                });
+    }
 
+    private void escucharJugadoresParaLimpieza() {
+        if (jugadoresRef == null) return;
         listenerJugadoresSala = jugadoresRef.addValueEventListener(new ValueEventListener() {
-            @Override
-            public void onDataChange(@NonNull DataSnapshot snapshot) {
-                if (salida) {
-                    return;
+            @Override public void onDataChange(@NonNull DataSnapshot snapshot) {
+                if (salida) return;
+                Map<String, String> actuales = new HashMap<>();
+                int coronas = 0;
+                for (DataSnapshot jugador : snapshot.getChildren()) {
+                    if(Boolean.FALSE.equals(jugador.child("estaConectado").getValue()) && Boolean.TRUE.equals(jugador.child("estaListo").getValue())) {
+                        jugadoresRef.child(jugador.getKey()).runTransaction(new Transaction.Handler() {
+                            @Override public Transaction.Result doTransaction(MutableData datos) {
+                                if(!Boolean.FALSE.equals(datos.child("estaConectado").getValue()) || !Boolean.TRUE.equals(datos.child("estaListo").getValue())) return Transaction.abort();
+                                datos.child("estaListo").setValue(false); return Transaction.success(datos);
+                            }
+                            @Override public void onComplete(DatabaseError e,boolean committed,DataSnapshot datos) {
+                                if(e!=null) Log.w("PRESENCIA","No se pudo limpiar preparacion desconectada",e.toException());
+                            }
+                        },false);
+                    }
+                    actuales.put(jugador.getKey(), leerNombreJugador(jugador));
+                    if (Boolean.TRUE.equals(jugador.child("esHost").getValue(Boolean.class))) coronas++;
                 }
-
-                if (!snapshot.exists() || snapshot.getChildrenCount() == 0) {
-                    eliminarSalaCompleta(() -> irHome(true, false));
-                    return;
+                if (!primeraLista) {
+                    for (DataSnapshot jugador : snapshot.getChildren()) {
+                        if (Boolean.FALSE.equals(jugador.child("estaConectado").getValue(Boolean.class)) &&
+                                !Boolean.FALSE.equals(ultimosJugadores.child(jugador.getKey())
+                                        .child("estaConectado").getValue(Boolean.class))) {
+                            notificarSalida(leerNombreJugador(jugador) + " esta reconectando. Conserva su lugar");
+                        }
+                    }
+                    for (String uid : nombresJugadores.keySet()) {
+                        if (!actuales.containsKey(uid)) {
+                            DataSnapshot anterior = ultimosJugadores.child(uid);
+                            boolean temporal = Boolean.FALSE.equals(anterior.child("estaConectado").getValue(Boolean.class));
+                            notificarSalida(nombresJugadores.get(uid) + (temporal
+                                    ? " se ha desconectado de la partida" : " ha abandonado la partida"));
+                        }
+                    }
                 }
-
-                asignarHostSiLaSalaNoTiene(snapshot);
-                limpiarJugadoresDesconectadosVencidos(snapshot);
+                primeraLista = false;
+                nombresJugadores.clear();
+                nombresJugadores.putAll(actuales);
+                ultimosJugadores = snapshot;
+                if (conectadoServidor && (coronas != 1 || snapshot.getChildrenCount() == 1)) {
+                    actualizarSala(null, false, null);
+                }
+                programarLimpieza();
             }
-
-            @Override
-            public void onCancelled(@NonNull DatabaseError error) {
-                Log.d("SALA_ACTIVITY", "Error escuchando jugadores: " + error.getMessage());
+            @Override public void onCancelled(@NonNull DatabaseError error) {
+                Log.e("SALA_ACTIVITY", error.getMessage());
             }
         });
+    }
+
+    private void notificarSalida(String mensaje) {
+        Log.i("SALIDA_SALA", mensaje);
+        Fragment fragment = getSupportFragmentManager().findFragmentById(R.id.sala_fragment_container);
+        View aviso = fragment == null || fragment.getView() == null ? null
+                : fragment.getView().findViewById(R.id.notificationPartida);
+        if (aviso == null && fragment != null && fragment.getView() != null) {
+            aviso = fragment.getView().findViewById(R.id.notificationLobby);
+        }
+        if (aviso != null) NotificationHelper.show(aviso, mensaje, NotificationHelper.WARNING);
+        else Toast.makeText(this, mensaje, Toast.LENGTH_SHORT).show();
+        Sounds.playNotificaciones();
     }
 
     private void actualizarHostLocal(boolean nuevoEsHost) {
-        if (esHost == nuevoEsHost) {
-            return;
-        }
-
         esHost = nuevoEsHost;
-
-        if (datosSalaOriginal != null) {
-            datosSalaOriginal.putBoolean("ES_ANFITRION", esHost);
+        if (datosSalaOriginal != null) datosSalaOriginal.putBoolean("ES_ANFITRION", esHost);
+        Fragment fragment = getSupportFragmentManager().findFragmentById(R.id.sala_fragment_container);
+        if (fragment != null && fragment.getArguments() != null) {
+            fragment.getArguments().putBoolean("ES_ANFITRION", esHost);
         }
-
-        actualizarHostEnFragmentActual(esHost);
-
-        Fragment fragmentActual = getSupportFragmentManager()
-                .findFragmentById(R.id.sala_fragment_container);
-
-        if (fragmentActual instanceof LobbyFragment && esHost) {
-            mostrarLobby(crearBundleActualizado());
-        }
-
-        Log.d("SALA_ACTIVITY", "Host actualizado localmente: " + esHost);
+        if (fragment instanceof PartidaFragment) ((PartidaFragment) fragment).actualizarAnfitrion(esHost);
+        if (fragment instanceof LobbyFragment) ((LobbyFragment) fragment).actualizarAnfitrion(esHost);
     }
 
-    private void actualizarHostEnFragmentActual(boolean nuevoEsHost) {
-        Fragment fragmentActual = getSupportFragmentManager()
-                .findFragmentById(R.id.sala_fragment_container);
-
-        if (fragmentActual == null) {
-            return;
-        }
-
-        try {
-            Field campoHost = fragmentActual.getClass().getDeclaredField("esAnfitrion");
-            campoHost.setAccessible(true);
-            campoHost.setBoolean(fragmentActual, nuevoEsHost);
-        } catch (Exception ignored) {
-
-        }
-    }
-
-    private void asignarHostSiLaSalaNoTiene(DataSnapshot snapshotJugadores) {
-        if (!soyResponsableDeLimpieza(snapshotJugadores)) {
-            return;
-        }
-
-        boolean hayHost = false;
-
-        for (DataSnapshot jugadorSnap : snapshotJugadores.getChildren()) {
-            Boolean host = jugadorSnap.child("esHost").getValue(Boolean.class);
-
-            if (Boolean.TRUE.equals(host)) {
-                hayHost = true;
-                break;
-            }
-        }
-
-        if (hayHost) {
-            return;
-        }
-
-        ArrayList<DataSnapshot> jugadoresDisponibles = obtenerJugadoresDisponibles(snapshotJugadores);
-
-        if (jugadoresDisponibles.isEmpty()) {
-            eliminarSalaCompleta(null);
-            return;
-        }
-
-        DataSnapshot nuevoHostSnap = jugadoresDisponibles.get(
-                new Random().nextInt(jugadoresDisponibles.size())
-        );
-
-        String nuevoHostUid = nuevoHostSnap.getKey();
-
-        if (nuevoHostUid == null) {
-            return;
-        }
-
-        asignarNuevoHost(snapshotJugadores, nuevoHostUid);
-    }
-
-    private void limpiarJugadoresDesconectadosVencidos(DataSnapshot snapshotJugadores) {
-        if (!soyResponsableDeLimpieza(snapshotJugadores)) {
-            return;
-        }
-
-        long ahora = System.currentTimeMillis();
-
-        ArrayList<String> jugadoresExpirados = new ArrayList<>();
-
-        for (DataSnapshot jugadorSnap : snapshotJugadores.getChildren()) {
-            String uid = jugadorSnap.getKey();
-
-            if (uid == null) {
-                continue;
-            }
-
-            Boolean conectado = jugadorSnap.child("estaConectado").getValue(Boolean.class);
-            Long desconectadoDesde = jugadorSnap.child("desconectadoDesde").getValue(Long.class);
-
-            if (Boolean.FALSE.equals(conectado) &&
-                    desconectadoDesde != null &&
-                    ahora - desconectadoDesde >= TIEMPO_GRACIA_DESCONEXION_MS) {
-
-                jugadoresExpirados.add(uid);
-            }
-        }
-
-        if (jugadoresExpirados.isEmpty()) {
-            return;
-        }
-
-        removerJugadoresExpirados(snapshotJugadores, jugadoresExpirados);
-    }
-
-    private void removerJugadoresExpirados(
-            DataSnapshot snapshotJugadores,
-            ArrayList<String> jugadoresExpirados
-    ) {
-        if (salaRef == null) {
-            return;
-        }
-
-        HashMap<String, Object> actualizaciones = new HashMap<>();
-
-        boolean hostFueExpulsado = false;
-        ArrayList<DataSnapshot> jugadoresRestantes = new ArrayList<>();
-
-        for (DataSnapshot jugadorSnap : snapshotJugadores.getChildren()) {
-            String uid = jugadorSnap.getKey();
-
-            if (uid == null) {
-                continue;
-            }
-
-            if (jugadoresExpirados.contains(uid)) {
-                actualizaciones.put("jugadores/" + uid, null);
-
-                Boolean eraHost = jugadorSnap.child("esHost").getValue(Boolean.class);
-
-                if (Boolean.TRUE.equals(eraHost)) {
-                    hostFueExpulsado = true;
-                }
-
-            } else {
-                jugadoresRestantes.add(jugadorSnap);
-            }
-        }
-
-        if (jugadoresRestantes.isEmpty()) {
-            eliminarSalaCompleta(null);
-            return;
-        }
-
-        if (hostFueExpulsado) {
-            DataSnapshot nuevoHostSnap = jugadoresRestantes.get(
-                    new Random().nextInt(jugadoresRestantes.size())
-            );
-
-            String nuevoHostUid = nuevoHostSnap.getKey();
-
-            if (nuevoHostUid != null) {
-                for (DataSnapshot jugadorSnap : jugadoresRestantes) {
-                    String uid = jugadorSnap.getKey();
-
-                    if (uid != null) {
-                        actualizaciones.put("jugadores/" + uid + "/esHost", false);
-                    }
-                }
-
-                actualizaciones.put("jugadores/" + nuevoHostUid + "/esHost", true);
-                actualizaciones.put("hostUID", nuevoHostUid);
-                actualizaciones.put("hostUid", nuevoHostUid);
-                actualizaciones.put("hostNombre", leerNombreJugador(nuevoHostSnap));
-            }
-        }
-
-        salaRef.updateChildren(actualizaciones);
-    }
-
-    private boolean soyResponsableDeLimpieza(DataSnapshot snapshotJugadores) {
-        if (!usuarioValido()) {
-            return false;
-        }
-
-        String miUid = auth.getCurrentUser().getUid();
-
-        if (esHost) {
-            return true;
-        }
-
-        String primerUidConectado = null;
-        String primerUidCualquiera = null;
-
-        for (DataSnapshot jugadorSnap : snapshotJugadores.getChildren()) {
-            String uid = jugadorSnap.getKey();
-
-            if (uid == null) {
-                continue;
-            }
-
-            if (primerUidCualquiera == null) {
-                primerUidCualquiera = uid;
-            }
-
-            Boolean conectado = jugadorSnap.child("estaConectado").getValue(Boolean.class);
-
-            if (Boolean.TRUE.equals(conectado)) {
-                primerUidConectado = uid;
-                break;
-            }
-        }
-
-        if (primerUidConectado != null) {
-            return miUid.equals(primerUidConectado);
-        }
-
-        return miUid.equals(primerUidCualquiera);
-    }
-
-    private ArrayList<DataSnapshot> obtenerJugadoresDisponibles(DataSnapshot snapshotJugadores) {
-        ArrayList<DataSnapshot> jugadores = new ArrayList<>();
-
-        for (DataSnapshot jugadorSnap : snapshotJugadores.getChildren()) {
-            Boolean conectado = jugadorSnap.child("estaConectado").getValue(Boolean.class);
-
-            if (Boolean.TRUE.equals(conectado)) {
-                jugadores.add(jugadorSnap);
-            }
-        }
-
-        if (!jugadores.isEmpty()) {
-            return jugadores;
-        }
-
-        for (DataSnapshot jugadorSnap : snapshotJugadores.getChildren()) {
-            jugadores.add(jugadorSnap);
-        }
-
-        return jugadores;
-    }
-
-    private void asignarNuevoHost(DataSnapshot snapshotJugadores, String nuevoHostUid) {
-        if (salaRef == null) {
-            return;
-        }
-
-        HashMap<String, Object> actualizaciones = new HashMap<>();
-
-        String nombreNuevoHost = "Jugador";
-
-        for (DataSnapshot jugadorSnap : snapshotJugadores.getChildren()) {
-            String uid = jugadorSnap.getKey();
-
-            if (uid != null) {
-                actualizaciones.put("jugadores/" + uid + "/esHost", false);
-            }
-
-            if (uid != null && uid.equals(nuevoHostUid)) {
-                nombreNuevoHost = leerNombreJugador(jugadorSnap);
-            }
-        }
-
-        actualizaciones.put("jugadores/" + nuevoHostUid + "/esHost", true);
-        actualizaciones.put("hostUID", nuevoHostUid);
-        actualizaciones.put("hostUid", nuevoHostUid);
-        actualizaciones.put("hostNombre", nombreNuevoHost);
-
-        salaRef.updateChildren(actualizaciones);
-    }
-
+    // Nombre publico conservado para los botones existentes; es un abandono explicito.
     public void mandarHomePorDesconexion() {
-        if (salida) {
-            return;
-        }
-
-        salida = true;
-        cancelarTiempoDeGracia();
-
-        abandonarSalaEnFirebase(() -> irHome(false, false));
+        salirLocalSinConexion();
     }
 
-    private void abandonarSalaEnFirebase(Runnable despues) {
-        if (!usuarioValido() || salaRef == null || jugadoresRef == null) {
-            ejecutarDespues(despues);
+    private void actualizarSala(String uidSaliente, boolean expirar, Runnable despues) {
+        if (!conectadoServidor || salaRef == null || !usuarioValido()) {
+            if (uidSaliente != null) {
+                salida = false;
+                notificarSalida("La salida no se confirmo: vuelve a conectar y reintenta");
+            }
             return;
         }
-
-        String miUid = auth.getCurrentUser().getUid();
-
-        jugadoresRef.addListenerForSingleValueEvent(new ValueEventListener() {
-            @Override
-            public void onDataChange(@NonNull DataSnapshot snapshotJugadores) {
-                if (!snapshotJugadores.exists()) {
-                    eliminarSalaCompleta(despues);
+        if (expirar && !offsetDisponible) return;
+        final long ahoraServidor = System.currentTimeMillis() + offsetServidor;
+        salaRef.runTransaction(new Transaction.Handler() {
+            @NonNull @Override public Transaction.Result doTransaction(@NonNull MutableData sala) {
+                if (sala.getValue() == null) return Transaction.success(sala);
+                boolean cambio;
+                if (uidSaliente != null) cambio = TransferenciaHost.abandonar(sala, uidSaliente);
+                else {
+                    cambio = expirar && TransferenciaHost.expirar(sala, ahoraServidor, TIEMPO_GRACIA_DESCONEXION_MS);
+                    cambio = TransferenciaHost.reconciliar(sala) || cambio;
+                }
+                return cambio ? Transaction.success(sala) : Transaction.abort();
+            }
+            @Override public void onComplete(DatabaseError error, boolean committed, DataSnapshot sala) {
+                if (error != null) {
+                    Log.e("HOST", error.getMessage());
+                    if (expirar && !salida) handlerDesconexion.postDelayed(() -> programarLimpieza(), 3000);
+                    if (uidSaliente != null) {
+                        salida = false;
+                        notificarSalida("No se pudo confirmar la salida. Reintenta");
+                        verificarSiSigueEnSalaYReconectar();
+                    }
                     return;
                 }
-
-                DataSnapshot miJugadorSnap = snapshotJugadores.child(miUid);
-                boolean yoEraHost = esHost;
-
-                Boolean hostFirebase = miJugadorSnap.child("esHost").getValue(Boolean.class);
-
-                if (Boolean.TRUE.equals(hostFirebase)) {
-                    yoEraHost = true;
+                if (sala != null && !sala.exists()) limpiarCodigoSinSala();
+                if (uidSaliente != null && (committed || (sala != null && !sala.child("jugadores").hasChild(uidSaliente)))) {
+                    Log.i("SALIDA_SALA", "Abandono confirmado: " + uidSaliente);
+                    if (despues != null) despues.run();
                 }
+            }
+        }, false);
+    }
 
-                ArrayList<DataSnapshot> jugadoresRestantes = new ArrayList<>();
-
-                for (DataSnapshot jugadorSnap : snapshotJugadores.getChildren()) {
-                    String uid = jugadorSnap.getKey();
-
-                    if (uid != null && !uid.equals(miUid)) {
-                        jugadoresRestantes.add(jugadorSnap);
+    private void limpiarCodigoSinSala() {
+        // El índice público se elimina únicamente después de confirmar que ya no existe la sala.
+        if (idSala != null && !idSala.isEmpty()) {
+            FirebaseDatabase.getInstance().getReference("salasPublicas").child(idSala).removeValue()
+                    .addOnFailureListener(e -> Log.w("SALAS_PUBLICAS", "Índice pendiente de limpieza", e));
+        }
+        if (codigoSala == null || codigoSala.trim().isEmpty()) return;
+        FirebaseDatabase.getInstance().getReference("codigosSalas").child(codigoSala)
+                .runTransaction(new Transaction.Handler() {
+                    @NonNull @Override public Transaction.Result doTransaction(@NonNull MutableData codigo) {
+                        if (codigo.getValue() == null) return Transaction.success(codigo);
+                        if (!idSala.equals(codigo.child("idSala").getValue(String.class))) return Transaction.abort();
+                        codigo.setValue(null);
+                        return Transaction.success(codigo);
                     }
-                }
-
-                if (jugadoresRestantes.isEmpty()) {
-                    eliminarSalaCompleta(despues);
-                    return;
-                }
-
-                HashMap<String, Object> actualizaciones = new HashMap<>();
-                actualizaciones.put("jugadores/" + miUid, null);
-
-                if (yoEraHost) {
-                    DataSnapshot nuevoHostSnap = jugadoresRestantes.get(
-                            new Random().nextInt(jugadoresRestantes.size())
-                    );
-
-                    String nuevoHostUid = nuevoHostSnap.getKey();
-
-                    if (nuevoHostUid != null) {
-                        for (DataSnapshot jugadorSnap : jugadoresRestantes) {
-                            String uid = jugadorSnap.getKey();
-
-                            if (uid != null) {
-                                actualizaciones.put("jugadores/" + uid + "/esHost", false);
-                            }
-                        }
-
-                        actualizaciones.put("jugadores/" + nuevoHostUid + "/esHost", true);
-                        actualizaciones.put("hostUID", nuevoHostUid);
-                        actualizaciones.put("hostUid", nuevoHostUid);
-                        actualizaciones.put("hostNombre", leerNombreJugador(nuevoHostSnap));
+                    @Override public void onComplete(DatabaseError error, boolean committed, DataSnapshot codigo) {
+                        if (error != null) Log.e("SALIDA_SALA", "Indice pendiente: " + error.getMessage());
                     }
-                }
-
-                salaRef.updateChildren(actualizaciones)
-                        .addOnCompleteListener(task -> ejecutarDespues(despues));
-            }
-
-            @Override
-            public void onCancelled(@NonNull DatabaseError error) {
-                ejecutarDespues(despues);
-            }
-        });
+                }, false);
     }
 
-    private void eliminarSalaCompleta(Runnable despues) {
-        if (salaRef == null) {
-            ejecutarDespues(despues);
-            return;
-        }
-
-        salaRef.removeValue().addOnCompleteListener(task -> {
-            if (codigoSala != null && !codigoSala.trim().isEmpty()) {
-                FirebaseDatabase.getInstance()
-                        .getReference("codigosSalas")
-                        .child(codigoSala)
-                        .removeValue()
-                        .addOnCompleteListener(task2 -> ejecutarDespues(despues));
-            } else {
-                ejecutarDespues(despues);
-            }
-        });
-    }
-
-    private void ejecutarDespues(Runnable despues) {
-        if (despues != null) {
-            despues.run();
-        }
-    }
-
-    private String leerNombreJugador(DataSnapshot jugadorSnap) {
-        String nombre = jugadorSnap.child("nombre").getValue(String.class);
-
-        if (nombre == null || nombre.trim().isEmpty()) {
-            nombre = "Jugador";
-        }
-
-        return nombre;
+    private String leerNombreJugador(DataSnapshot jugador) {
+        String nombre = jugador.child("nombre").getValue(String.class);
+        return nombre == null || nombre.trim().isEmpty() ? "Jugador" : nombre;
     }
 
     private boolean usuarioValido() {
@@ -766,13 +693,65 @@ public class SalaActivity extends AppCompatActivity {
                 auth.getCurrentUser() != null;
     }
 
+    private void comprobarSalidaDeSala() {
+        if (salida || !conectadoServidor || !usuarioValido() || salaRef == null) return;
+        final String uid=auth.getCurrentUser().getUid();
+        final int version=versionConexion;
+        // Una lectura local temporalmente incompleta no es prueba de expulsión.
+        salaRef.get().addOnCompleteListener(t -> {
+            if (salida || !conectadoServidor || isDestroyed() || version!=versionConexion) return;
+            if (!t.isSuccessful()) {
+                Log.w("RECUPERACION", "No se pudo confirmar membresía", t.getException());
+                reintentarRecuperacionDespues();
+                return;
+            }
+            DataSnapshot sala=t.getResult();
+            DataSnapshot jugador=sala.child("jugadores").child(uid);
+            boolean expulsado=Boolean.TRUE.equals(sala.child("expulsados").child(uid).getValue());
+            boolean vigente=jugador.exists() && !expulsado &&
+                    com.example.basta_game.utils.IngresoSala.reservaVigente(
+                            jugador.child("estaConectado").getValue(),
+                            jugador.child("desconectadoDesde").getValue(),
+                            sala.child("sesiones").child(uid).getValue(),
+                            offsetDisponible ? System.currentTimeMillis()+offsetServidor : Long.MIN_VALUE,
+                            TIEMPO_GRACIA_DESCONEXION_MS);
+            if (vigente) {
+                reintentarRecuperacionDespues();
+                return;
+            }
+            getIntent().putExtra("EXPULSADO",expulsado);
+            irHome(true,false);
+        });
+    }
+    public void salirLocalSinConexion() {
+        if(salida) return;
+        if(usuarioValido() && !sesionesPropias.isEmpty()) {
+            java.util.Set<String> conocidas=new java.util.HashSet<>();
+            if(estadoSesiones!=null) for(DataSnapshot s:estadoSesiones.child(auth.getCurrentUser().getUid()).getChildren()) conocidas.add(s.getKey());
+            conocidas.addAll(sesionesPropias);
+            String sesion=sesionActual!=null ? sesionActual.getKey() : sesionesPropias.iterator().next();
+            com.example.basta_game.utils.SalidasPendientes.guardar(this,idSala,auth.getCurrentUser().getUid(),partidaPresencia,sesion,conocidas,sesionesPropias);
+        }
+        // Navigation is local; reconciliation must never hold this Activity hostage.
+        salida=true; versionConexion++;
+        com.example.basta_game.utils.Sounds.detenerTodo();
+        if(com.example.basta_game.utils.ConexionJuego.transporteDisponible()) com.example.basta_game.utils.SalidasPendientes.reconciliar(getApplicationContext());
+        irHome(false,false);
+    }
     private void irHome(boolean desconexion, boolean creadorDesconexion) {
         salida = true;
+        cerrarSesionActual();
         cancelarTiempoDeGracia();
+        if (conectadoServidor && nodoJugadorSala != null) {
+            nodoJugadorSala.onDisconnect().cancel().addOnFailureListener(e -> Log.w("PRESENCIA", "Cancelacion pendiente", e));
+            salaRef.child("minijuegoActual").onDisconnect().cancel();
+        }
         limpiarListeners();
 
         Intent intent = new Intent(SalaActivity.this, HomeActivity.class);
         intent.putExtra("DESCONEXION", desconexion);
+        intent.putExtra("MOTIVO_SALIDA", desconexion ? "Tu lugar en la sala ya no esta disponible" : (!com.example.basta_game.utils.ConexionJuego.transporteDisponible() ? "Saliste de la partida. Confirmaremos tu salida al reconectar" : "Abandonaste la sala"));
+        if(getIntent().getBooleanExtra("EXPULSADO",false)) intent.putExtra("MOTIVO_SALIDA","Has sido expulsado de la sala");
         intent.putExtra("CREADOR_DESCONEXION", creadorDesconexion);
         intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
         startActivity(intent);
@@ -780,6 +759,15 @@ public class SalaActivity extends AppCompatActivity {
     }
 
     private void limpiarListeners() {
+        detenerReintentoRecuperacion();
+        if (conexionRef != null && listenerConexion != null) conexionRef.removeEventListener(listenerConexion);
+        if (offsetRef != null && listenerOffset != null) offsetRef.removeEventListener(listenerOffset);
+        if(listenerSesiones!=null) salaRef.child("sesiones").removeEventListener(listenerSesiones);
+        if(listenerIdPartida!=null) salaRef.child("idPartida").removeEventListener(listenerIdPartida);
+        listenerIdPartida=null;
+        listenerSesiones=null;
+        listenerConexion = null;
+        listenerOffset = null;
         if (nodoJugadorSala != null && listenerMiJugador != null) {
             nodoJugadorSala.removeEventListener(listenerMiJugador);
             listenerMiJugador = null;
@@ -792,7 +780,15 @@ public class SalaActivity extends AppCompatActivity {
     }
 
     @Override
+    protected void onSaveInstanceState(@NonNull Bundle estado) {
+        estado.putStringArrayList("sesionesPropias",new java.util.ArrayList<>(sesionesPropias));
+        estado.putString("partidaPresencia",partidaPresencia);
+        super.onSaveInstanceState(estado);
+    }
+
+    @Override
     protected void onDestroy() {
+        cerrarSesionActual();
         super.onDestroy();
 
         cancelarTiempoDeGracia();

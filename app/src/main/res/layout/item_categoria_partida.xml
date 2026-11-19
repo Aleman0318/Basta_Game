@@ -1,22 +1,23 @@
 <?xml version="1.0" encoding="utf-8"?>
 <com.google.android.material.card.MaterialCardView
+    android:id="@+id/tarjetaCategoriaPartida"
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:layout_marginHorizontal="2dp"
-    android:layout_marginVertical="7dp"
+    android:layout_marginTop="4dp" android:layout_marginBottom="4dp"
     app:cardBackgroundColor="#FCFDFF"
     app:cardCornerRadius="20dp"
     app:cardElevation="3dp"
     app:strokeColor="#BFD0FF"
-    app:strokeWidth="1.5dp">
+    app:strokeWidth="1.5dp" android:layout_marginStart="2dp" android:layout_marginEnd="2dp">
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
-        android:padding="12dp">
+        android:padding="8dp">
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -25,8 +26,8 @@
             android:orientation="horizontal">
 
             <com.google.android.material.card.MaterialCardView
-                android:layout_width="48dp"
-                android:layout_height="48dp"
+                android:layout_width="36dp"
+                android:layout_height="36dp"
                 app:cardBackgroundColor="#EEF4FF"
                 app:cardCornerRadius="16dp"
                 app:cardElevation="0dp"
@@ -68,39 +69,98 @@
                     android:maxLines="1"
                     android:text="Animal"
                     android:textColor="@color/colorTextoP"
-                    android:textSize="22sp" />
+                    android:textSize="18sp" />
 
             </LinearLayout>
+
+            <TextView
+                android:id="@+id/txtCuentaEspejoCategoriaPartida"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="8dp"
+                android:background="@drawable/bg_input_juego"
+                android:paddingStart="8dp"
+                android:paddingEnd="8dp"
+                android:paddingTop="4dp"
+                android:paddingBottom="4dp"
+                android:text="🪞 30 s"
+                android:textColor="#7442B7"
+                android:textStyle="bold"
+                android:textSize="13sp"
+                android:visibility="gone" />
 
         </LinearLayout>
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="10dp"
+            android:layout_marginTop="6dp"
             android:fontFamily="@font/manrope_regular"
-            android:text="Tu respuesta"
+            android:text="Tu respuesta" android:visibility="gone"
             android:textColor="@color/colorContenidoInputs"
             android:textSize="12sp"
             android:textStyle="bold" />
 
-        <EditText
-            android:id="@+id/etRespuestaCategoriaPartida"
+        <TextView
+            android:id="@+id/txtDecretoCategoriaPartida"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="2dp"
+            android:paddingStart="10dp"
+            android:paddingEnd="10dp"
+            android:text="Vocal A prohibida"
+            android:fontFamily="@font/manrope_regular"
+            android:textStyle="bold"
+            android:textColor="#A25215"
+            android:textSize="11sp"
+            android:visibility="gone" />
+
+        <!-- La respuesta real se invierte al activarse Espejo. Sin capa visual superpuesta. -->
+        <FrameLayout
             android:layout_width="match_parent"
             android:layout_height="50dp"
-            android:layout_marginTop="5dp"
-            android:background="@drawable/bg_input_juego"
-            android:fontFamily="@font/playkidz"
-            android:gravity="center_vertical"
-            android:hint="Escribe aquí..."
-            android:imeOptions="actionNext"
-            android:inputType="textCapWords|textNoSuggestions"
-            android:maxLines="1"
-            android:paddingHorizontal="14dp"
-            android:singleLine="true"
-            android:textColor="@color/colorPrimary"
-            android:textColorHint="@color/colorContenidoInputs"
-            android:textSize="20sp" />
+            android:layout_marginTop="5dp">
+
+            <EditText
+                android:id="@+id/etRespuestaCategoriaPartida"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:background="@drawable/bg_input_juego"
+                android:fontFamily="@font/playkidz"
+                android:gravity="center_vertical"
+                android:hint="Escribe aquí..."
+                android:imeOptions="actionNext"
+                android:inputType="textCapWords|textNoSuggestions"
+                android:maxLines="1"
+                android:paddingHorizontal="14dp"
+                android:paddingStart="14dp"
+                android:paddingEnd="14dp"
+                android:singleLine="true"
+                android:textColor="@color/colorPrimary"
+                android:textColorHint="@color/colorContenidoInputs"
+                android:textSize="20sp" />
+
+            <!-- Capa visual como D10: desaparece en cuanto finaliza el efecto. -->
+            <TextView
+                android:id="@+id/txtEspejoVistaCategoriaPartida"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:background="@android:color/transparent"
+                android:clickable="false"
+                android:focusable="false"
+                android:longClickable="false"
+                android:importantForAccessibility="no"
+                android:fontFamily="@font/playkidz"
+                android:gravity="center_vertical"
+                android:maxLines="1"
+                android:singleLine="true"
+                android:ellipsize="end"
+                android:paddingStart="14dp"
+                android:paddingEnd="14dp"
+                android:textColor="@color/colorPrimary"
+                android:textSize="20sp"
+                android:visibility="gone" />
+        </FrameLayout>
 
     </LinearLayout>
 

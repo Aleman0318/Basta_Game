@@ -6,7 +6,12 @@ import java.util.Random;
 
 public class LetraSala {
 
-    private static final String letras = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+    private static final String letras = "ABCDEFGHIJKLMNÑOPQRSTUVWXYZ";
+    public static ArrayList<String> nuevaPartida() {
+        ArrayList<String> orden=new ArrayList<>();
+        for(int i=0;i<letras.length();i++) orden.add(String.valueOf(letras.charAt(i)));
+        Collections.shuffle(orden);return orden;
+    }
 
     private static ArrayList<String> bolsaLetras = new ArrayList<>();
     private static ArrayList<String> letrasUsadas = new ArrayList<>();

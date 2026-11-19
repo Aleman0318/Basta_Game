@@ -3,6 +3,8 @@
 
 
     <uses-permission android:name="android.permission.INTERNET"/>
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>
+    <uses-permission android:name="android.permission.VIBRATE"/>
 
     <application
         android:name=".BastaAplication"
@@ -22,7 +24,7 @@
         <activity
             android:name=".SplashActivity"
             android:exported="true"
-            android:theme="@style/Theme.Basta_Game">
+            android:theme="@style/Theme.Basta.Start">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 

@@ -115,9 +115,59 @@ public class ComodinCambioDeFlujo extends BaseComodin {
                                             updates.put("eventoCaosGlobal/ronda_" + rondaActual + "/uidAtacante", miUid);
                                             updates.put("eventoCaosGlobal/ronda_" + rondaActual + "/uidVictima", uidObjetivo);
 
-                                            salaRef.updateChildren(updates).addOnCompleteListener(task -> {
-                                                callback.onSuccess("SILENCIO");
-                                            });
+                                            // Resolver protección y puntuación en UNA transacción de sala.
+                                            // Si el objetivo tiene Escudo, se publica PARRY y el atacante
+                                            // pierde la unidad usada, pero no se tocan los puntos.
+                                            final String victimaNombreFinal = nombreVictima;
+                                            salaRef.runTransaction(new com.google.firebase.database.Transaction.Handler() {
+                                                @NonNull @Override public com.google.firebase.database.Transaction.Result doTransaction(
+                                                        @NonNull com.google.firebase.database.MutableData sala) {
+                                                    Object numeroRonda = sala.child("rondaActual").getValue();
+                                                    if (sala.getValue() == null ||
+                                                            !"revision_puntuaciones".equals(sala.child("fase").getValue()) ||
+                                                            !(numeroRonda instanceof Number) ||
+                                                            ((Number) numeroRonda).intValue() != rondaActual ||
+                                                            !sala.child("jugadores").hasChild(miUid) ||
+                                                            uidObjetivo == null ||
+                                                            !sala.child("jugadores").hasChild(uidObjetivo)) {
+                                                        return com.google.firebase.database.Transaction.abort();
+                                                    }
+                                                    String partida = sala.child("idPartida").getValue(String.class);
+                                                    if (!uidObjetivo.equals(miUid) &&
+                                                            com.example.basta_game.utils.DefensaEscudoDorado.registrarBloqueo(
+                                                                    sala, partida, rondaActual, uidObjetivo, miUid,
+                                                                    nombreJugador, victimaNombreFinal, idUso, "uno_reversa")) {
+                                                        return com.google.firebase.database.Transaction.success(sala);
+                                                    }
+                                                    // Recalcular puntos sobre el estado actual, no sobre la
+                                                    // lectura anterior: evita sobrescribir cambios concurrentes.
+                                                    Object misActuales = sala.child("puntajesRondas/ronda_" + rondaActual +
+                                                            "/" + miUid).getValue();
+                                                    Object susActuales = sala.child("puntajesRondas/ronda_" + rondaActual +
+                                                            "/" + uidObjetivo).getValue();
+                                                    if (!(misActuales instanceof Number) ||
+                                                            !(susActuales instanceof Number))
+                                                        return com.google.firebase.database.Transaction.abort();
+                                                    int puntosMios = ((Number) misActuales).intValue();
+                                                    int puntosVictima = ((Number) susActuales).intValue();
+                                                    if (uidObjetivo.equals(miUid)) {
+                                                        updates.put("puntajesRondas/ronda_" + rondaActual + "/" + miUid,
+                                                                Math.max(0, puntosMios - castigoFinal));
+                                                    } else {
+                                                        updates.put("puntajesRondas/ronda_" + rondaActual + "/" + miUid, puntosVictima);
+                                                        updates.put("puntajesRondas/ronda_" + rondaActual + "/" + uidObjetivo, puntosMios);
+                                                    }
+                                                    for (java.util.Map.Entry<String, Object> entry : updates.entrySet())
+                                                        sala.child(entry.getKey()).setValue(entry.getValue());
+                                                    return com.google.firebase.database.Transaction.success(sala);
+                                                }
+                                                @Override public void onComplete(com.google.firebase.database.DatabaseError error,
+                                                                                 boolean confirmado,
+                                                                                 com.google.firebase.database.DataSnapshot datos) {
+                                                    if (error == null && confirmado) callback.onSuccess("SILENCIO");
+                                                    else callback.onError("No se pudo confirmar Cambio de Flujo; revisa tu inventario");
+                                                }
+                                            }, false);
                                         }
 
                                         @Override

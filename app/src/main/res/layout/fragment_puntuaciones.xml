@@ -183,6 +183,22 @@
         </LinearLayout>
     </com.google.android.material.card.MaterialCardView>
 
+    <TextView
+        android:id="@+id/txtPendientesRevision"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:background="@drawable/bg_chip_blanco_azul"
+        android:gravity="center"
+        android:paddingHorizontal="14dp"
+        android:paddingVertical="9dp"
+        android:fontFamily="@font/manrope_regular"
+        android:text="Comprobando quién falta..."
+        android:textColor="@color/colorPrimary"
+        android:textSize="13sp"
+        android:textStyle="bold"
+        android:visibility="gone" />
+
     <com.google.android.material.button.MaterialButton
         android:id="@+id/btnUsarComodinFinal"
         android:layout_width="match_parent"

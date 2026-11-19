@@ -157,6 +157,7 @@ public class PuntuacionesFragment extends Fragment {
                         }
                     }
 
+                    total+=(int)com.example.basta_game.utils.ImpuestoRevolucionario.ajusteVisible(snapshotSala,uid);
                     lista.add(new PuntuacionJugador(0, uid, nombre, puntajes, total));
                 }
 

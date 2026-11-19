@@ -18,6 +18,9 @@ public class RespuestaValidacion {
     private String claveVotacion;
     private boolean votacionResuelta = false;
     private String resultadoVotacion;
+    private boolean decretoEvaluado;
+    private boolean decretoMultada;
+    private String vocalDecreto;
 
     public RespuestaValidacion(String uidJugador, String nombreJugador, String respuesta, String fotoPerfilUrl) {
         this.uidJugador = uidJugador;
@@ -60,6 +63,17 @@ public class RespuestaValidacion {
     public boolean isVotacionResuelta() { return votacionResuelta; }
     public void setVotacionResuelta(boolean votacionResuelta) { this.votacionResuelta = votacionResuelta; }
 
+    public boolean isDecretoEvaluado() { return decretoEvaluado; }
+    public boolean isDecretoMultada() { return decretoMultada; }
+    public String getVocalDecreto() { return vocalDecreto; }
+    public void establecerDecreto(boolean infraccion, String vocal) {
+        decretoEvaluado = true;
+        decretoMultada = infraccion;
+        vocalDecreto = vocal;
+        // No adelantar puntajes ni impedir votar. El resultado final llega
+        // tras la ventana de votación y lo calcula DecretoSilencio.
+
+    }
     public String getResultadoVotacion() { return resultadoVotacion; }
     public void setResultadoVotacion(String resultadoVotacion) { this.resultadoVotacion = resultadoVotacion; }
 }

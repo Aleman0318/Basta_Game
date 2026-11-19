@@ -4,14 +4,14 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content"
+    android:layout_height="match_parent"
     android:gravity="center"
     android:orientation="vertical"
     android:padding="20dp">
 
     <com.google.android.material.card.MaterialCardView
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="match_parent"
         app:cardBackgroundColor="#FCFDFF"
         app:cardCornerRadius="24dp"
         app:cardElevation="8dp"
@@ -20,7 +20,7 @@
 
         <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+            android:layout_height="match_parent"
             android:orientation="vertical"
             android:padding="20dp">
 
@@ -31,7 +31,7 @@
                 android:gravity="center"
                 android:text="RESUMEN DE COMODINES"
                 android:textColor="@color/colorPrimary"
-                android:textSize="24sp" />
+                android:textSize="28sp" />
 
             <TextView
                 android:layout_width="match_parent"
@@ -40,17 +40,17 @@
                 android:layout_marginBottom="16dp"
                 android:fontFamily="@font/manrope_regular"
                 android:gravity="center"
-                android:text="Esto pasó en la ronda mientras respondían..."
+                android:text="¡Así se sacudió la partida!"
                 android:textColor="@color/colorContenidoInputs"
-                android:textSize="13sp"
+                android:textSize="14sp"
                 android:textStyle="bold" />
 
             <androidx.recyclerview.widget.RecyclerView
                 android:id="@+id/rvEventosComodines"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
+                android:layout_height="0dp"
                 android:layout_weight="1"
-                android:nestedScrollingEnabled="false"
+                android:nestedScrollingEnabled="true"
                 android:overScrollMode="never"
                 tools:itemCount="2"
                 tools:listitem="@layout/item_fila_puntuacion" /> <TextView

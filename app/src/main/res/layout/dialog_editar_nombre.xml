@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="utf-8"?>
+<com.google.android.material.card.MaterialCardView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent" android:layout_height="wrap_content"
+    app:cardBackgroundColor="@color/colorBg" app:cardCornerRadius="26dp"
+    app:cardElevation="10dp" app:strokeColor="#B8C8FF" app:strokeWidth="2dp">
+    <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+        android:padding="22dp" android:orientation="vertical">
+        <TextView android:layout_width="match_parent" android:layout_height="wrap_content"
+            android:text="CAMBIAR NOMBRE" android:gravity="center" android:textSize="25sp"
+            android:fontFamily="@font/lilitaone_regular" android:textColor="@color/colorPrimary" />
+        <View android:layout_width="140dp" android:layout_height="2dp"
+            android:layout_marginTop="8dp" android:layout_marginBottom="12dp"
+            android:layout_gravity="center" android:background="@color/colorPrimary" />
+        <TextView android:layout_width="match_parent" android:layout_height="wrap_content"
+            android:gravity="center" android:fontFamily="@font/manrope_regular"
+            android:text="Tu nombre será visible para los demás jugadores. No cambiará tu correo ni tu contraseña."
+            android:textColor="@color/colorTextoP" android:textSize="14sp" />
+        <com.google.android.material.textfield.TextInputLayout
+            android:layout_width="match_parent" android:layout_height="wrap_content"
+            android:layout_marginTop="16dp" app:boxBackgroundMode="outline"
+            app:boxCornerRadiusTopStart="15dp" app:boxCornerRadiusTopEnd="15dp"
+            app:boxCornerRadiusBottomStart="15dp" app:boxCornerRadiusBottomEnd="15dp"
+            app:boxStrokeColor="@color/colorPrimary" android:hint="Nombre de usuario">
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/etNuevoNombrePerfil" android:layout_width="match_parent"
+                android:layout_height="wrap_content" android:singleLine="true"
+                android:maxLength="24" android:inputType="textCapWords"
+                android:textColor="@color/colorTextoP" />
+        </com.google.android.material.textfield.TextInputLayout>
+        <TextView android:id="@+id/tvErrorNombrePerfil" android:layout_width="match_parent"
+            android:layout_height="wrap_content" android:visibility="gone" android:textColor="#C63737"
+            android:textSize="13sp" android:layout_marginTop="5dp" />
+        <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+            android:layout_marginTop="20dp" android:orientation="horizontal" android:gravity="center">
+            <com.google.android.material.button.MaterialButton android:id="@+id/btnCancelarNombrePerfil"
+                android:layout_width="0dp" android:layout_height="48dp" android:layout_weight="1"
+                android:layout_marginEnd="4dp" android:text="Cancelar" android:textAllCaps="false"
+                android:fontFamily="@font/lilitaone_regular" android:textColor="#52627B"
+                app:backgroundTint="#E8EEFF" app:cornerRadius="18dp" />
+            <com.google.android.material.button.MaterialButton android:id="@+id/btnGuardarNombrePerfil"
+                android:layout_width="0dp" android:layout_height="48dp" android:layout_weight="1"
+                android:layout_marginStart="4dp" android:text="Guardar" android:textAllCaps="false"
+                android:fontFamily="@font/lilitaone_regular" android:textColor="@color/colorBg"
+                app:backgroundTint="@color/colorPrimary" app:cornerRadius="18dp" />
+        </LinearLayout>
+    </LinearLayout>
+</com.google.android.material.card.MaterialCardView>

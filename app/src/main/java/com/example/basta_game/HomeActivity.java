@@ -26,11 +26,30 @@ public class HomeActivity extends AppCompatActivity {
     private BottomNavigationView bottomNavigationView;
     private View notificationHome;
     private FirebaseAuth auth;
+    private android.app.Dialog confirmacionSalida;
 
-    private final Fragment fragmentJugar = new JugarFragment();
-    private final Fragment fragmentTienda = new TiendaFragment();
-    private final Fragment fragmentHistorial = new HistorialFragment();
-    private final Fragment fragmentPerfil = new PerfilFragment();
+    public void confirmarCerrarSesion() {
+        if (isFinishing() || (confirmacionSalida != null && confirmacionSalida.isShowing())) return;
+        confirmacionSalida = com.example.basta_game.utils.CustomDialogHelper.show(this,
+                "¿Deseas cerrar sesión?", "Estás a punto de salir de tu cuenta. ¿Quieres continuar?", false,
+                new com.example.basta_game.utils.CustomDialogHelper.DialogButton("Cancelar", 0xFF5E6C84, android.graphics.Color.WHITE, true, null),
+                new com.example.basta_game.utils.CustomDialogHelper.DialogButton("Cerrar sesión", 0xFFE63946, android.graphics.Color.WHITE, true, () -> {
+                    auth.signOut();
+                    startActivity(new android.content.Intent(this, LoginActivity.class).addFlags(
+                            android.content.Intent.FLAG_ACTIVITY_NEW_TASK | android.content.Intent.FLAG_ACTIVITY_CLEAR_TASK));
+                    finish();
+                }));
+    }
+
+    @Override protected void onDestroy() {
+        if (confirmacionSalida != null) { confirmacionSalida.dismiss(); confirmacionSalida = null; }
+        super.onDestroy();
+    }
+
+    private Fragment fragmentJugar = new JugarFragment();
+    private Fragment fragmentTienda = new TiendaFragment();
+    private Fragment fragmentHistorial = new HistorialFragment();
+    private Fragment fragmentPerfil = new PerfilFragment();
     private final FragmentManager fm = getSupportFragmentManager();
 
     private Fragment fragmentActivo = fragmentJugar;
@@ -38,26 +57,38 @@ public class HomeActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        if (savedInstanceState != null) {
+            fragmentJugar = fm.findFragmentByTag("jugar");
+            fragmentTienda = fm.findFragmentByTag("tienda");
+            fragmentHistorial = fm.findFragmentByTag("historial");
+            fragmentPerfil = fm.findFragmentByTag("perfil");
+            for (Fragment fragment : fm.getFragments()) {
+                if (!fragment.isHidden()) fragmentActivo = fragment;
+            }
+        }
         EdgeToEdge.enable(this);
         setContentView(R.layout.activity_home);
 
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main_home), (v, insets) -> {
             Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
-            v.setPadding(systemBars.left, systemBars.top, systemBars.right, 0);
+            v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
             return insets;
         });
 
         notificationHome = findViewById(R.id.notificationHome);
         auth = FirebaseAuth.getInstance();
+        getOnBackPressedDispatcher().addCallback(this, new androidx.activity.OnBackPressedCallback(true) {
+            @Override public void handleOnBackPressed() { confirmarCerrarSesion(); }
+        });
 
         if (getIntent().getExtras() != null) {
             boolean seDesconecto = getIntent().getExtras().getBoolean("DESCONEXION");
             boolean seDesconectoSiendoHost = getIntent().getExtras().getBoolean("CREADOR_DESCONEXION");
 
-            if (seDesconecto && !seDesconectoSiendoHost) {
+            if ((seDesconecto || getIntent().hasExtra("MOTIVO_SALIDA")) && !seDesconectoSiendoHost) {
                 NotificationHelper.show(
                         notificationHome,
-                        "Has abandonado la partida",
+                        getIntent().getStringExtra("MOTIVO_SALIDA") == null ? "Abandonaste la sala" : getIntent().getStringExtra("MOTIVO_SALIDA"),
                         NotificationHelper.WARNING
                 );
                 Sounds.playNotificaciones();

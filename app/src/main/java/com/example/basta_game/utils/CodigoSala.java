@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Random;
 
 public class CodigoSala {
+    public static String invitacion(String codigo) { return "¡JUEGA BASTA CONMIGO! El código de la sala es: "+codigo; }
 
     private static String caracteres = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
     private static int tamCodigo = 6;

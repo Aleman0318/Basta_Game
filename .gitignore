@@ -37,3 +37,9 @@ Thumbs.db
 
 # Google Services - OJO: ver explicación abajo
 # google-services.json
+
+# Configuracion privada/local y herramientas generadas
+app/google-services.json
+graphify-out/
+.codex/
+app/release/

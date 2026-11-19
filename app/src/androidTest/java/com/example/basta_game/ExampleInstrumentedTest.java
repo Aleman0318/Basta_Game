@@ -21,6 +21,6 @@ public class ExampleInstrumentedTest {
     public void useAppContext() {
         // Context of the app under test.
         Context appContext = InstrumentationRegistry.getInstrumentation().getTargetContext();
-        assertEquals("com.example.basta_game", appContext.getPackageName());
+        assertTrue(appContext.getPackageName().equals("com.example.basta_game") || appContext.getPackageName().equals("com.example.basta_game.responsive"));
     }
 }

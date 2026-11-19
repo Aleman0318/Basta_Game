@@ -39,6 +39,9 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ServerValue;
 import com.google.firebase.database.ValueEventListener;
+import com.google.firebase.database.MutableData;
+import com.google.firebase.database.Transaction;
+import com.example.basta_game.utils.InicioPartida;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -46,6 +49,9 @@ import java.util.HashMap;
 public class LobbyFragment extends Fragment {
 
     private boolean esAnfitrion = false;
+
+    private HashMap<String, JugadorSala> jugadoresMemoria = new HashMap<>();
+    private boolean primerCargaJugadores = true;
     private boolean estoyListo = false;
     private View notificationLobby;
 
@@ -65,6 +71,7 @@ public class LobbyFragment extends Fragment {
 
     private Bundle bundleDatosPartida;
     private boolean yaEntroAPartida = false;
+    private boolean esperandoFinResultados = false;
 
     private DatabaseReference salaRef;
     private DatabaseReference nodoEstadoPartidaRef;
@@ -143,7 +150,7 @@ public class LobbyFragment extends Fragment {
         notificationLobby = view.findViewById(R.id.notificationLobby);
         txtCodigoSala = view.findViewById(R.id.tvidSalaLobby);
 
-        txtCodigoSala.setText(codigoSala);
+        com.example.basta_game.utils.InvitacionSala.configurar(view,codigoSala);
 
         Animations.animacionAparicion(btnComenzarPartidaVista);
         Animations.animacionAparicion(btnToggleListo);
@@ -206,9 +213,12 @@ public class LobbyFragment extends Fragment {
             );
         });
 
-        btnComenzarPartidaVista.setOnClickListener(v -> validarJugadoresEIniciarPartida());
+        btnComenzarPartidaVista.setOnClickListener(v -> {
+            if (!esperandoFinResultados) validarJugadoresEIniciarPartida();
+        });
 
         btnToggleListo.setOnClickListener(v -> {
+            if (esperandoFinResultados) return;
             estoyListo = !estoyListo;
 
             if (estoyListo) {
@@ -221,6 +231,34 @@ public class LobbyFragment extends Fragment {
         return view;
     }
 
+    public void actualizarAnfitrion(boolean actual) {
+        esAnfitrion = actual;
+        if(getView()!=null) getView().findViewById(R.id.txtAyudaExpulsar).setVisibility(actual ? View.VISIBLE : View.GONE);
+        if (bundleDatosPartida != null) bundleDatosPartida.putBoolean("ES_ANFITRION", actual);
+        if (btnComenzarPartida != null) btnComenzarPartida.setVisibility(actual ? View.VISIBLE : View.GONE);
+    }
+
+    private void confirmarExpulsion(String uid) {
+        if(!isAdded() || !esAnfitrion || !VerificacionesAuth.VerificarInicioSesion(auth)) return;
+        JugadorSala jugador=jugadoresMemoria.get(uid);
+        if(uid.equals(auth.getCurrentUser().getUid()) || jugador==null) return;
+        CustomDialogHelper.show(requireContext(),"Expulsar jugador","¿Expulsar a "+jugador.getNombre()+" de la sala?",true,
+                new CustomDialogHelper.DialogButton("Cancelar",Color.GRAY,Color.WHITE,true,null),
+                new CustomDialogHelper.DialogButton("Expulsar",Color.rgb(229,57,53),Color.WHITE,true,() -> {
+                    final String host=auth.getCurrentUser().getUid();
+                    final long conexion=com.example.basta_game.utils.ConexionJuego.version();
+        salaRef.runTransaction(new Transaction.Handler() {
+                        @Override public Transaction.Result doTransaction(MutableData sala) {
+                            if(!com.example.basta_game.utils.ConexionJuego.vigente(conexion)) return Transaction.abort();
+                            if(sala.getValue()==null) return Transaction.success(sala);
+                            return InicioPartida.expulsarEnEspera(sala,host,uid) ? Transaction.success(sala) : Transaction.abort();
+                        }
+                        @Override public void onComplete(DatabaseError error,boolean committed,DataSnapshot sala) {
+                            if(error!=null || !committed) NotificationHelper.showGlobal("No se pudo retirar: revisa tu rol y el estado de la sala",NotificationHelper.WARNING);
+                        }
+                    },false);
+                }));
+    }
     private void validarJugadoresEIniciarPartida() {
         if (!VerificacionesAuth.VerificarInicioSesion(auth)) {
             return;
@@ -248,16 +286,16 @@ public class LobbyFragment extends Fragment {
                     if (hijo.exists()) {
                         contadorJugadores++;
 
-                        if (player != null && player.isEstaListo()) {
+                        if (player != null && player.isEstaConectado() && player.isEstaListo()) {
                             contadorListos++;
                         }
                     }
                 }
 
-                if (contadorJugadores <= 0) {
+                if (contadorJugadores < 2) {
                     NotificationHelper.show(
                             notificationLobby,
-                            "No hay jugadores en la sala",
+                            "Se necesitan al menos dos jugadores conectados",
                             NotificationHelper.ERROR
                     );
                     Sounds.playNotificaciones();
@@ -267,14 +305,14 @@ public class LobbyFragment extends Fragment {
                 if (contadorListos < contadorJugadores) {
                     NotificationHelper.show(
                             notificationLobby,
-                            "Todos los jugadores deben estar listos",
+                            "Todos deben estar conectados y confirmar que estan listos",
                             NotificationHelper.ERROR
                     );
                     Sounds.playNotificaciones();
                     return;
                 }
 
-                iniciarPartidaDesdeLobby(snapshot);
+                iniciarPartidaDesdeLobby();
             }
 
             @Override
@@ -289,10 +327,13 @@ public class LobbyFragment extends Fragment {
         });
     }
 
-    private void iniciarPartidaDesdeLobby(DataSnapshot snapshotJugadores) {
-        if (salaRef == null) {
+    private void iniciarPartidaDesdeLobby() {
+        if (salaRef == null || !VerificacionesAuth.VerificarInicioSesion(auth)) {
             return;
         }
+        final String idPartida = salaRef.push().getKey();
+        final String uidHost = auth.getCurrentUser().getUid();
+        if (idPartida == null) return;
 
         if (btnComenzarPartida != null) {
             btnComenzarPartida.setEnabled(false);
@@ -303,6 +344,7 @@ public class LobbyFragment extends Fragment {
         actualizaciones.put("estadoPartida", "En juego");
         actualizaciones.put("fase", "jugando");
         actualizaciones.put("rondaActual", 1);
+        actualizaciones.put("letrasPartida",com.example.basta_game.utils.LetraSala.nuevaPartida());
         actualizaciones.put("inicioRonda", ServerValue.TIMESTAMP);
         actualizaciones.put("inicioRondaDe", 1);
 
@@ -333,96 +375,62 @@ public class LobbyFragment extends Fragment {
         actualizaciones.put("historialGuardado", null);
         actualizaciones.put("cambioRondaTimestamp", ServerValue.TIMESTAMP);
 
-        for (DataSnapshot jugadorSnap : snapshotJugadores.getChildren()) {
-            String uid = jugadorSnap.getKey();
-
-            if (uid != null) {
-                actualizaciones.put("jugadores/" + uid + "/puntajePartida", 0);
-                actualizaciones.put("jugadores/" + uid + "/estaListo", false);
-            }
-        }
-
-        salaRef.updateChildren(actualizaciones).addOnCompleteListener(task -> {
-            if (!isAdded()) {
-                return;
+        final long conexion=com.example.basta_game.utils.ConexionJuego.version();
+        salaRef.runTransaction(new Transaction.Handler() {
+            @NonNull
+            @Override
+            public Transaction.Result doTransaction(@NonNull MutableData sala) {
+                if(!com.example.basta_game.utils.ConexionJuego.vigente(conexion)) return Transaction.abort();
+                // Una cache vacia debe contrastarse con el servidor, no crear una sala parcial.
+                if (sala.getValue() == null) return Transaction.success(sala);
+                return InicioPartida.aplicar(sala, idPartida, uidHost, actualizaciones)
+                        ? Transaction.success(sala) : Transaction.abort();
             }
 
-            if (task.isSuccessful()) {
-                if (bundleDatosPartida != null) {
-                    bundleDatosPartida.putInt("RONDA_ACTUAL", 1);
-                    bundleDatosPartida.putBoolean("CREADOR", esAnfitrion);
-                    bundleDatosPartida.putBoolean("ANEXO", false);
+            @Override
+            public void onComplete(DatabaseError error, boolean committed, DataSnapshot sala) {
+                if (!isAdded()) return;
+                if (error == null && committed && sala != null &&
+                        idPartida.equals(sala.child("idPartida").getValue(String.class))) {
+                    Log.d("LOBBY", "Partida iniciada: " + idPartida);
+                } else {
+                    if (btnComenzarPartida != null && !esperandoFinResultados) btnComenzarPartida.setEnabled(true);
+                    NotificationHelper.show(notificationLobby,
+                            "No se pudo iniciar: revisa conexion, anfitrion y jugadores listos",
+                            NotificationHelper.ERROR);
+                    Sounds.playNotificaciones();
                 }
-
-                Log.d("LOBBY", "Partida iniciada correctamente con rondaActual=1");
-
-            } else {
-                if (btnComenzarPartida != null) {
-                    btnComenzarPartida.setEnabled(true);
-                }
-
-                NotificationHelper.show(
-                        notificationLobby,
-                        "No se pudo iniciar la partida",
-                        NotificationHelper.ERROR
-                );
-
-                Sounds.playNotificaciones();
             }
-        });
+        }, false);
     }
 
     private void cambiarEstadoListoJugador(boolean listo, AppCompatButton btnToggleListo) {
-        if (auth != null && VerificacionesAuth.VerificarInicioSesion(auth)) {
-
-            String uid = auth.getCurrentUser().getUid();
-
-            DatabaseReference nodoSala = FirebaseDatabase
-                    .getInstance()
-                    .getReference("salas")
-                    .child(idSalaMetodo)
-                    .child("jugadores")
-                    .child(uid);
-
-            nodoSala.addListenerForSingleValueEvent(new ValueEventListener() {
-                @Override
-                public void onDataChange(@NonNull DataSnapshot snapshot) {
-                    JugadorSala jugador = snapshot.getValue(JugadorSala.class);
-
-                    if (jugador != null) {
-                        jugador.setEstaListo(listo);
-
-                        nodoSala.setValue(jugador).addOnCompleteListener(taskEstado -> {
-                            if (taskEstado.isSuccessful()) {
-
-                                if (listo) {
-                                    btnToggleListo.setText("NO ESTOY LISTO");
-                                    btnToggleListo.setBackgroundTintList(ColorStateList.valueOf(Color.parseColor("#888888")));
-                                } else {
-                                    btnToggleListo.setText("ESTOY LISTO");
-                                    btnToggleListo.setBackgroundTintList(ColorStateList.valueOf(Color.parseColor("#4CAF50")));
-                                }
-
-                            } else {
-                                NotificationHelper.show(
-                                        notificationLobby,
-                                        "Hubo un error al cambiar de estado",
-                                        NotificationHelper.ERROR
-                                );
-                                Sounds.playNotificaciones();
-                            }
-                        });
-                    }
+        if (!VerificacionesAuth.VerificarInicioSesion(auth) || salaRef == null) return;
+        String uid = auth.getCurrentUser().getUid();
+        final long conexion=com.example.basta_game.utils.ConexionJuego.version();
+        btnToggleListo.setEnabled(false);
+        salaRef.runTransaction(new Transaction.Handler() {
+            @NonNull @Override public Transaction.Result doTransaction(@NonNull MutableData jugador) {
+                if(!com.example.basta_game.utils.ConexionJuego.vigente(conexion)) return Transaction.abort();
+                if(jugador.getValue()==null) return Transaction.success(jugador);
+                return InicioPartida.marcarListo(jugador,uid,listo) ? Transaction.success(jugador) : Transaction.abort();
+            }
+            @Override public void onComplete(DatabaseError error, boolean committed, DataSnapshot jugador) {
+                if (!isAdded() || getView() == null) return;
+                btnToggleListo.setEnabled(!esperandoFinResultados);
+                if (error == null && committed && jugador != null && jugador.exists()) {
+                    estoyListo = listo;
+                    btnToggleListo.setText(listo ? "NO ESTOY LISTO" : "ESTOY LISTO");
+                    btnToggleListo.setBackgroundTintList(ColorStateList.valueOf(Color.parseColor(listo ? "#888888" : "#4CAF50")));
+                    if (esperandoFinResultados) btnToggleListo.setText("ESPERANDO A LOS DEMÁS...");
+                } else {
+                    estoyListo = !listo;
+                    NotificationHelper.show(notificationLobby, "Hubo un error al cambiar de estado", NotificationHelper.ERROR);
+                    Sounds.playNotificaciones();
                 }
-
-                @Override
-                public void onCancelled(@NonNull DatabaseError error) {
-
-                }
-            });
-        }
+            }
+        }, false);
     }
-
     private void mostrarCategoriasComoTarjetas(ArrayList<String> categorias) {
         contenedorCategoriasLobby.removeAllViews();
 
@@ -605,21 +613,47 @@ public class LobbyFragment extends Fragment {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
                 ArrayList<JugadorSala> jugadoresEnSala = new ArrayList<>();
+                HashMap<String, JugadorSala> nuevosJugadores = new HashMap<>();
 
                 for (DataSnapshot hijo : snapshot.getChildren()) {
                     JugadorSala jugador = hijo.getValue(JugadorSala.class);
-
                     if (jugador != null) {
+                        jugador.setUid(hijo.getKey());
                         jugadoresEnSala.add(jugador);
+                        nuevosJugadores.put(hijo.getKey(), jugador);
                     }
                 }
 
-                if (rvJugadoresLobby == null) {
-                    return;
-                }
+                if (!primerCargaJugadores) {
+                    for (String uid : nuevosJugadores.keySet()) {
+                        if (!jugadoresMemoria.containsKey(uid) && !uid.equals(auth.getCurrentUser().getUid())) {
+                            NotificationHelper.show(notificationLobby, nuevosJugadores.get(uid).getNombre() + " entró a la sala", NotificationHelper.INFO);
+                            Sounds.playNotificaciones();
+                        }
+                    }
 
+                }
+                primerCargaJugadores = false;
+                jugadoresMemoria.clear();
+                jugadoresMemoria.putAll(nuevosJugadores);
+
+                if (rvJugadoresLobby == null) return;
                 JugadorSalaAdapter adaptador = new JugadorSalaAdapter(jugadoresEnSala);
+                adaptador.configurarExpulsion(esAnfitrion, auth.getCurrentUser().getUid(), thisUid -> confirmarExpulsion(thisUid));
                 rvJugadoresLobby.setAdapter(adaptador);
+                if(getView()!=null) getView().findViewById(R.id.txtAyudaExpulsar).setVisibility(esAnfitrion ? View.VISIBLE : View.GONE);
+                DataSnapshot yo=snapshot.child(auth.getCurrentUser().getUid());
+                estoyListo=Boolean.TRUE.equals(yo.child("estaConectado").getValue()) && Boolean.TRUE.equals(yo.child("estaListo").getValue());
+                View vista=getView();
+                if(vista!=null) {
+                    AppCompatButton boton=vista.findViewById(R.id.btnToggleListo);
+                    boton.setText(estoyListo ? "NO ESTOY LISTO" : "ESTOY LISTO");
+                    boton.setBackgroundTintList(ColorStateList.valueOf(Color.parseColor(estoyListo ? "#888888" : "#4CAF50")));
+                    if (esperandoFinResultados) {
+                        boton.setEnabled(false);
+                        boton.setText("ESPERANDO A LOS DEMÁS...");
+                    }
+                }
             }
 
             @Override
@@ -659,6 +693,21 @@ public class LobbyFragment extends Fragment {
 
                 String estado = snapshot.child("estadoPartida").getValue(String.class);
                 String fase = snapshot.child("fase").getValue(String.class);
+                // Cada jugador puede volver al lobby sin borrar los resultados de sus amigos.
+                // La sala se reiniciará cuando todos hayan pulsado Volver al lobby.
+                boolean esperando = "resultados_finales".equalsIgnoreCase(fase);
+                if (esperando != esperandoFinResultados) {
+                    esperandoFinResultados = esperando;
+                    View raiz = getView();
+                    if (raiz != null) {
+                        AppCompatButton listo = raiz.findViewById(R.id.btnToggleListo);
+                        AppCompatButton comenzar = raiz.findViewById(R.id.btnComenzarPartida);
+                        listo.setEnabled(!esperando);
+                        comenzar.setEnabled(!esperando);
+                        if (esperando) listo.setText("ESPERANDO A LOS DEMÁS...");
+                        else listo.setText(estoyListo ? "NO ESTOY LISTO" : "ESTOY LISTO");
+                    }
+                }
 
                 int rondaFirebase = leerEntero(snapshot.child("rondaActual"), 0);
                 Long inicioRonda = snapshot.child("inicioRonda").getValue(Long.class);
@@ -682,6 +731,7 @@ public class LobbyFragment extends Fragment {
                 yaEntroAPartida = true;
 
                 if (bundleDatosPartida != null) {
+                    bundleDatosPartida.putString("ID_PARTIDA", snapshot.child("idPartida").getValue(String.class));
                     bundleDatosPartida.putInt("RONDA_ACTUAL", rondaFirebase);
                     bundleDatosPartida.putBoolean("CREADOR", esAnfitrion);
                     bundleDatosPartida.putBoolean("ANEXO", false);

@@ -1,147 +1,59 @@
 <?xml version="1.0" encoding="utf-8"?>
-<com.google.android.material.card.MaterialCardView
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<com.google.android.material.card.MaterialCardView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
-    android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:layout_marginVertical="6dp"
-    app:cardCornerRadius="18dp"
-    app:cardElevation="3dp"
-    app:cardBackgroundColor="#FCFDFF"
-    app:strokeWidth="1.5dp"
-    app:strokeColor="#D6E0FF">
-
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:gravity="center_vertical"
-        android:paddingVertical="10dp"
-        android:paddingHorizontal="10dp">
-
-        <FrameLayout
-            android:layout_width="48dp"
-            android:layout_height="48dp">
-
-            <com.google.android.material.card.MaterialCardView
-                android:layout_width="46dp"
-                android:layout_height="46dp"
-                android:layout_gravity="center"
-                app:cardCornerRadius="23dp"
-                app:cardElevation="0dp"
-                app:strokeWidth="1.5dp"
-                app:strokeColor="@color/colorPrimary">
-
-                <ImageView
-                    android:id="@+id/imgAvatarValidacion"
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:scaleType="centerCrop"
-                    android:src="@drawable/ic_siluetas" />
-
+    android:layout_width="match_parent" android:layout_height="wrap_content"
+    android:layout_marginVertical="6dp" app:cardCornerRadius="18dp"
+    app:cardElevation="2dp" app:cardBackgroundColor="#FCFDFF"
+    app:strokeWidth="1dp" app:strokeColor="#D6E0FF" android:layout_marginTop="6dp" android:layout_marginBottom="6dp">
+    <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+        android:orientation="horizontal" android:gravity="center_vertical" android:padding="10dp">
+        <LinearLayout android:layout_width="56dp" android:layout_height="wrap_content"
+            android:orientation="vertical" android:gravity="center_horizontal">
+            <com.google.android.material.card.MaterialCardView android:layout_width="48dp"
+                android:layout_height="48dp" app:cardCornerRadius="24dp" app:cardElevation="0dp"
+                app:strokeWidth="1dp" app:strokeColor="@color/colorPrimary">
+                <ImageView android:id="@+id/imgAvatarValidacion" android:layout_width="match_parent"
+                    android:layout_height="match_parent" android:scaleType="centerCrop"
+                    android:contentDescription="Avatar del jugador" android:src="@drawable/ic_siluetas" />
             </com.google.android.material.card.MaterialCardView>
-
-        </FrameLayout>
-
-        <LinearLayout
-            android:layout_width="74dp"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="8dp"
-            android:orientation="vertical">
-
-            <TextView
-                android:id="@+id/txtUsuarioValidacion"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:fontFamily="@font/lilitaone_regular"
-                android:textColor="@color/colorTextoP"
-                android:textSize="15sp"
-                android:maxLines="1"
-                android:ellipsize="end"
-                tools:text="Marlon" />
-
-            <TextView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:fontFamily="@font/manrope_regular"
-                android:text="Jugador"
-                android:textColor="@color/colorContenidoInputs"
-                android:textSize="10sp"
-                android:textStyle="bold" />
-
+            <TextView android:id="@+id/txtUsuarioValidacion" android:layout_width="match_parent"
+                android:layout_height="wrap_content" android:layout_marginTop="4dp"
+                android:gravity="center" android:fontFamily="@font/lilitaone_regular"
+                android:textColor="@color/colorTextoP" android:textSize="12sp"
+                android:maxLines="2" android:ellipsize="end" />
         </LinearLayout>
-
-        <TextView
-            android:id="@+id/txtRespuestaValidacion"
-            android:layout_width="0dp"
-            android:layout_height="46dp"
-            android:layout_weight="1"
-            android:layout_marginStart="5dp"
-            android:layout_marginEnd="7dp"
-            android:background="@drawable/bg_input_juego"
-            android:gravity="center_vertical"
-            android:paddingHorizontal="12dp"
-            android:fontFamily="@font/playkidz"
-            android:textColor="@color/colorPrimary"
-            android:textSize="18sp"
-            android:maxLines="1"
-            android:ellipsize="end"
-            tools:text="Manzana" />
-
-        <FrameLayout
-            android:layout_width="64dp"
-            android:layout_height="44dp"
-            android:layout_gravity="center">
-
-            <com.google.android.material.card.MaterialCardView
-                android:id="@+id/btnValidarAccion"
-                android:layout_width="64dp"
-                android:layout_height="44dp"
-                android:layout_gravity="center"
-                android:clickable="true"
-                android:focusable="true"
-                android:foreground="?attr/selectableItemBackground"
-                android:contentDescription="Votar respuesta"
-                app:cardCornerRadius="15dp"
-                app:cardBackgroundColor="#FFF7D6"
-                app:cardElevation="0dp"
-                app:strokeWidth="1.5dp"
-                app:strokeColor="@color/colorSecondary">
-
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:orientation="vertical"
-                    android:gravity="center">
-
-                    <TextView
-                        android:id="@+id/txtBotonVotarValidacion"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:fontFamily="@font/lilitaone_regular"
-                        android:text="VOTAR"
-                        android:textColor="@color/colorSecondary"
-                        android:textSize="11sp"
-                        android:includeFontPadding="false" />
-
-                </LinearLayout>
-
-            </com.google.android.material.card.MaterialCardView>
-
-            <TextView
-                android:id="@+id/txtPuntuacionValidacion"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:gravity="center"
-                android:fontFamily="@font/lilitaone_regular"
-                android:text="+10"
-                android:textColor="@color/verde_puntos"
-                android:textSize="20sp"
+        <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content"
+            android:layout_weight="1" android:layout_marginStart="8dp" android:orientation="vertical">
+            <TextView android:id="@+id/txtAvisoDecretoValidacion"
+                android:layout_width="match_parent" android:layout_height="wrap_content"
+                android:layout_marginBottom="6dp" android:padding="7dp"
+                android:gravity="center_vertical" android:fontFamily="@font/manrope_regular"
+                android:textSize="11sp" android:textStyle="bold"
+                android:textColor="#9E4B00" android:background="#FFF0D5"
                 android:visibility="gone" />
-
-        </FrameLayout>
-
+            <TextView android:id="@+id/txtRespuestaValidacion" android:layout_width="match_parent"
+                android:layout_height="wrap_content" android:minHeight="52dp"
+                android:background="@drawable/bg_input_juego" android:gravity="center_vertical"
+                android:padding="10dp" android:fontFamily="@font/playkidz"
+                android:textColor="@color/colorPrimary" android:textSize="18sp" />
+            <FrameLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+                android:layout_marginTop="6dp" android:minHeight="48dp">
+                <com.google.android.material.card.MaterialCardView android:id="@+id/btnValidarAccion"
+                    android:layout_width="match_parent" android:layout_height="wrap_content"
+                    android:minHeight="48dp" android:clickable="true" android:focusable="true"
+                    android:foreground="?attr/selectableItemBackground" android:contentDescription="Votar respuesta"
+                    app:cardCornerRadius="15dp" app:cardBackgroundColor="#FFF7D6"
+                    app:cardElevation="0dp" app:strokeWidth="1.5dp" app:strokeColor="@color/colorSecondary">
+                    <TextView android:id="@+id/txtBotonVotarValidacion" android:layout_width="match_parent"
+                        android:layout_height="wrap_content" android:minHeight="48dp" android:padding="8dp"
+                        android:gravity="center" android:fontFamily="@font/lilitaone_regular"
+                        android:text="VOTAR" android:textColor="@color/colorSecondary" android:textSize="16sp" />
+                </com.google.android.material.card.MaterialCardView>
+                <TextView android:id="@+id/txtPuntuacionValidacion" android:layout_width="match_parent"
+                    android:layout_height="wrap_content" android:minHeight="48dp" android:padding="8dp"
+                    android:gravity="center" android:fontFamily="@font/lilitaone_regular"
+                    android:textColor="@color/verde_puntos" android:textSize="24sp" android:visibility="gone" />
+            </FrameLayout>
+        </LinearLayout>
     </LinearLayout>
-
 </com.google.android.material.card.MaterialCardView>

@@ -1,0 +1,32 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<com.google.android.material.card.MaterialCardView xmlns:android="http://schemas.android.com/apk/res/android" xmlns:app="http://schemas.android.com/apk/res-auto" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_margin="16dp" app:cardBackgroundColor="#FCFDFF" app:cardCornerRadius="28dp" app:cardElevation="10dp" app:strokeColor="#D6E0FF" app:strokeWidth="2dp">
+  <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical" android:gravity="center" android:paddingTop="24dp" android:paddingBottom="24dp" android:paddingHorizontal="16dp">
+    <TextView android:visibility="gone" android:textColor="#0B4CE3" android:id="@+id/txtModoEspectador" android:text="MODO ESPECTADOR" android:gravity="center" android:textStyle="bold" android:textSize="18sp" android:padding="8dp" android:layout_height="wrap_content" android:layout_width="match_parent" android:fontFamily="@font/lilitaone_regular" />
+    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:fontFamily="@font/lilitaone_regular" android:text="¡TRES EN RAYA!" android:textColor="#E65100" android:textSize="28sp" />
+    <TextView android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="4dp" android:layout_marginBottom="12dp" android:fontFamily="@font/manrope_regular" android:gravity="center" android:text="Haz línea de 3. Tu ficha más vieja se desvanecera y desaparecerá al colocar la cuarta." android:textColor="#5E5777" android:textSize="13sp" />
+    <TextView android:id="@+id/txtTurnoTER" android:layout_width="wrap_content" android:layout_height="wrap_content" android:fontFamily="@font/manrope_regular" android:textStyle="bold" android:textColor="#304EDB" android:textSize="14sp" android:text="Turno del Atacante" android:layout_marginTop="4dp" android:layout_marginBottom="20dp" />
+    <!-- CABECERA: AVATARES (Miniatura) -->
+    <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="horizontal" android:gravity="center" android:layout_marginBottom="16dp">
+      <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:fontFamily="@font/lilitaone_regular" android:textColor="#304EDB" android:textSize="20sp" android:text="X" android:layout_marginEnd="8dp" />
+      <TextView android:id="@+id/txtNombreA_TER" android:layout_width="100dp" android:layout_height="wrap_content" android:fontFamily="@font/lilitaone_regular" android:textColor="#14213D" android:textSize="14sp" android:gravity="center" android:maxLines="1" android:text="Atacante" />
+      <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:fontFamily="@font/lilitaone_regular" android:text="VS" android:textColor="#E65100" android:textSize="18sp" android:layout_marginHorizontal="12dp" />
+      <TextView android:id="@+id/txtNombreV_TER" android:layout_width="100dp" android:layout_height="wrap_content" android:fontFamily="@font/lilitaone_regular" android:textColor="#14213D" android:textSize="14sp" android:gravity="center" android:maxLines="1" android:text="Víctima" />
+      <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:fontFamily="@font/lilitaone_regular" android:textColor="#E53935" android:textSize="20sp" android:text="O" android:layout_marginStart="8dp" />
+    </LinearLayout>
+    <!-- EL TABLERO 3x3 -->
+    <GridLayout android:layout_width="wrap_content" android:layout_height="wrap_content" android:columnCount="3" android:rowCount="3" android:layout_gravity="center" android:background="#D6E0FF" android:padding="4dp">
+      <!-- Fila 0 -->
+      <TextView android:id="@+id/celda0" style="@style/CasillaTER" />
+      <TextView android:id="@+id/celda1" style="@style/CasillaTER" />
+      <TextView android:id="@+id/celda2" style="@style/CasillaTER" />
+      <!-- Fila 1 -->
+      <TextView android:id="@+id/celda3" style="@style/CasillaTER" />
+      <TextView android:id="@+id/celda4" style="@style/CasillaTER" />
+      <TextView android:id="@+id/celda5" style="@style/CasillaTER" />
+      <!-- Fila 2 -->
+      <TextView android:id="@+id/celda6" style="@style/CasillaTER" />
+      <TextView android:id="@+id/celda7" style="@style/CasillaTER" />
+      <TextView android:id="@+id/celda8" style="@style/CasillaTER" />
+    </GridLayout>
+  </LinearLayout>
+</com.google.android.material.card.MaterialCardView>

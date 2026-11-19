@@ -38,11 +38,17 @@ public class ResumenComodinesAdapter extends RecyclerView.Adapter<ResumenComodin
         EventoComodin evento = listaEventos.get(position);
 
         holder.txtTitulo.setText(evento.getTitulo());
-        holder.txtDescripcion.setText(evento.getDescripcion());
+        android.text.SpannableString relato=new android.text.SpannableString(evento.getDescripcion());
+        java.util.regex.Matcher cifras=java.util.regex.Pattern.compile("\\d+(?:[.,]\\d+)? (?:puntos|s\\b)").matcher(relato);
+        while(cifras.find()) relato.setSpan(new android.text.style.StyleSpan(android.graphics.Typeface.BOLD),cifras.start(),cifras.end(),0);
+        holder.txtDescripcion.setText(relato);
         holder.imgIcono.setImageResource(evento.getIconoResId());
 
         // Coloreamos los bordes dependiendo si fue un beneficio o un castigo
-        if (evento.isEsBeneficio()) {
+        if (evento.isNeutral()) {
+            holder.cardView.setStrokeColor(Color.parseColor("#D6E0FF"));
+            holder.cardView.setCardBackgroundColor(Color.parseColor("#EEF4FF"));
+        } else if (evento.isEsBeneficio()) {
             holder.cardView.setStrokeColor(Color.parseColor("#BDE8B8")); // Verde suave
             holder.cardView.setCardBackgroundColor(Color.parseColor("#F1FFF0"));
         } else {
